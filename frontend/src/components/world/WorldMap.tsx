@@ -136,76 +136,37 @@ class CoveyGameScene extends Phaser.Scene {
     return undefined;
   }
 
-  update() {
-    if (this.paused) {
-      return;
+  createZoneForPrivateSpace(spaceID: number, map: Phaser.Tilemaps.Tilemap, sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, debug?: boolean) {
+    // Get the location of the private space drawed on the map as an object
+    const location = map.findObject('Objects',
+    (obj) => obj.name === `Private Space ${spaceID}`) as unknown as
+    Phaser.GameObjects.Components.Transform;
+
+    // Get the dimensions for the private space drawed on the map
+    const size = map.findObject('Objects',
+      (obj) => obj.name === `Private Space ${spaceID}`) as unknown as
+      Phaser.GameObjects.Components.Size;
+
+    // Make a zone (hitbox) - origin is top left so correct by adding half the size
+    const privateZone = this.add.zone(location.x + (size.width/2),
+      location.y + (size.height/2),
+      size.width, 
+      size.height);
+
+    // Enable the zone (hitbox)
+    this.physics.world.enable(privateZone);
+    this.physics.add.overlap(sprite, privateZone, ()=>console.log(`in Private Space ${spaceID}`));
+
+    if (debug === true) {
+      // Draw graphics for debugging reasons
+      const debugGraphics = this.add.graphics();
+      debugGraphics.lineStyle(2, 0xffff00);
+      debugGraphics.strokeRect(location.x, 
+        location.y, 
+        size.width, 
+        size.height);
     }
-    if (this.player && this.cursors) {
-      const speed = 175;
-      const prevVelocity = this.player.sprite.body.velocity.clone();
-      const body = this.player.sprite.body as Phaser.Physics.Arcade.Body;
-
-      // Stop any previous movement from the last frame
-      body.setVelocity(0);
-
-      const primaryDirection = this.getNewMovementDirection();
-      switch (primaryDirection) {
-        case 'left':
-          body.setVelocityX(-speed);
-          this.player.sprite.anims.play('misa-left-walk', true);
-          break;
-        case 'right':
-          body.setVelocityX(speed);
-          this.player.sprite.anims.play('misa-right-walk', true);
-          break;
-        case 'front':
-          body.setVelocityY(speed);
-          this.player.sprite.anims.play('misa-front-walk', true);
-          break;
-        case 'back':
-          body.setVelocityY(-speed);
-          this.player.sprite.anims.play('misa-back-walk', true);
-          break;
-        default:
-          // Not moving
-          this.player.sprite.anims.stop();
-          // If we were moving, pick and idle frame to use
-          if (prevVelocity.x < 0) {
-            this.player.sprite.setTexture('atlas', 'misa-left');
-          } else if (prevVelocity.x > 0) {
-            this.player.sprite.setTexture('atlas', 'misa-right');
-          } else if (prevVelocity.y < 0) {
-            this.player.sprite.setTexture('atlas', 'misa-back');
-          } else if (prevVelocity.y > 0) this.player.sprite.setTexture('atlas', 'misa-front');
-          break;
-      }
-
-      // Normalize and scale the velocity so that player can't move faster along a diagonal
-      this.player.sprite.body.velocity.normalize()
-        .scale(speed);
-
-      const isMoving = primaryDirection !== undefined;
-      this.player.label.setX(body.x);
-      this.player.label.setY(body.y - 20);
-      if (!this.lastLocation
-        || this.lastLocation.x !== body.x
-        || this.lastLocation.y !== body.y || this.lastLocation.rotation !== primaryDirection
-        || this.lastLocation.moving !== isMoving) {
-        if (!this.lastLocation) {
-          this.lastLocation = {
-            x: body.x,
-            y: body.y,
-            rotation: primaryDirection || 'front',
-            moving: isMoving,
-          };
-        }
-        this.lastLocation.x = body.x;
-        this.lastLocation.y = body.y;
-        this.lastLocation.rotation = primaryDirection || 'front';
-        this.lastLocation.moving = isMoving;
-        this.emitMovement(this.lastLocation);
-      }
-    }
+    return privateZone;
   }
 
   create() {
@@ -410,6 +371,78 @@ class CoveyGameScene extends Phaser.Scene {
       // Some players got added to the queue before we were ready, make sure that they have
       // sprites....
       this.players.forEach((p) => this.updatePlayerLocation(p));
+    }
+  }
+
+  update() {
+    if (this.paused) {
+      return;
+    }
+    if (this.player && this.cursors) {
+      const speed = 175;
+      const prevVelocity = this.player.sprite.body.velocity.clone();
+      const body = this.player.sprite.body as Phaser.Physics.Arcade.Body;
+
+      // Stop any previous movement from the last frame
+      body.setVelocity(0);
+
+      const primaryDirection = this.getNewMovementDirection();
+      switch (primaryDirection) {
+        case 'left':
+          body.setVelocityX(-speed);
+          this.player.sprite.anims.play('misa-left-walk', true);
+          break;
+        case 'right':
+          body.setVelocityX(speed);
+          this.player.sprite.anims.play('misa-right-walk', true);
+          break;
+        case 'front':
+          body.setVelocityY(speed);
+          this.player.sprite.anims.play('misa-front-walk', true);
+          break;
+        case 'back':
+          body.setVelocityY(-speed);
+          this.player.sprite.anims.play('misa-back-walk', true);
+          break;
+        default:
+          // Not moving
+          this.player.sprite.anims.stop();
+          // If we were moving, pick and idle frame to use
+          if (prevVelocity.x < 0) {
+            this.player.sprite.setTexture('atlas', 'misa-left');
+          } else if (prevVelocity.x > 0) {
+            this.player.sprite.setTexture('atlas', 'misa-right');
+          } else if (prevVelocity.y < 0) {
+            this.player.sprite.setTexture('atlas', 'misa-back');
+          } else if (prevVelocity.y > 0) this.player.sprite.setTexture('atlas', 'misa-front');
+          break;
+      }
+
+      // Normalize and scale the velocity so that player can't move faster along a diagonal
+      this.player.sprite.body.velocity.normalize()
+        .scale(speed);
+
+      const isMoving = primaryDirection !== undefined;
+      this.player.label.setX(body.x);
+      this.player.label.setY(body.y - 20);
+      if (!this.lastLocation
+        || this.lastLocation.x !== body.x
+        || this.lastLocation.y !== body.y || this.lastLocation.rotation !== primaryDirection
+        || this.lastLocation.moving !== isMoving) {
+        if (!this.lastLocation) {
+          this.lastLocation = {
+            x: body.x,
+            y: body.y,
+            rotation: primaryDirection || 'front',
+            moving: isMoving,
+          };
+        }
+        this.lastLocation.x = body.x;
+        this.lastLocation.y = body.y;
+        this.lastLocation.rotation = primaryDirection || 'front';
+        this.lastLocation.moving = isMoving;
+        this.emitMovement(this.lastLocation);
+      }
     }
   }
 
