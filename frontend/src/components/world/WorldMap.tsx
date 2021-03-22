@@ -136,6 +136,15 @@ class CoveyGameScene extends Phaser.Scene {
     return undefined;
   }
 
+
+  /**
+   * Creates a zone for the defined private space (in the tilemap)
+   * @param spaceID the private space id given as the name of the object
+   * @param map map object for the current world
+   * @param sprite sprite object for collision detection
+   * @param [debug] optional param to enable rendering of the zone
+   * @returns  a zone object
+   */
   createZoneForPrivateSpace(spaceID: number, map: Phaser.Tilemaps.Tilemap, sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, debug?: boolean) {
     // Get the location of the private space drawed on the map as an object
     const location = map.findObject('Objects',
@@ -297,6 +306,10 @@ class CoveyGameScene extends Phaser.Scene {
 
     // Watch the player and worldLayer for collisions, for the duration of the scene:
     this.physics.add.collider(sprite, worldLayer);
+
+    // Create zone for Private Space 1 and 2 using the createZoneForPrivateSpace function
+    this.createZoneForPrivateSpace(1, map, this.player.sprite, true);
+    this.createZoneForPrivateSpace(2, map, this.player.sprite, true);
 
     // Create the player's walking animations from the texture atlas. These are stored in the global
     // animation manager so any sprite can access them.
