@@ -63,26 +63,163 @@
                  "y":1216
                 }, 
                 {
-                 "height":253,
-                 "id":295,
-                 "name":"Private Space 1",
+                 "height":64.5949720670387,
+                 "id":277,
+                 "name":"transporter",
+                 "properties":[
+                        {
+                         "name":"target",
+                         "type":"object",
+                         "value":279
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":317,
-                 "x":817,
-                 "y":674
+                 "width":85.5446927374302,
+                 "x":815.293296089385,
+                 "y":864.175977653632
                 }, 
                 {
-                 "height":260,
-                 "id":296,
-                 "name":"Private Space 2",
+                 "height":0,
+                 "id":279,
+                 "name":"target_statue",
+                 "point":true,
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":273,
-                 "x":948,
-                 "y":125
+                 "width":0,
+                 "x":1108.58938547486,
+                 "y":322.101955307263
+                }, 
+                {
+                 "height":61.1033519553071,
+                 "id":283,
+                 "name":"transporter",
+                 "properties":[
+                        {
+                         "name":"target",
+                         "type":"object",
+                         "value":284
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":60.2304469273743,
+                 "x":192.912011173184,
+                 "y":1186.27793296089
+                }, 
+                {
+                 "height":0,
+                 "id":284,
+                 "name":"target_fountain",
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":939.245810055866,
+                 "y":848.463687150838
+                }, 
+                {
+                 "height":71.5782122905028,
+                 "id":286,
+                 "name":"transporter",
+                 "properties":[
+                        {
+                         "name":"target",
+                         "type":"object",
+                         "value":275
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":63.722067039106,
+                 "x":990.747206703911,
+                 "y":280.20251396648
+                }, 
+                {
+                 "height":18.84375,
+                 "id":287,
+                 "name":"label",
+                 "rotation":0,
+                 "text":
+                    {
+                     "pixelsize":10,
+                     "text":"To Fountain",
+                     "wrap":true
+                    },
+                 "type":"",
+                 "visible":true,
+                 "width":89.546875,
+                 "x":192.656730097765,
+                 "y":1220.50130935754
+                }, 
+                {
+                 "height":18.8438,
+                 "id":288,
+                 "name":"label",
+                 "rotation":0,
+                 "text":
+                    {
+                     "pixelsize":10,
+                     "text":"To Statue",
+                     "wrap":true
+                    },
+                 "type":"",
+                 "visible":true,
+                 "width":89.5469,
+                 "x":819.402527653631,
+                 "y":882.687038547486
+                }, 
+                {
+                 "height":18.8438,
+                 "id":289,
+                 "name":"label",
+                 "rotation":0,
+                 "text":
+                    {
+                     "pixelsize":10,
+                     "text":"Back to Start",
+                     "wrap":true
+                    },
+                 "type":"",
+                 "visible":true,
+                 "width":89.5469,
+                 "x":993.983533240223,
+                 "y":291.730334636872
+                }, 
+                {
+                 "height":63.7220670391062,
+                 "id":293,
+                 "name":"transporter",
+                 "properties":[
+                        {
+                         "name":"target",
+                         "type":"object",
+                         "value":275
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":88.1634078212292,
+                 "x":1041.37569832402,
+                 "y":862.430167597765
+                }, 
+                {
+                 "height":18.84375,
+                 "id":294,
+                 "name":"label",
+                 "rotation":0,
+                 "text":
+                    {
+                     "text":"To start",
+                     "wrap":true
+                    },
+                 "type":"",
+                 "visible":true,
+                 "width":89.546875,
+                 "x":1045.48494238827,
+                 "y":871.339298184358
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -91,7 +228,7 @@
          "y":0
         }],
  "nextlayerid":5,
- "nextobjectid":297,
+ "nextobjectid":295,
  "orientation":"orthogonal",
  "properties":[
         {
@@ -100,7 +237,7 @@
          "value":"clamped"
         }],
  "renderorder":"right-down",
- "tiledversion":"2021.02.15",
+ "tiledversion":"1.4.3",
  "tileheight":32,
  "tilesets":[
         {
@@ -118,6 +255,15 @@
          "margin":1,
          "name":"tuxmon-sample-32px-extruded",
          "spacing":2,
+         "terrains":[
+                {
+                 "name":"Path",
+                 "tile":173
+                }, 
+                {
+                 "name":"Grass",
+                 "tile":125
+                }],
          "tilecount":720,
          "tileheight":32,
          "tiles":[
@@ -1253,7 +1399,8 @@
                          "name":"collides",
                          "type":"bool",
                          "value":false
-                        }]
+                        }],
+                 "terrain":[1, 1, 1, 1]
                 }, 
                 {
                  "id":126,
@@ -1460,7 +1607,8 @@
                          "name":"collides",
                          "type":"bool",
                          "value":false
-                        }]
+                        }],
+                 "terrain":[1, 1, 1, 0]
                 }, 
                 {
                  "id":149,
@@ -1469,7 +1617,8 @@
                          "name":"collides",
                          "type":"bool",
                          "value":false
-                        }]
+                        }],
+                 "terrain":[1, 1, 0, 0]
                 }, 
                 {
                  "id":150,
@@ -1478,7 +1627,8 @@
                          "name":"collides",
                          "type":"bool",
                          "value":false
-                        }]
+                        }],
+                 "terrain":[1, 1, 0, 1]
                 }, 
                 {
                  "id":151,
@@ -1658,7 +1808,8 @@
                          "name":"collides",
                          "type":"bool",
                          "value":false
-                        }]
+                        }],
+                 "terrain":[0, 0, 0, 1]
                 }, 
                 {
                  "id":171,
@@ -1667,7 +1818,8 @@
                          "name":"collides",
                          "type":"bool",
                          "value":false
-                        }]
+                        }],
+                 "terrain":[0, 0, 1, 0]
                 }, 
                 {
                  "id":172,
@@ -1676,7 +1828,8 @@
                          "name":"collides",
                          "type":"bool",
                          "value":false
-                        }]
+                        }],
+                 "terrain":[1, 0, 1, 0]
                 }, 
                 {
                  "id":173,
@@ -1685,7 +1838,8 @@
                          "name":"collides",
                          "type":"bool",
                          "value":false
-                        }]
+                        }],
+                 "terrain":[0, 0, 0, 0]
                 }, 
                 {
                  "id":174,
@@ -1694,7 +1848,8 @@
                          "name":"collides",
                          "type":"bool",
                          "value":false
-                        }]
+                        }],
+                 "terrain":[0, 1, 0, 1]
                 }, 
                 {
                  "id":175,
@@ -1874,7 +2029,8 @@
                          "name":"collides",
                          "type":"bool",
                          "value":false
-                        }]
+                        }],
+                 "terrain":[0, 1, 0, 0]
                 }, 
                 {
                  "id":195,
@@ -1883,7 +2039,8 @@
                          "name":"collides",
                          "type":"bool",
                          "value":false
-                        }]
+                        }],
+                 "terrain":[1, 0, 0, 0]
                 }, 
                 {
                  "id":196,
@@ -1892,7 +2049,8 @@
                          "name":"collides",
                          "type":"bool",
                          "value":false
-                        }]
+                        }],
+                 "terrain":[1, 0, 1, 1]
                 }, 
                 {
                  "id":197,
@@ -1901,7 +2059,8 @@
                          "name":"collides",
                          "type":"bool",
                          "value":false
-                        }]
+                        }],
+                 "terrain":[0, 0, 1, 1]
                 }, 
                 {
                  "id":198,
@@ -1910,7 +2069,8 @@
                          "name":"collides",
                          "type":"bool",
                          "value":false
-                        }]
+                        }],
+                 "terrain":[0, 1, 1, 1]
                 }, 
                 {
                  "id":199,
@@ -6169,86 +6329,10 @@
                          "value":false
                         }]
                 }],
-         "tilewidth":32,
-         "wangsets":[
-                {
-                 "colors":[
-                        {
-                         "color":"#ff0000",
-                         "name":"Path",
-                         "probability":1,
-                         "tile":173
-                        }, 
-                        {
-                         "color":"#00ff00",
-                         "name":"Grass",
-                         "probability":1,
-                         "tile":125
-                        }],
-                 "name":"Terrains",
-                 "tile":-1,
-                 "type":"corner",
-                 "wangtiles":[
-                        {
-                         "tileid":125,
-                         "wangid":[0, 2, 0, 2, 0, 2, 0, 2]
-                        }, 
-                        {
-                         "tileid":148,
-                         "wangid":[0, 2, 0, 1, 0, 2, 0, 2]
-                        }, 
-                        {
-                         "tileid":149,
-                         "wangid":[0, 2, 0, 1, 0, 1, 0, 2]
-                        }, 
-                        {
-                         "tileid":150,
-                         "wangid":[0, 2, 0, 2, 0, 1, 0, 2]
-                        }, 
-                        {
-                         "tileid":170,
-                         "wangid":[0, 1, 0, 2, 0, 1, 0, 1]
-                        }, 
-                        {
-                         "tileid":171,
-                         "wangid":[0, 1, 0, 1, 0, 2, 0, 1]
-                        }, 
-                        {
-                         "tileid":172,
-                         "wangid":[0, 1, 0, 1, 0, 2, 0, 2]
-                        }, 
-                        {
-                         "tileid":173,
-                         "wangid":[0, 1, 0, 1, 0, 1, 0, 1]
-                        }, 
-                        {
-                         "tileid":174,
-                         "wangid":[0, 2, 0, 2, 0, 1, 0, 1]
-                        }, 
-                        {
-                         "tileid":194,
-                         "wangid":[0, 2, 0, 1, 0, 1, 0, 1]
-                        }, 
-                        {
-                         "tileid":195,
-                         "wangid":[0, 1, 0, 1, 0, 1, 0, 2]
-                        }, 
-                        {
-                         "tileid":196,
-                         "wangid":[0, 1, 0, 2, 0, 2, 0, 2]
-                        }, 
-                        {
-                         "tileid":197,
-                         "wangid":[0, 1, 0, 2, 0, 2, 0, 1]
-                        }, 
-                        {
-                         "tileid":198,
-                         "wangid":[0, 2, 0, 2, 0, 2, 0, 1]
-                        }]
-                }]
+         "tilewidth":32
         }],
  "tilewidth":32,
  "type":"map",
- "version":1.5,
+ "version":1.4,
  "width":40
 }
