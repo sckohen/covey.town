@@ -15,6 +15,7 @@ export default class CoveyTownsStore {
   private static _instance: CoveyTownsStore;
 
   private _towns: CoveyTownController[] = [];
+  private _privateSpace: CoveySpaceController[] = [];
 
   static getInstance(): CoveyTownsStore {
     if (CoveyTownsStore._instance === undefined) {
