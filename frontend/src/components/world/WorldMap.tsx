@@ -138,12 +138,12 @@ class CoveyGameScene extends Phaser.Scene {
 
 
   /**
-   * Creates a zone for the defined private space (in the tilemap)
-   * @param spaceID the private space id given as the name of the object
+   * Creates a Phaser zone for the defined spaces (in the tilemap)
+   * @param spaceID the space id given as the name of the object
    * @param map map object for the current world
    * @param sprite sprite object for collision detection
    * @param [debug] optional param to enable rendering of the zone
-   * @returns  a zone object
+   * @returns  a zone object that detects players inside it
    */
   createZoneForPrivateSpace(spaceID: number, map: Phaser.Tilemaps.Tilemap, sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, debug?: boolean) {
     // Get the location of the private space drawed on the map as an object

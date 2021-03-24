@@ -101,13 +101,13 @@ export default class CoveySpaceController {
    *
    * @param player the player to be removed from the whitelist
    */
-  removePlayerToWhiteList(player: Player): void {
+  removePlayerFromWhiteList(player: Player): void {
     this._whiteList = this._whiteList.filter((p) => p.id !== player.id);
   }
 
   /**
-   * Subscribe to events from this town. Callers should make sure to
-   * unsubscribe when they no longer want those events by calling removeTownListener
+   * Subscribe to events from this space. Callers should make sure to
+   * unsubscribe when they no longer want those events by calling removeSpaceListener
    *
    * @param listener New listener
    */
@@ -116,16 +116,21 @@ export default class CoveySpaceController {
   }
 
   /**
-   * Unsubscribe from events in this town.
+   * Unsubscribe from events in this space.
    *
    * @param listener The listener to unsubscribe, must be a listener that was registered
-   * with addTownListener, or otherwise will be a no-op
+   * with addSpaceListener, or otherwise will be a no-op
    */
   removeSpaceListener(listener: CoveySpaceListener): void {
     this._listeners = this._listeners.filter((v) => v !== listener);
   }
 
+
+  /**
+   * Disconnects all players that are listen
+   */
   disconnectAllPlayers(): void {
+    this._players = [];
     this._listeners.forEach((listener) => listener.onSpaceDisbanded());
   }
 }
