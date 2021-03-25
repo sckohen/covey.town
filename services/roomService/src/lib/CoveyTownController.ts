@@ -129,6 +129,10 @@ export default class CoveyTownController {
     this._listeners.forEach((listener) => listener.onPlayerMoved(player));
   }
 
+  /**
+   * Adds private space
+   * @param newSpace 
+   */
   addPrivateSpace(newSpace: CoveySpaceController): void {
     this._privateSpaces.push(newSpace);
   }

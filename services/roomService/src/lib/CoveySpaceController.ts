@@ -1,5 +1,4 @@
 
-import { UserLocation } from '../CoveyTypes';
 import CoveySpaceListener from '../types/CoveySpaceListener';
 import Player from '../types/Player';
 
@@ -53,7 +52,7 @@ export default class CoveySpaceController {
   private _spaceHost: Player | null;
 
    /** The player who is the designated by the host to be the presenter * */
-   private _presenter: Player | null;
+  private _presenter: Player | null;
 
   /** The max number of players allowed into a space at a time * */
   private _capacity: number;
@@ -73,7 +72,7 @@ export default class CoveySpaceController {
    *
    * @param newPlayer The new player to add to the space
    */
-   addPlayer(newPlayer: Player): Player[] {
+  addPlayer(newPlayer: Player): Player[] {
     this._players.push(newPlayer);
 
     // Notify other players that this player has joined
@@ -97,7 +96,7 @@ export default class CoveySpaceController {
    *
    * @param newPlayer The new player to be add to the whitelist
    */
-   addPlayerToWhiteList(newPlayer: Player): Player[] {
+  addPlayerToWhiteList(newPlayer: Player): Player[] {
     this._whiteList.push(newPlayer);
     
     return this._whiteList;
@@ -116,7 +115,7 @@ export default class CoveySpaceController {
     * Changes the host for this space
     * @param newHost the player that is the new host
     */
-   updateSpaceHost(newHost: Player | null): void {
+  updateSpaceHost(newHost: Player | null): void {
     this._spaceHost = newHost;
   }
 
@@ -124,7 +123,7 @@ export default class CoveySpaceController {
     * Changes the presenter for this space
     * @param newPresenter the player that is the new presenter
     */
-   updatePresenter(newPresenter: Player | null): void {
+  updatePresenter(newPresenter: Player | null): void {
     this._presenter = newPresenter;
   }
 
@@ -147,7 +146,6 @@ export default class CoveySpaceController {
   removeSpaceListener(listener: CoveySpaceListener): void {
     this._listeners = this._listeners.filter((v) => v !== listener);
   }
-
 
   /**
    * Disconnects all players that are listen
