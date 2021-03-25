@@ -16,6 +16,10 @@ export default class CoveySpaceController {
     return this._spaceHost;
   }
 
+  get presenter(): Player | null {
+    return this._presenter;
+  }
+
   get players(): Player[] {
     return this._players;
   }
@@ -48,6 +52,9 @@ export default class CoveySpaceController {
    /** The player who is the designated host for this space * */
   private _spaceHost: Player | null;
 
+   /** The player who is the designated by the host to be the presenter * */
+   private _presenter: Player | null;
+
   /** The max number of players allowed into a space at a time * */
   private _capacity: number;
 
@@ -58,7 +65,7 @@ export default class CoveySpaceController {
     this._coveySpaceID = coveySpaceID;
     this._capacity = 50; // not sure if necessary
     this._spaceHost = null; // start off as no player until first player enters space
-
+    this._presenter = null; // start off as no player until host chooses the presenter
   }
 
   /**
@@ -103,6 +110,22 @@ export default class CoveySpaceController {
    */
   removePlayerFromWhiteList(player: Player): void {
     this._whiteList = this._whiteList.filter((p) => p.id !== player.id);
+  }
+
+   /**
+    * Changes the host for this space
+    * @param newHost the player that is the new host
+    */
+   updateSpaceHost(newHost: Player | null): void {
+    this._spaceHost = newHost;
+  }
+
+  /**
+    * Changes the presenter for this space
+    * @param newPresenter the player that is the new presenter
+    */
+   updatePresenter(newPresenter: Player | null): void {
+    this._presenter = newPresenter;
   }
 
   /**

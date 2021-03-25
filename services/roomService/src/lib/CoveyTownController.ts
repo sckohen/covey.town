@@ -5,6 +5,7 @@ import Player from '../types/Player';
 import PlayerSession from '../types/PlayerSession';
 import TwilioVideo from './TwilioVideo';
 import IVideoClient from './IVideoClient';
+import CoveySpaceController from './CoveySpaceController';
 
 const friendlyNanoID = customAlphabet('1234567890ABCDEF', 8);
 
@@ -48,8 +49,15 @@ export default class CoveyTownController {
     return this._coveyTownID;
   }
 
+  get privateSpace(): CoveySpaceController[] {
+    return this._privateSpaces;
+  }
+
   /** The list of players currently in the town * */
   private _players: Player[] = [];
+  
+  /** The list of spaces in the town * */
+  private _privateSpaces: CoveySpaceController[] = [];
 
   /** The list of valid sessions for this town * */
   private _sessions: PlayerSession[] = [];
@@ -76,6 +84,7 @@ export default class CoveyTownController {
     this._townUpdatePassword = nanoid(24);
     this._isPubliclyListed = isPubliclyListed;
     this._friendlyName = friendlyName;
+    this._privateSpaces = []; // Initialize with no spaces
   }
 
   /**
@@ -118,6 +127,10 @@ export default class CoveyTownController {
   updatePlayerLocation(player: Player, location: UserLocation): void {
     player.updateLocation(location);
     this._listeners.forEach((listener) => listener.onPlayerMoved(player));
+  }
+
+  addPrivateSpace(newSpace: CoveySpaceController): void {
+    this._privateSpaces.push(newSpace);
   }
 
   /**
