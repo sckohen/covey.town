@@ -49,6 +49,17 @@ describe('CoveyTownController', () => {
         expect(mockGetTokenForTown).toBeCalledWith(townController.coveyTownID, newPlayerSession.player.id);
       });
   });
+  describe('addPlayer', () => { // Included in handout
+    it('should use the coveyTownID and player ID properties when requesting a video token',
+      async () => {
+        const townName = `FriendlyNameTest-${nanoid()}`;
+        const townController = new CoveyTownController(townName, false);
+        const newPlayerSession = await townController.addPlayer(new Player(nanoid()));
+        expect(mockGetTokenForTown).toBeCalledTimes(1);
+        expect(mockGetTokenForTown).toBeCalledWith(townController.coveyTownID, newPlayerSession.player.id);
+      });
+  });
+
   describe('town listeners and events', () => {
     let testingTown: CoveyTownController;
     const mockListeners = [mock<CoveyTownListener>(),

@@ -5,7 +5,8 @@ import Player from '../types/Player';
 import PlayerSession from '../types/PlayerSession';
 import TwilioVideo from './TwilioVideo';
 import IVideoClient from './IVideoClient';
-import CoveySpaceController from './CoveySpaceController';
+import CoveySpaceController  from './CoveySpaceController';
+
 
 const friendlyNanoID = customAlphabet('1234567890ABCDEF', 8);
 
@@ -49,7 +50,7 @@ export default class CoveyTownController {
     return this._coveyTownID;
   }
 
-  get privateSpace(): CoveySpaceController[] {
+  get privateSpaces(): CoveySpaceController[] {
     return this._privateSpaces;
   }
 
@@ -86,6 +87,7 @@ export default class CoveyTownController {
     this._friendlyName = friendlyName;
     this._privateSpaces = []; // Initialize with no spaces
   }
+
 
   /**
    * Adds a player to this Covey Town, provisioning the necessary credentials for the
@@ -129,13 +131,6 @@ export default class CoveyTownController {
     this._listeners.forEach((listener) => listener.onPlayerMoved(player));
   }
 
-  /**
-   * Adds private space
-   * @param newSpace 
-   */
-  addPrivateSpace(newSpace: CoveySpaceController): void {
-    this._privateSpaces.push(newSpace);
-  }
 
   /**
    * Subscribe to events from this town. Callers should make sure to
@@ -169,5 +164,72 @@ export default class CoveyTownController {
 
   disconnectAllPlayers(): void {
     this._listeners.forEach((listener) => listener.onTownDestroyed());
+  }
+
+  // This is where the private space storing begins
+
+  /**
+   * Adds private space
+   * @param newSpace 
+   */
+  addPrivateSpace(newSpace: CoveySpaceController): void {
+    this._privateSpaces.push(newSpace);
+  }
+
+  /**
+   * updates a private space based on the host's request
+   * @param coveySpaceId the ID number for a covey space
+   * @param spaceHost the desired host of a space that may or maynot be updated
+   * @param whitelist the desired whitelist of a space that may or maynot be updated
+   */
+  updateCoveySpace(coveySpaceID: string, spaceHost: Player, spacePresenter: Player, whitelist: Player[]): void {
+    const hostedSpace = this.getControllerForSpace(coveySpaceID);
+    if ( spaceHost.id !== hostedSpace?.spaceHostID) {
+      hostedSpace?.updateSpaceHost(spaceHost.id);
+    }
+    if ( spacePresenter.id !== hostedSpace?.presenterID) {
+      hostedSpace?.updatePresenter(spacePresenter.id);
+    }
+    if (whitelist !== hostedSpace?.whiteList) {
+      hostedSpace?.updateWhitelist(whitelist);
+    }
+  }
+
+  /**
+   * gets a specific private space controller from a given covey space ID
+   * @param coveySpaceID The ID number for a covey space
+   */
+  getControllerForSpace(coveySpaceID: string): CoveySpaceController | undefined {
+    return this._privateSpaces.find((v) => v.coveySpaceID == coveySpaceID); 
+
+  }
+
+  /**
+   * Gets the list of all private spaces
+   */
+  getSpaces(): CoveySpaceController[] {
+    return this._privateSpaces;
+  }
+
+  /**
+   * Adds the player to the space they requested to join
+   * @param newPlayer the player that would like to join the space
+   * @param spaceID the spaceID for the space they would like to join
+   */
+  joinSpace(newPlayer: Player, spaceID: string): void {
+    const spaceController = this.getControllerForSpace(spaceID);
+
+    spaceController?.addPlayer(newPlayer);
+  }
+
+  /**
+   * Removes the player from the space they requested to leave
+   * @param player the player that would like to leave the space
+   * @param spaceID the spaceID for the space they would like to leave
+   */
+   leaveSpace(player: Player, spaceID: string): void {
+    const spaceController = this.getControllerForSpace(spaceID);
+
+    spaceController?.removePlayer(player);
   }
 }

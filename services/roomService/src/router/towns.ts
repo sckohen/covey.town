@@ -3,14 +3,9 @@ import BodyParser from 'body-parser';
 import io from 'socket.io';
 import { Server } from 'http';
 import { StatusCodes } from 'http-status-codes';
-import {
-  townCreateHandler, townDeleteHandler,
-  townJoinHandler,
-  townListHandler,
-  townSubscriptionHandler,
-  townUpdateHandler,
-} from '../requestHandlers/CoveyTownRequestHandlers';
+import { spaceListHandler } from '../requestHandlers/CoveySpaceRequestHandlers';
 import { logError } from '../Utils';
+import { townCreateHandler, townDeleteHandler, townJoinHandler, townListHandler, townSubscriptionHandler, townUpdateHandler } from '../requestHandlers/CoveyTownRequestHandlers';
 
 export default function addTownRoutes(http: Server, app: Express): io.Server {
   /*
@@ -86,6 +81,7 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
         });
     }
   });
+  
   /**
    * Update a town
    */
@@ -104,6 +100,26 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR)
         .json({
           message: 'Internal server error, please see log in server for more details',
+        });
+    }
+  });
+
+  /**
+  * List the spaces in a town
+  */
+  app.get('/space/:townID/:spaceID', BodyParser.json(), async (_req, res) => {
+    try {
+      const result = await spaceListHandler({
+        coveyTownID: _req.params.townID,
+        coveySpaceID: _req.params.spaceID,
+      });
+      res.status(200)
+        .json(result);
+    } catch (err) {
+      logError(err);
+      res.status(500)
+        .json({
+          message: 'Internal server error, please see log in server for details',
         });
     }
   });
