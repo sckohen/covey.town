@@ -7,7 +7,6 @@ import Player from '../types/Player';
  * can occur (e.g. joining a town, moving, leaving a town)
  */
 export default class CoveySpaceController {
-
   get spaceHostID(): string | null {
     return this._spaceHostID;
   }
@@ -46,6 +45,7 @@ export default class CoveySpaceController {
 
    /** The id for the player who is the designated by the host to be the presenter * */
   private _presenterID: string | null;
+
 
   /** The list of players that are allowed to join this private space * */
   private _whiteList: Player[] = [];
