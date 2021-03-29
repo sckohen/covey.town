@@ -3,7 +3,7 @@ import CoveySpaceListener from '../types/CoveySpaceListener';
 import Player from '../types/Player';
 
 /**
- * The CoveyTownController implements the logic for each town: managing the various events that
+ * The CoveyTownController implements  the logic for each town: managing the various events that
  * can occur (e.g. joining a town, moving, leaving a town)
  */
 export default class CoveySpaceController {
@@ -31,7 +31,7 @@ export default class CoveySpaceController {
     return this._whiteList;
   }
 
-  /** The list of players currently in the space * */
+  /** The list of players currently in the space   * */
   private _players: Player[] = [];
 
   /** The list of CoveyTownListeners that are subscribed to events in this town * */
