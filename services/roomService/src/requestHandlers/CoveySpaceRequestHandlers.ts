@@ -85,7 +85,8 @@ export interface SpaceListResponse {
  * Payload sent by the client to delete a Town
  */
 export interface SpaceDisbandRequest {
-  // not sure if needs to send any payload
+  coveyTownID: string;
+  coveySpaceID: string;
 }
 
 /**
@@ -220,21 +221,54 @@ export async function spaceClaimHandler(requestData: SpaceClaimRequest): Promise
 
 // Curtis
 export async function spaceDisbandHandler(requestData: SpaceDisbandRequest): Promise<ResponseEnvelope<Record<string, null>>> {
-  
+  const townsStore = CoveyTownsStore.getInstance();
+  const coveyTownController = townsStore.getControllerForTown(requestData.coveyTownID);
+
+  if (!coveyTownController) {
+    return {
+      isOK: false,
+      message: 'Error: No such town',
+    };
+  }
+
+  const coveySpaceController = coveyTownController.getControllerForSpace(requestData.coveySpaceID);
+  if (!coveySpaceController) {
+    return {
+      isOK: false,
+      message: 'Error: No such space',
+    };
+  }
+
+  coveySpaceController.disband();
+
+  return {
+    isOK: true,
+    response: {},
+    message: `The space ${requestData.coveySpaceID} was disbanded.`,
+  };
 }
 
 // anne
 export async function spaceUpdateHandler(requestData: SpaceUpdateRequest): Promise<ResponseEnvelope<Record<string, null>>> {
-  // NOT DONE DO LATER !!!
   const townsStore = CoveyTownsStore.getInstance();
   const coveyTownController = townsStore.getControllerForTown(requestData.coveyTownID);
+
+  if (!coveyTownController) {
+    return {
+      isOK: false,
+      message: 'Error: No such town',
+    };
+  }
+
+  const coveySpaceController = coveyTownController.getControllerForSpace(requestData.coveySpaceID);
   
+  coveySpaceController?.updateWhitelist(requestData.newWhitelist);
+  coveySpaceController?.updatePresenter(requestData.newPresenterPlayerID);
   return {
     isOK: true,
     response: {},
-    message: !true ? 'something went wrong here??? !!! add real message later' : undefined,
-    };
-  }
+    message: 
+  };
 }
 
 /**

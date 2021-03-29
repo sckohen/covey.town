@@ -7,7 +7,7 @@ import Player from '../types/Player';
  * can occur (e.g. joining a town, moving, leaving a town)
  */
 export default class CoveySpaceController {
-  get spaceHostID(): string | null {
+  get spaceHostID(): string[] | null {
     return this._spaceHostID;
   }
 

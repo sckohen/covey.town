@@ -29,7 +29,7 @@ function generateTestLocation(): UserLocation {
   };
 }
 
-describe('CoveyTownController', () => {
+describe('CoveySpaceController', () => {
   beforeEach(() => {
     mockGetTokenForTown.mockClear();
   });
