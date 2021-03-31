@@ -95,8 +95,9 @@ export interface SpaceDisbandRequest {
 export interface SpaceUpdateRequest {
   coveyTownID: string;
   coveySpaceID: string;
-  newHost?: string;
-  newPresenter?: string[];
+  newHost: Player;
+  newPresenter: Player;
+  newWhitelist: Player[];
 }
 
 /**
@@ -260,16 +261,16 @@ export async function spaceUpdateHandler(requestData: SpaceUpdateRequest): Promi
     };
   }
 
-  const coveySpaceController = coveyTownController.getControllerForSpace(requestData.coveySpaceID);
-  
-  coveySpaceController?.updateWhitelist(requestData.newWhitelist);
-  coveySpaceController?.updatePresenter(requestData.newPresenterPlayerID);
+  //spaceHost: Player, spacePresenter: Player, whitelist: Player[]
+  coveyTownController.updateCoveySpace(requestData.coveySpaceID, requestData.newHost, requestData.newPresenter, requestData.newWhitelist)
+
   return {
     isOK: true,
     response: {},
-    message: 
-  };
+    message: 'CoveySpaceUpdated'
+  }
 }
+
 
 /**
  * An adapter between CoveyTownController's event interface (CoveyTownListener)
