@@ -166,7 +166,7 @@ export default class CoveyTownController {
     this._listeners.forEach((listener) => listener.onTownDestroyed());
   }
 
-  // This is where the private space storing begins
+  // This is where the private space storing begins !!!
 
   /**
    * Create a new private space 
