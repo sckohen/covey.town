@@ -1,6 +1,7 @@
 import { CoveySpaceList } from '../CoveyTypes';
 import Player from '../types/Player';
 import CoveySpaceController  from './CoveySpaceController';
+import CoveyTownsStore from './CoveyTownsStore';
 
 
 export default class CoveySpacesStore {
@@ -20,15 +21,15 @@ export default class CoveySpacesStore {
   * @param coveySpaceID The ID number for a covey space
   */
   getControllerForSpace(coveySpaceID: string): CoveySpaceController | undefined {
-      return this._spaces.find(space => space.coveySpaceID == coveySpaceID); 
+    return this._spaces.find(space => space.coveySpaceID == coveySpaceID); 
 
-    }
+  }
 
   /**
    * Gets the list of all private spaces
    * TODO: revisit what should be returned in the CoveySpaceList
    */
-   getSpaces(): CoveySpaceList {
+  getSpaces(): CoveySpaceList {
     return this._spaces.map(spaceController => ({
       coveySpaceID: spaceController.coveySpaceID, 
       currentPlayers: spaceController.players}));
@@ -38,10 +39,18 @@ export default class CoveySpacesStore {
   /**
    * Creates a new space
    * @param newSpaceID the ID for the new space
+   * @param townController ID for the town this space belongs to
    * @returns the space with the given ID
    */
-  createSpace(newSpaceID: string): CoveySpaceController {
-    const newSpace = new CoveySpaceController(newSpaceID);
+  createSpace(newSpaceID: string, townControllerID: string): CoveySpaceController {
+    const townsStore = CoveyTownsStore.getInstance();
+    const townController = townsStore.getControllerForTown(townControllerID);
+
+    if (townController === undefined) {
+      throw new Error('Town not found.');
+    }
+
+    const newSpace = new CoveySpaceController(newSpaceID, townController);
     this._spaces.push(newSpace);
     return newSpace;
   }
@@ -52,16 +61,18 @@ export default class CoveySpacesStore {
    * @param spaceHost the desired host of a space that may or maynot be updated
    * @param whitelist the desired whitelist of a space that may or maynot be updated
    */
-  updateSpace(coveySpaceID: string, spaceHost: Player, spacePresenter: Player, whitelist: Player[]): void {
+  updateSpace(coveySpaceID: string, spaceHost?: Player, spacePresenter?: Player, whitelist?: Player[]): void {
     const hostedSpace = this.getControllerForSpace(coveySpaceID);
-    if ( spaceHost.id !== hostedSpace?.spaceHostID) {
-      hostedSpace?.updateSpaceHost(spaceHost.id);
-    }
-    if ( spacePresenter.id !== hostedSpace?.presenterID) {
-      hostedSpace?.updatePresenter(spacePresenter.id);
-    }
-    if (whitelist !== hostedSpace?.whiteList) {
-      hostedSpace?.updateWhitelist(whitelist);
+    if (hostedSpace){
+      if (spaceHost !== undefined) {
+        hostedSpace.updateSpaceHost(spaceHost.id);
+      }
+      if (spacePresenter !== undefined) {
+        hostedSpace.updatePresenter(spacePresenter.id);
+      }
+      if (whitelist !== undefined) {
+        hostedSpace.updateWhitelist(whitelist);
+      }
     }
   }
   

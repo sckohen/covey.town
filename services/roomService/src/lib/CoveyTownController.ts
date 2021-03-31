@@ -5,7 +5,6 @@ import Player from '../types/Player';
 import PlayerSession from '../types/PlayerSession';
 import TwilioVideo from './TwilioVideo';
 import IVideoClient from './IVideoClient';
-import CoveySpaceController  from './CoveySpaceController';
 import CoveySpacesStore  from './CoveySpacesStore';
 
 
@@ -19,6 +18,7 @@ export default class CoveyTownController {
   get capacity(): number {
     return this._capacity;
   }
+
   set isPubliclyListed(value: boolean) {
     this._isPubliclyListed = value;
   }
@@ -165,50 +165,5 @@ export default class CoveyTownController {
 
   disconnectAllPlayers(): void {
     this._listeners.forEach((listener) => listener.onTownDestroyed());
-  }
-
-  //
-  //
-  // This is where the private space additions begins !!!
-  //
-  //
-
-  /**
-   * Adds the player to the space they requested to join
-   * @param newPlayerID the ID for the player that would like to join the space
-   * @param spaceID the spaceID for the space they would like to join
-   * @returns the controller for the space the player joined
-   */
-  joinSpace(newPlayerID: string, spaceID: string): CoveySpaceController {
-    const spaceController = this._privateSpaces.getControllerForSpace(spaceID);
-    const playerFromID = this.players.find(p => p.id === newPlayerID);
-    
-    if (!spaceController || !playerFromID) {
-      throw new Error("Space controller or newPlayer not found");
-    }
-
-    spaceController.addPlayer(playerFromID);
-    return spaceController;
-  }
-
-  /**
-   * Removes the player from the space they requested to leave
-   * @param playerID the the ID for the player that would like to leave the space
-   * @param spaceID the spaceID for the space they would like to leave
-   */
-   leaveSpace(playerID: string, spaceID: string): void {
-    const spaceController = this._privateSpaces.getControllerForSpace(spaceID);
-    const playerFromID = this.players.find(p => p.id === playerID);
-    
-    if (!spaceController || !playerFromID) {
-      throw new Error("Space controller or player not found");
-    }
-
-    spaceController.removePlayer(playerFromID);
-  }
-
-  // TODO
-  claimSpace(playerID: string, spaceID: string): void {
-
   }
 }
