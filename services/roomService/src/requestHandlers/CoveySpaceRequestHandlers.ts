@@ -11,7 +11,6 @@ import CoveySpaceController from '../lib/CoveySpaceController';
  * Request to create a covey space
  */
 export interface SpaceCreateRequest {
-  coveyTownID: string;
   /** The id for the space that is to be created* */
   coveySpaceID: string;
 }
@@ -27,7 +26,6 @@ export interface SpaceCreateResponse {
  * Payload sent by client to claim a space within a Town in Covey.Town
  */
  export interface SpaceClaimRequest {
-  coveyTownID: string;
   /** The id for the space that is to be claimed* */
   coveySpaceID: string;
   /** The id for the new host (player) for the private space* */
@@ -68,13 +66,6 @@ export interface SpaceJoinResponse {
 }
 
 /**
- * The format of a request to list the spaces within a Town in Covey.town.
- */
-export interface SpaceListRequest {
-  coveyTownID: string;
-}
-
-/**
  * Response from the server for a space list request
  */
 export interface SpaceListResponse {
@@ -86,7 +77,6 @@ export interface SpaceListResponse {
  * Payload sent by the client to delete a Town
  */
 export interface SpaceDisbandRequest {
-  coveyTownID: string;
   coveySpaceID: string;
 }
 
@@ -94,7 +84,6 @@ export interface SpaceDisbandRequest {
  * Payload sent by the client to update a space.
  */
 export interface SpaceUpdateRequest {
-  coveyTownID: string;
   coveySpaceID: string;
   newHost: Player;
   newPresenter: Player;
@@ -169,14 +158,12 @@ export async function spaceJoinHandler(requestData: SpaceJoinRequest): Promise<R
 }
 
 // john
-export async function spaceListHandler(requestData: SpaceListRequest): Promise<ResponseEnvelope<SpaceListResponse>> {
+export async function spaceListHandler(): Promise<ResponseEnvelope<SpaceListResponse>> {
   const spacesStore = CoveySpacesStore.getInstance();
 
   return {
     isOK: true,
-    response: {
-      spaces: spacesStore.getSpaces(),
-    }
+    response: { spaces: spacesStore.getSpaces() }
   }
 }
 
@@ -216,7 +203,6 @@ export async function spaceDisbandHandler(requestData: SpaceDisbandRequest): Pro
 export async function spaceUpdateHandler(requestData: SpaceUpdateRequest): Promise<ResponseEnvelope<Record<string, null>>> {
   const spacesStore = CoveySpacesStore.getInstance();
 
-  //spaceHost: Player, spacePresenter: Player, whitelist: Player[]
   spacesStore.updateSpace(
     requestData.coveySpaceID, 
     requestData.newHost, 
