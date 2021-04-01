@@ -3,7 +3,6 @@ import { Socket } from 'socket.io';
 import Player from '../types/Player';
 import { CoveySpaceList, UserLocation } from '../CoveyTypes';
 import CoveyTownListener from '../types/CoveyTownListener';
-import CoveyTownsStore from '../lib/CoveyTownsStore';
 import CoveySpacesStore from '../lib/CoveySpacesStore';
 
 /**

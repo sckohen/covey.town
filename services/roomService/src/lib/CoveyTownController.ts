@@ -58,7 +58,7 @@ export default class CoveyTownController {
   /** The list of players currently in the town * */
   private _players: Player[] = [];
   
-  /** The all private spaces in this town * */
+  /** All the private spaces in this town * */
   private _privateSpaces: CoveySpacesStore;
 
   /** The list of valid sessions for this town * */
@@ -131,7 +131,6 @@ export default class CoveyTownController {
     player.updateLocation(location);
     this._listeners.forEach((listener) => listener.onPlayerMoved(player));
   }
-
 
   /**
    * Subscribe to events from this town. Callers should make sure to

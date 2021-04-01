@@ -307,14 +307,13 @@ class CoveyGameScene extends Phaser.Scene {
     // Watch the player and worldLayer for collisions, for the duration of the scene:
     this.physics.add.collider(sprite, worldLayer);
 
-    // Create zone for Private Space 1 and 2 using the createZoneForPrivateSpace function
+    // Create zone for all Private Spaces using the createZoneForPrivateSpace function
     if (this.player !== undefined) {
       const spriteForPlayer = this.player.sprite;
-
       // Get the a list of private space drawn on the map and create zones for all of them
       const privateSpaces = map.filterObjects('Objects', (obj) => obj.name.includes('Private Space'));
       privateSpaces.forEach(space => this.createZoneForPrivateSpace(space.name.slice(-1), map, spriteForPlayer, true))
-    }
+  }
 
     // Create the player's walking animations from the texture atlas. These are stored in the global
     // animation manager so any sprite can access them.

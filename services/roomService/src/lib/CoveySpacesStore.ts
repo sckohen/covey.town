@@ -50,7 +50,10 @@ export default class CoveySpacesStore {
       throw new Error('Town not found.');
     }
 
-    const newSpace = new CoveySpaceController(newSpaceID, townController);
+    // The uniqueID for the space is combination of townControllerID and the spaceID
+    const uniqueID = townControllerID + '_' + newSpaceID;
+
+    const newSpace = new CoveySpaceController(uniqueID, townController);
     this._spaces.push(newSpace);
     return newSpace;
   }
@@ -85,8 +88,8 @@ export default class CoveySpacesStore {
 
     if (spaceController) {
       spaceController.disconnectAllPlayers();
-      spaceController.updateSpaceHost(null);
-      spaceController.updatePresenter(null);
+      spaceController.updateSpaceHost(undefined);
+      spaceController.updatePresenter(undefined);
       spaceController.updateWhitelist([]);
       return true;
     }

@@ -62,7 +62,7 @@ export default class CoveySpaceController {
     this._presenterID = undefined; // start off as no player until host chooses the presenter
   }
 
-
+  
   /**
    * Finds and returns the player object from the ID
    * @param playerID the ID for the player wanted

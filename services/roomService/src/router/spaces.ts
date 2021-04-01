@@ -85,9 +85,9 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
   });
 
   /**
-   * Disband a private space (go back to being a normal space) 
+   * Disband a private space (go back to being a normal space)
    */
-     app.patch('/spaces/:spaceID', BodyParser.json(), async (req, res) => {
+     app.delete('/spaces/:spaceID', BodyParser.json(), async (req, res) => {
       try {
         const result = await spaceDisbandHandler({
           coveySpaceID: req.params.spaceID,
