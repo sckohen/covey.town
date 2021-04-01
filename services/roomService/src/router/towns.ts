@@ -3,7 +3,6 @@ import BodyParser from 'body-parser';
 import io from 'socket.io';
 import { Server } from 'http';
 import { StatusCodes } from 'http-status-codes';
-import { spaceListHandler } from '../requestHandlers/CoveySpaceRequestHandlers';
 import { logError } from '../Utils';
 import { townCreateHandler, townDeleteHandler, townJoinHandler, townListHandler, townSubscriptionHandler, townUpdateHandler } from '../requestHandlers/CoveyTownRequestHandlers';
 
@@ -103,28 +102,4 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
         });
     }
   });
-
-  /**
-  * List the spaces in a town
-  */
-  app.get('/space/:townID/:spaceID', BodyParser.json(), async (_req, res) => {
-    try {
-      const result = await spaceListHandler({
-        coveyTownID: _req.params.townID,
-        coveySpaceID: _req.params.spaceID,
-      });
-      res.status(200)
-        .json(result);
-    } catch (err) {
-      logError(err);
-      res.status(500)
-        .json({
-          message: 'Internal server error, please see log in server for details',
-        });
-    }
-  });
-
-  const socketServer = new io.Server(http, { cors: { origin: '*' } });
-  socketServer.on('connection', townSubscriptionHandler);
-  return socketServer;
 }

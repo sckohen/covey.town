@@ -67,7 +67,7 @@ export interface SpaceJoinResponse {
 /**
  * The format of a request to leave a space within a Town in Covey.Town, as dispatched by the server middleware
  */
- export interface SpaceLeaveRequest {
+export interface SpaceLeaveRequest {
   /** the id for the player that would like to join * */
   playerID: string;
   /** ID of the space that the player would like to join * */

@@ -64,8 +64,8 @@ export default class CoveySpaceController {
 
 
   /**
-   * Finds the player object from the ID
-   * @param playerID the ID for the wanted player
+   * Finds and returns the player object from the ID
+   * @param playerID the ID for the player wanted
    * @returns player object with the given ID
    */
   playerFromID(playerID: string): Player {
