@@ -35,7 +35,6 @@ export default class CoveySpacesStore {
       currentPlayers: spaceController.players}));
   }
 
-
   /**
    * Creates a new space
    * @param newSpaceID the ID for the new space

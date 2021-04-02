@@ -1,11 +1,6 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import assert from 'assert';
-import Player from '../types/Player';
-import { CoveySpaceList } from '../CoveyTypes';
-import { UserLocation } from '../CoveyTypes';
-
-
-export type ServerPlayer = { _id: string, _userName: string, location: UserLocation };
+import { ServerPlayer } from './Player';
 
 /**
  * Request to create a covey space
@@ -58,7 +53,7 @@ export interface SpaceJoinRequest {
  */
 export interface SpaceJoinResponse {
   /** current players in a space */
-  currentPlayers: Player[];
+  currentPlayers: ServerPlayer[];
   /** the id for the player who is the current host of this space * */
   currentHostID: string | undefined;
   /** the id for the player who is the current presenter in this space */
@@ -80,7 +75,7 @@ export interface SpaceLeaveRequest {
  */
 export interface SpaceListResponse {
   // might not need this, may remove or use for added functionality
-  spaces: CoveySpaceList;
+  spaces: CoveySpaceInfo;
 }
 
 /**
@@ -95,9 +90,9 @@ export interface SpaceDisbandRequest {
  */
 export interface SpaceUpdateRequest {
   coveySpaceID: string;
-  newHost: Player;
-  newPresenter: Player;
-  newWhitelist: Player[];
+  newHost: ServerPlayer;
+  newPresenter: ServerPlayer;
+  newWhitelist: ServerPlayer[];
 }
 
 /**
@@ -108,6 +103,13 @@ export interface ResponseEnvelope<T> {
   message?: string;
   response?: T;
 }
+
+export type CoveySpaceInfo = {
+  friendlyName: string;
+  coveyTownID: string;
+  currentOccupancy: number;
+  maximumOccupancy: number
+};
 
 export default class SpacesServiceClient {
   private _axios: AxiosInstance;

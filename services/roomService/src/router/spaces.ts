@@ -3,10 +3,10 @@ import BodyParser from 'body-parser';
 import io from 'socket.io';
 import { Server } from 'http';
 import { StatusCodes } from 'http-status-codes';
-import { spaceClaimHandler, spaceJoinHandler, spaceDisbandHandler, spaceListHandler, spaceSubscriptionHandler, spaceUpdateHandler, spaceCreateHandler } from '../requestHandlers/CoveySpaceRequestHandlers';
+import { spaceJoinHandler, spaceDisbandHandler, spaceListHandler, spaceSubscriptionHandler, spaceUpdateHandler, spaceCreateHandler } from '../requestHandlers/CoveySpaceRequestHandlers';
 import { logError } from '../Utils';
 
-export default function addTownRoutes(http: Server, app: Express): io.Server {
+export default function addSpaceRoutes(http: Server, app: Express): io.Server {
   /**
    * Create a new space
    */
@@ -65,26 +65,6 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
   });
 
   /**
-   * Claim a space (create a private space)
-   */
-  app.patch('/spaces/:spaceID', BodyParser.json(), async (req, res) => {
-    try {
-      const result = await spaceClaimHandler({
-        coveySpaceID: req.params.spaceID,
-        newHostPlayerID: req.body.hostID,
-      });
-      res.status(StatusCodes.OK)
-        .json(result);
-    } catch (err) {
-      logError(err);
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
-        .json({
-          message: 'Internal server error, please see log in server for more details',
-        });
-    }
-  });
-
-  /**
    * Disband a private space (go back to being a normal space)
    */
      app.delete('/spaces/:spaceID', BodyParser.json(), async (req, res) => {
@@ -104,7 +84,7 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
     });
 
   /**
-   * Update a space
+   * Update a space (also used to claim space)
    */
   app.patch('/spaces/:spaceID', BodyParser.json(), async (req, res) => {
     try {

@@ -163,8 +163,19 @@ class CoveyGameScene extends Phaser.Scene {
       size.height);
 
     // Enable the zone (hitbox)
+    const { spaceApiClient, myPlayerID, currentTownID } = useCoveyAppState();
+    let inSpace = false;
     this.physics.world.enable(privateZone);
-    this.physics.add.overlap(sprite, privateZone, ()=>console.log(`in Private Space ${spaceID}`));
+    this.physics.add.overlap(sprite, privateZone, async ()=> {
+      
+      // join the space if not already in one
+      if(inSpace) {
+        const request = { playerID: myPlayerID, coveySpaceID: currentTownID }
+        const response = await spaceApiClient.joinSpace(request);
+        console.log(response);
+        inSpace = true;
+      }
+    });
 
     if (debug === true) {
       // Draw graphics for debugging reasons
@@ -479,7 +490,9 @@ class CoveyGameScene extends Phaser.Scene {
 export default function WorldMap(): JSX.Element {
   const video = Video.instance();
   const {
-    emitMovement, players,
+    emitMovement, 
+    players,
+    spaceApiClient,
   } = useCoveyAppState();
   const [gameScene, setGameScene] = useState<CoveyGameScene>();
   useEffect(() => {
