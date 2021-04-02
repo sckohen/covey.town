@@ -238,23 +238,3 @@ export async function spaceUpdateHandler(requestData: SpaceUpdateRequest): Promi
     message: `The space ${requestData.coveySpaceID} was updated.`,
   };
 }
-
-
-/**
- * An adapter between CoveyTownController's event interface (CoveyTownListener)
- * and the low-level network communication protocol
- *
- * @param socket the Socket object that we will use to communicate with the player
- */
-function spaceSocketAdapter(socket: Socket): CoveySpaceListener {
-  
-}
-
-/**
- * A handler to process a remote player's subscription to updates for a town
- *
- * @param socket the Socket object that we will use to communicate with the player
- */
-export function spaceSubscriptionHandler(socket: Socket): void {
-  
-}
