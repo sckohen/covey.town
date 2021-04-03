@@ -50,7 +50,7 @@ export default class CoveySpacesStore {
     }
 
     // The uniqueID for the space is combination of townControllerID and the spaceID
-    const uniqueID = `${townControllerID  }_${  newSpaceID}`;
+    const uniqueID = `${townControllerID}_${newSpaceID}`;
 
     const newSpace = new CoveySpaceController(uniqueID, townController);
     this._spaces.push(newSpace);
