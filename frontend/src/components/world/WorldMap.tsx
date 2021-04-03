@@ -145,7 +145,7 @@ class CoveyGameScene extends Phaser.Scene {
    * @param [debug] optional param to enable rendering of the zone
    * @returns  a zone object that detects players inside it
    */
-  createZoneForPrivateSpace(spaceID: string, map: Phaser.Tilemaps.Tilemap, sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, debug?: boolean) {
+  createZoneForSpace(spaceID: string, map: Phaser.Tilemaps.Tilemap, sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, debug?: boolean) {
     // Get the location of the private space drawed on the map as an object
     const location = map.findObject('Objects',
     (obj) => obj.name === `Private Space ${spaceID}`) as unknown as
@@ -163,19 +163,8 @@ class CoveyGameScene extends Phaser.Scene {
       size.height);
 
     // Enable the zone (hitbox)
-    const { spaceApiClient, myPlayerID, currentTownID } = useCoveyAppState();
-    let inSpace = false;
     this.physics.world.enable(privateZone);
-    this.physics.add.overlap(sprite, privateZone, async ()=> {
-      
-      // join the space if not already in one
-      if(inSpace) {
-        const request = { playerID: myPlayerID, coveySpaceID: currentTownID }
-        const response = await spaceApiClient.joinSpace(request);
-        console.log(response);
-        inSpace = true;
-      }
-    });
+    this.physics.add.overlap(sprite, privateZone, ()=> {console.log(`in space ${spaceID}`)});
 
     if (debug === true) {
       // Draw graphics for debugging reasons
@@ -188,6 +177,20 @@ class CoveyGameScene extends Phaser.Scene {
     }
     return privateZone;
   }
+
+  
+  /**
+   * Would it help to declare this function (originally in create)
+   */
+  // initializeSpaces() {
+  //   // Create zone for all Private Spaces using the createZoneForPrivateSpace function
+  //   if (this.player !== undefined) {
+  //     const spriteForPlayer = this.player.sprite;
+  //     // Get the a list of private space drawn on the map and create zones for all of them
+  //     const privateSpaces = map.filterObjects('Objects', (obj) => obj.name.includes('Private Space'));
+  //     privateSpaces.forEach(space => this.createZoneForSpace(space.name.slice(-1), map, spriteForPlayer, true));
+  //   }
+  // }
 
   create() {
     const map = this.make.tilemap({ key: 'map' });
@@ -323,7 +326,7 @@ class CoveyGameScene extends Phaser.Scene {
       const spriteForPlayer = this.player.sprite;
       // Get the a list of private space drawn on the map and create zones for all of them
       const privateSpaces = map.filterObjects('Objects', (obj) => obj.name.includes('Private Space'));
-      privateSpaces.forEach(space => this.createZoneForPrivateSpace(space.name.slice(-1), map, spriteForPlayer, true))
+      privateSpaces.forEach(space => this.createZoneForSpace(space.name.slice(-1), map, spriteForPlayer, true));
   }
 
     // Create the player's walking animations from the texture atlas. These are stored in the global

@@ -1,4 +1,3 @@
-
 import CoveySpaceListener from '../types/CoveySpaceListener';
 import Player from '../types/Player';
 import CoveyTownController from './CoveyTownController';

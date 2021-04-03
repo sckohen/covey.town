@@ -1,8 +1,8 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import assert from 'assert';
 import Player from '../types/Player';
-import { CoveySpaceList } from '../CoveyTypes';
-import { UserLocation } from '../CoveyTypes';
+import { CoveySpaceList, UserLocation } from '../CoveyTypes';
+
 
 
 export type ServerPlayer = { _id: string, _userName: string, location: UserLocation };
@@ -10,7 +10,7 @@ export type ServerPlayer = { _id: string, _userName: string, location: UserLocat
 /**
  * Request to create a covey space
  */
- export interface SpaceCreateRequest {
+export interface SpaceCreateRequest {
   /** The town that this space belongs to */
   coveyTownID: string;
   /** The id for the space that is to be created* */
