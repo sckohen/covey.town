@@ -3,6 +3,7 @@ import Phaser from 'phaser';
 import Player, { UserLocation } from '../../classes/Player';
 import Video from '../../classes/Video/Video';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
+import SpacesServiceClient from '../../classes/SpacesServiceClient';
 
 // https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
 class CoveyGameScene extends Phaser.Scene {
@@ -33,10 +34,13 @@ class CoveyGameScene extends Phaser.Scene {
 
   private emitMovement: (loc: UserLocation) => void;
 
-  constructor(video: Video, emitMovement: (loc: UserLocation) => void) {
+  private spaceCreateInfo: SpaceCreationInfo;
+
+  constructor(video: Video, emitMovement: (loc: UserLocation) => void, spaceCreateInfo: SpaceCreationInfo) {
     super('PlayGame');
     this.video = video;
     this.emitMovement = emitMovement;
+    this.spaceCreateInfo = spaceCreateInfo;
   }
 
   preload() {
@@ -163,8 +167,18 @@ class CoveyGameScene extends Phaser.Scene {
       size.height);
 
     // Enable the zone (hitbox)
+    let inSpace = false;
     this.physics.world.enable(privateZone);
-    this.physics.add.overlap(sprite, privateZone, ()=> {console.log(`in space ${spaceID}`)});
+    this.physics.add.overlap(sprite, privateZone, async ()=> {
+      
+      // join the space if not already in one
+      if (inSpace) {
+        const request = { playerID: this.spaceCreateInfo.myPlayerID, coveySpaceID: this.spaceCreateInfo.currentTownID };
+        const response = await this.spaceCreateInfo.spaceApiClient.joinSpace(request);
+        console.log(response);
+        inSpace = true;
+      }
+    });
 
     if (debug === true) {
       // Draw graphics for debugging reasons
@@ -490,12 +504,20 @@ class CoveyGameScene extends Phaser.Scene {
   }
 }
 
+type SpaceCreationInfo = {
+  spaceApiClient: SpacesServiceClient,
+  myPlayerID: string,
+  currentTownID: string,
+}
+
 export default function WorldMap(): JSX.Element {
   const video = Video.instance();
   const {
     emitMovement, 
     players,
     spaceApiClient,
+    myPlayerID,
+    currentTownID,
   } = useCoveyAppState();
   const [gameScene, setGameScene] = useState<CoveyGameScene>();
   useEffect(() => {
@@ -512,9 +534,11 @@ export default function WorldMap(): JSX.Element {
       },
     };
 
+    const spaceCreateInfo = { spaceApiClient, myPlayerID, currentTownID };
+
     const game = new Phaser.Game(config);
     if (video) {
-      const newGameScene = new CoveyGameScene(video, emitMovement);
+      const newGameScene = new CoveyGameScene(video, emitMovement, spaceCreateInfo);
       setGameScene(newGameScene);
       game.scene.add('coveyBoard', newGameScene, true);
       video.pauseGame = () => {
@@ -527,7 +551,7 @@ export default function WorldMap(): JSX.Element {
     return () => {
       game.destroy(true);
     };
-  }, [video, emitMovement]);
+  }, [video, emitMovement, spaceApiClient, myPlayerID, currentTownID]);
 
   const deepPlayers = JSON.stringify(players);
   useEffect(() => {

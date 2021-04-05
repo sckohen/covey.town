@@ -70,7 +70,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     socket: state.socket,
     emitMovement: state.emitMovement,
     apiClient: state.apiClient,
-    spaceApiClient: state.spaceApiClient
+    spaceApiClient: state.spaceApiClient,
   };
 
   function calculateNearbyPlayers(players: Player[], currentLocation: UserLocation) {
