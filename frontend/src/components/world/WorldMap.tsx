@@ -36,11 +36,14 @@ class CoveyGameScene extends Phaser.Scene {
 
   private spaceCreateInfo: SpaceCreationInfo;
 
+  private inSpace: string | undefined;
+
   constructor(video: Video, emitMovement: (loc: UserLocation) => void, spaceCreateInfo: SpaceCreationInfo) {
     super('PlayGame');
     this.video = video;
     this.emitMovement = emitMovement;
     this.spaceCreateInfo = spaceCreateInfo;
+    this.inSpace = undefined;
   }
 
   preload() {
@@ -140,7 +143,6 @@ class CoveyGameScene extends Phaser.Scene {
     return undefined;
   }
 
-
   /**
    * Creates a Phaser zone for the defined spaces (in the tilemap)
    * @param spaceID the space id given as the name of the object
@@ -149,7 +151,9 @@ class CoveyGameScene extends Phaser.Scene {
    * @param [debug] optional param to enable rendering of the zone
    * @returns  a zone object that detects players inside it
    */
-  createZoneForSpace(spaceID: string, map: Phaser.Tilemaps.Tilemap, sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, debug?: boolean) {
+  createZoneForSpace(spaceID: string, map: Phaser.Tilemaps.Tilemap, sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, debug?: boolean): Phaser.GameObjects.Zone {
+    const { myPlayerID, currentTownID, spaceApiClient } = this.spaceCreateInfo;
+
     // Get the location of the private space drawed on the map as an object
     const location = map.findObject('Objects',
     (obj) => obj.name === `Private Space ${spaceID}`) as unknown as
@@ -166,19 +170,31 @@ class CoveyGameScene extends Phaser.Scene {
       size.width, 
       size.height);
 
-    // Enable the zone (hitbox)
-    let inSpace = false;
-    this.physics.world.enable(privateZone);
-    this.physics.add.overlap(sprite, privateZone, async ()=> {
-      
-      // join the space if not already in one
-      if (inSpace) {
-        const request = { playerID: this.spaceCreateInfo.myPlayerID, coveySpaceID: this.spaceCreateInfo.currentTownID };
-        const response = await this.spaceCreateInfo.spaceApiClient.joinSpace(request);
-        console.log(response);
-        inSpace = true;
-      }
-    });
+    this.physics.add.collider(sprite, privateZone);
+
+    if(playerInZone) {
+      //  const coveySpaceID = `${currentTownID}_${spaceID}`;
+      //  const request = { playerID: myPlayerID, coveySpaceID };
+      //  const response = await spaceApiClient.joinSpace(request);
+      //  console.log(response);
+      //  this.inSpace = coveySpaceID;
+      console.log("inZone");
+    } else {
+      console.log("not in zo")
+    }
+
+    // // Enable the zone (hitbox)
+    // this.physics.world.enable(privateZone);
+    // this.physics.add.overlap(sprite, privateZone, async ()=> {
+    //   // join the space if not already in one
+    //   if (this.inSpace === undefined) {
+    //     const coveySpaceID = `${currentTownID}_${spaceID}`;
+    //     const request = { playerID: myPlayerID, coveySpaceID };
+    //     const response = await spaceApiClient.joinSpace(request);
+    //     console.log(response);
+    //     this.inSpace = coveySpaceID;
+    //   }
+    // });
 
     if (debug === true) {
       // Draw graphics for debugging reasons
@@ -190,6 +206,20 @@ class CoveyGameScene extends Phaser.Scene {
         size.height);
     }
     return privateZone;
+  }
+
+
+  /**
+   * Checks overlap between the sprite of the player and the zones
+   * @param sprite the sprite for the player 
+   * @param zone the zone
+   * @returns the verdict
+   */
+  checkOverlap (sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, zone: Phaser.GameObjects.Zone) {
+    const boundsA = sprite.getBounds();
+    const boundsB = zone.getBounds();
+
+    return Phaser.Geom.Intersects.RectangleToRectangle(boundsA, boundsB);
   }
 
   
@@ -489,6 +519,10 @@ class CoveyGameScene extends Phaser.Scene {
         this.emitMovement(this.lastLocation);
       }
     }
+
+    // TODO: Overlap between player and zone
+    // if(checkOverlap(this.player?.sprite, privateZone))
+
   }
 
   pause() {
