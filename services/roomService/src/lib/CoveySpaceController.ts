@@ -1,3 +1,4 @@
+import { throws } from 'assert';
 import CoveySpaceListener from '../types/CoveySpaceListener';
 import Player from '../types/Player';
 import CoveyTownController from './CoveyTownController';
@@ -50,9 +51,11 @@ export default class CoveySpaceController {
   /** The id for the player who is the designated by the host to be the presenter * */
   private _presenterID: string | undefined;
 
-
   /** The list of players that are allowed to join this private space * */
   private _whiteList: Player[] = [];
+
+  /** Whether the space is private or not (starts as not private) */
+  private _isPrivate: Boolean = false;
 
   constructor(coveySpaceID: string, townController: CoveyTownController) {
     this._coveySpaceID = coveySpaceID;
@@ -84,17 +87,37 @@ export default class CoveySpaceController {
    */
   addPlayer(newPlayerID: string): void {
     const newPlayer = this.playerFromID(newPlayerID);
-    
-    // add the player so long as there is no whitelist or they are in the whitelist
-    if (this._whiteList.length === 0 || this._whiteList.includes(newPlayer)){
-      // Adds the new player to the list of players
-      this._players.push(newPlayer);
-      // Notify other players that this player has joined
-      this._listeners.forEach((listener) => listener.onPlayerWalkedIn(newPlayer));
+
+    if (this._players.includes(newPlayer)) {
+      return;
     }
-    throw new Error(`The player ${newPlayer.userName} is not in the whitelist`);
+    if (this._isPrivate === false) {
+      this._players.push(newPlayer);
+    } else if (this._whiteList.includes(newPlayer)) {
+      this._players.push(newPlayer);
+    } // throw new Error(`The player ${newPlayer.userName} is not in the whitelist`);
+
     
-  }
+  //  if (this._players.includes(newPlayer)){
+  //     // If the space is not private, add anyone to the space
+  //     if (this._isPrivate === false){
+  //     this._players.push(newPlayer);
+  //     // Notify other players that this player has joined
+  //     this._listeners.forEach((listener) => listener.onPlayerWalkedIn(newPlayer));
+  //   }
+
+  //     // If the space is private, check if they are in the whitelist
+  //     if (this._whiteList.includes(newPlayer)){
+  //       // Adds the new player to the list of players
+  //       this._players.push(newPlayer);
+  //       // Notify other players that this player has joined
+  //       this._listeners.forEach((listener) => listener.onPlayerWalkedIn(newPlayer));
+  //     } else {
+  //       // If the player is not in the whitelist, throw an error
+  //       throw new Error(`The player ${newPlayer.userName} is not in the whitelist`);
+  //   }
+  // }
+}
 
   /**
    * Remove the player specified from the space
@@ -116,9 +139,13 @@ export default class CoveySpaceController {
   addPlayerToWhiteList(newPlayerID: string): Player[] {
     const newPlayer = this.playerFromID(newPlayerID);
 
-    this._whiteList.push(newPlayer);
-    
-    return this._whiteList;
+    // If the whitespace already includes the newPlayer, don't add the player, else add the player
+    if (this._whiteList.includes(newPlayer)){
+      return this._whiteList;
+    } else {
+      this._whiteList.push(newPlayer);
+      return this._whiteList;
+    }
   }
 
   /**
@@ -137,7 +164,15 @@ export default class CoveySpaceController {
     * @param newHost ID of the player that is the new host
     */
   updateSpaceHost(newHostID: string | undefined): void {
+    // Updates the spacehost
     this._spaceHostID = newHostID;
+
+    // If the new host is not undefined space is set to private, else it is not private
+    if (newHostID !== undefined) {
+      this._isPrivate = true;
+    } else {
+      this._isPrivate = false;
+    }
   }
   
   /**

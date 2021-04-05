@@ -5,7 +5,7 @@ import { Server } from 'http';
 import { StatusCodes } from 'http-status-codes';
 import { logError } from '../Utils';
 import { townCreateHandler, townDeleteHandler, townJoinHandler, townListHandler, townSubscriptionHandler, townUpdateHandler } from '../requestHandlers/CoveyTownRequestHandlers';
-import { spaceJoinHandler, spaceDisbandHandler, spaceListHandler, spaceUpdateHandler, spaceCreateHandler } from '../requestHandlers/CoveySpaceRequestHandlers';
+import { spaceJoinHandler, spaceLeaveHandler, spaceDisbandHandler, spaceListHandler, spaceUpdateHandler, spaceCreateHandler } from '../requestHandlers/CoveySpaceRequestHandlers';
 
 export default function addTownRoutes(http: Server, app: Express): io.Server {
   /*
@@ -146,9 +146,29 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
   /**
      * Join a space
      */
-  app.post('/spaces/:spaceID/:playerID', BodyParser.json(), async (req, res) => {
+  app.put('/spaces/:spaceID/:playerID', BodyParser.json(), async (req, res) => {
     try {
       const result = await spaceJoinHandler({
+        playerID: req.params.playerID,
+        coveySpaceID: req.params.spaceID,
+      });
+      res.status(StatusCodes.OK)
+        .json(result);
+    } catch (err) {
+      logError(err);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({
+          message: 'Internal server error, please see log in server for more details',
+        });
+    }
+  });
+
+  /**
+     * Leave a space
+     */
+   app.delete('/spaces/:spaceID/:playerID', BodyParser.json(), async (req, res) => {
+    try {
+      const result = await spaceLeaveHandler({
         playerID: req.params.playerID,
         coveySpaceID: req.params.spaceID,
       });
@@ -166,21 +186,21 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
   /**
      * Disband a private space (go back to being a normal space)
      */
-  app.delete('/spaces/:spaceID', BodyParser.json(), async (req, res) => {
-    try {
-      const result = await spaceDisbandHandler({
-        coveySpaceID: req.params.spaceID,
-      });
-      res.status(200)
-        .json(result);
-    } catch (err) {
-      logError(err);
-      res.status(500)
-        .json({
-          message: 'Internal server error, please see log in server for details',
-        });
-    }
-  });
+  // app.delete('/spaces/:spaceID', BodyParser.json(), async (req, res) => {
+  //   try {
+  //     const result = await spaceDisbandHandler({
+  //       coveySpaceID: req.params.spaceID,
+  //     });
+  //     res.status(200)
+  //       .json(result);
+  //   } catch (err) {
+  //     logError(err);
+  //     res.status(500)
+  //       .json({
+  //         message: 'Internal server error, please see log in server for details',
+  //       });
+  //   }
+  // });
   
   /**
      * Update a space (also used to claim space)

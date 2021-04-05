@@ -32,7 +32,11 @@ export default class CoveySpacesStore {
   getSpaces(): CoveySpaceList {
     return this._spaces.map(spaceController => ({
       coveySpaceID: spaceController.coveySpaceID, 
-      currentPlayers: spaceController.players}));
+      currentPlayers: spaceController.players.map(player => player.userName),
+      whiteList: spaceController.whiteList.map(player => player.userName),
+      hostID: spaceController.spaceHostID,
+      presenterID: spaceController.presenterID,
+    }));
   }
 
   /**
@@ -81,6 +85,7 @@ export default class CoveySpacesStore {
   /**
   * Removes all players from the space in means to disband the space (returns back to original state)
   * @param spaceID the spaceID for the space they would like to leave
+  * @returns success as a boolean
   */
   disbandSpace(spaceID: string): boolean {
     const spaceController = this.getControllerForSpace(spaceID);

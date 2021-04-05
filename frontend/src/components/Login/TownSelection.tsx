@@ -35,7 +35,7 @@ export default function TownSelection({ doLogin }: TownSelectionProps): JSX.Elem
   const [townIDToJoin, setTownIDToJoin] = useState<string>('');
   const [currentPublicTowns, setCurrentPublicTowns] = useState<CoveyTownInfo[]>();
   const { connect } = useVideoContext();
-  const { apiClient, spaceApiClient } = useCoveyAppState();
+  const { apiClient } = useCoveyAppState();
   const toast = useToast();
 
   const updateTownListings = useCallback(() => {
@@ -112,10 +112,6 @@ export default function TownSelection({ doLogin }: TownSelectionProps): JSX.Elem
         isPubliclyListed: newTownIsPublic
       });
 
-      // Create pre-defined spaces in the backend
-      await spaceApiClient.createSpace({ coveyTownID: newTownInfo.coveyTownID, coveySpaceID: '1' });
-      await spaceApiClient.createSpace({ coveyTownID: newTownInfo.coveyTownID, coveySpaceID: '2' });
-
       let privateMessage = <></>;
       if (!newTownIsPublic) {
         privateMessage =
@@ -131,6 +127,7 @@ export default function TownSelection({ doLogin }: TownSelectionProps): JSX.Elem
         isClosable: true,
         duration: null,
       })
+
       await handleJoin(newTownInfo.coveyTownID);
     } catch (err) {
       toast({

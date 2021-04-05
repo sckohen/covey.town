@@ -103,10 +103,11 @@ export interface ResponseEnvelope<T> {
 }
 
 export type CoveySpaceInfo = {
-  friendlyName: string;
-  coveyTownID: string;
-  currentOccupancy: number;
-  maximumOccupancy: number
+  coveySpaceID: string; 
+  currentPlayers: ServerPlayer[]; 
+  whiteList: ServerPlayer[]; 
+  hostID: string | undefined; 
+  presenterID: string | undefined[];
 };
 
 export default class SpacesServiceClient {
@@ -134,11 +135,11 @@ export default class SpacesServiceClient {
     throw new Error(`Error processing request: ${response.data.message}`);
   }
 
-  async createSpace(requestData: SpaceCreateRequest): Promise<void> {
-    const { coveyTownID, coveySpaceID } = requestData;
-    const responseWrapper = await this._axios.post<ResponseEnvelope<void>>(`/spaces/${coveyTownID}/${coveySpaceID}`, requestData);
-    return SpacesServiceClient.unwrapOrThrowError(responseWrapper);
-  }
+  // async createSpace(requestData: SpaceCreateRequest): Promise<void> {
+  //   const { coveyTownID, coveySpaceID } = requestData;
+  //   const responseWrapper = await this._axios.post<ResponseEnvelope<void>>(`/spaces/${coveyTownID}/${coveySpaceID}`, requestData);
+  //   return SpacesServiceClient.unwrapOrThrowError(responseWrapper);
+  // }
 
   async updateSpace(requestData: SpaceUpdateRequest): Promise<void> {
     const { coveySpaceID } = requestData;
@@ -157,9 +158,15 @@ export default class SpacesServiceClient {
     return SpacesServiceClient.unwrapOrThrowError(responseWrapper);
   }
 
-  async joinSpace(requestData: SpaceJoinRequest): Promise<SpaceJoinResponse> {
+  async joinSpace(requestData: SpaceJoinRequest): Promise<void> {
     const { coveySpaceID, playerID } = requestData;
-    const responseWrapper = await this._axios.post(`/spaces/${coveySpaceID}/${playerID}`, requestData);
+    const responseWrapper = await this._axios.put(`/spaces/${coveySpaceID}/${playerID}`);
+    return SpacesServiceClient.unwrapOrThrowError(responseWrapper);
+  }
+
+  async leaveSpace(requestData: SpaceLeaveRequest): Promise<void> {
+    const { coveySpaceID, playerID } = requestData;
+    const responseWrapper = await this._axios.delete(`/spaces/${coveySpaceID}/${playerID}`);
     return SpacesServiceClient.unwrapOrThrowError(responseWrapper);
   }
 

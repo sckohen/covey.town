@@ -8,5 +8,5 @@ export type UserLocation = {
   moving: boolean;
 };
 export type CoveyTownList = { friendlyName: string; coveyTownID: string; currentOccupancy: number; maximumOccupancy: number }[];
-export type CoveySpaceList = { coveySpaceID: string; currentPlayers: Player[]}[];
+export type CoveySpaceList = { coveySpaceID: string; currentPlayers: string[]; whiteList: string[]; hostID: string | undefined; presenterID: string | undefined}[];
 
