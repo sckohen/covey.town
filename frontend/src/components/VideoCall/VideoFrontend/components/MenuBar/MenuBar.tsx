@@ -14,6 +14,7 @@ import ToggleVideoButton from '../Buttons/ToggleVideoButton/ToggleVideoButton';
 import ToggleScreenShareButton from '../Buttons/ToogleScreenShareButton/ToggleScreenShareButton';
 import TownSettings from '../../../../Login/TownSettings';
 import MenuContainer from '@material-ui/core/Menu';
+import useCoveyAppState from '../../../../../hooks/useCoveyAppState';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   container: {
@@ -62,6 +63,24 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
   },
 }));
 
+function ClaimSpace() {
+  const { currentSpace, spaceApiClient, myPlayerID } = useCoveyAppState();
+
+  return (
+    <Button
+      onClick={async () => {
+        if (currentSpace !== undefined) {
+          console.log('claiming space');
+          const claimRequest = await spaceApiClient.claimSpace({ coveySpaceID: currentSpace, newHostPlayerID: myPlayerID });
+          console.log(claimRequest);
+        }
+      }}
+    >
+      Claim Space
+    </Button>
+  );
+}
+
 export default function MenuBar(props: { setMediaError?(error: Error): void }) {
   const classes = useStyles();
   const { isSharingScreen, toggleScreenShare } = useVideoContext();
@@ -92,7 +111,7 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
             <Grid style={{ flex: 1 }}>
               <Grid container justify="flex-end">
                 <TownSettings />
-
+                <ClaimSpace />
                 <Menu />
                 <EndCallButton />
               </Grid>
