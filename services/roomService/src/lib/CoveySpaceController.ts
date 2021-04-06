@@ -1,4 +1,3 @@
-import { throws } from 'assert';
 import CoveySpaceListener from '../types/CoveySpaceListener';
 import Player from '../types/Player';
 import CoveyTownController from './CoveyTownController';
@@ -55,7 +54,7 @@ export default class CoveySpaceController {
   private _whiteList: Player[] = [];
 
   /** Whether the space is private or not (starts as not private) */
-  private _isPrivate: Boolean = false;
+  private _isPrivate = false;
 
   constructor(coveySpaceID: string, townController: CoveyTownController) {
     this._coveySpaceID = coveySpaceID;
@@ -95,8 +94,8 @@ export default class CoveySpaceController {
       this._players.push(newPlayer);
     } else if (this._whiteList.includes(newPlayer)) {
       this._players.push(newPlayer);
-    } // throw new Error(`The player ${newPlayer.userName} is not in the whitelist`);
-}
+    } 
+  }
 
   /**
    * Remove the player specified from the space
@@ -121,10 +120,10 @@ export default class CoveySpaceController {
     // If the whitespace already includes the newPlayer, don't add the player, else add the player
     if (this._whiteList.includes(newPlayer)){
       return this._whiteList;
-    } else {
-      this._whiteList.push(newPlayer);
-      return this._whiteList;
-    }
+    } 
+    this._whiteList.push(newPlayer);
+    return this._whiteList;
+    
   }
 
   /**

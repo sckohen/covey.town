@@ -21,7 +21,7 @@ export default class CoveySpacesStore {
   * @param coveySpaceID The ID number for a covey space
   */
   getControllerForSpace(coveySpaceID: string): CoveySpaceController | undefined {
-    return this._spaces.find(space => space.coveySpaceID == coveySpaceID); 
+    return this._spaces.find(space => space.coveySpaceID === coveySpaceID); 
 
   }
 

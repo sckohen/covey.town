@@ -5,7 +5,7 @@ import { Server } from 'http';
 import { StatusCodes } from 'http-status-codes';
 import { logError } from '../Utils';
 import { townCreateHandler, townDeleteHandler, townJoinHandler, townListHandler, townSubscriptionHandler, townUpdateHandler } from '../requestHandlers/CoveyTownRequestHandlers';
-import { spaceJoinHandler, spaceLeaveHandler, spaceDisbandHandler, spaceListHandler, spaceUpdateHandler, spaceCreateHandler } from '../requestHandlers/CoveySpaceRequestHandlers';
+import { spaceJoinHandler, spaceLeaveHandler, spaceListHandler, spaceUpdateHandler, spaceCreateHandler } from '../requestHandlers/CoveySpaceRequestHandlers';
 
 export default function addTownRoutes(http: Server, app: Express): io.Server {
   /*
@@ -166,7 +166,7 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
   /**
      * Leave a space
      */
-   app.delete('/spaces/:spaceID/:playerID', BodyParser.json(), async (req, res) => {
+  app.delete('/spaces/:spaceID/:playerID', BodyParser.json(), async (req, res) => {
     try {
       const result = await spaceLeaveHandler({
         playerID: req.params.playerID,
@@ -182,25 +182,6 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
         });
     }
   });
-  
-  /**
-     * Disband a private space (go back to being a normal space)
-     */
-  // app.delete('/spaces/:spaceID', BodyParser.json(), async (req, res) => {
-  //   try {
-  //     const result = await spaceDisbandHandler({
-  //       coveySpaceID: req.params.spaceID,
-  //     });
-  //     res.status(200)
-  //       .json(result);
-  //   } catch (err) {
-  //     logError(err);
-  //     res.status(500)
-  //       .json({
-  //         message: 'Internal server error, please see log in server for details',
-  //       });
-  //   }
-  // });
   
   /**
      * Update a space, also used to:

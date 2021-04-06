@@ -114,7 +114,7 @@ export async function spaceJoinHandler(requestData: SpaceJoinRequest): Promise<R
     return {
       isOK: false,
       message: 'Error: No such space',
-      response: {}
+      response: {},
     };
   }  
   
@@ -123,7 +123,7 @@ export async function spaceJoinHandler(requestData: SpaceJoinRequest): Promise<R
   return {
     isOK: true,
     message: `Player ID${playerID} has joined space ${coveySpaceID}`,
-    response: {}
+    response: {},
   };
 }
 
@@ -149,7 +149,7 @@ export async function spaceLeaveHandler(requestData: SpaceLeaveRequest): Promise
   return {
     isOK: true,
     message: `Player ID${playerID} has left space ${coveySpaceID}`,
-    response: {}
+    response: {},
   };
 }
 
@@ -183,7 +183,7 @@ export async function spaceClaimHandler(requestData: SpaceClaimRequest): Promise
     return {
       isOK: false,
       message: 'Error: No such space',
-      response: {}
+      response: {},
     };
   }
 
@@ -191,7 +191,7 @@ export async function spaceClaimHandler(requestData: SpaceClaimRequest): Promise
   return {
     isOK: true,
     message: `The host was update to be player with ID ${requestData.newHostPlayerID} and the space is now private`,
-    response: {}
+    response: {},
   };
 }
 
@@ -217,6 +217,6 @@ export async function spaceUpdateHandler(requestData: SpaceUpdateRequest): Promi
   return {
     isOK: true,
     message: `The space ${requestData.coveySpaceID} was updated.`,
-    response: {}
+    response: {},
   };
 }

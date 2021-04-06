@@ -193,7 +193,6 @@ class CoveyGameScene extends Phaser.Scene {
     this.spaces.push(privateZone);
     return privateZone;
   }
-
   
    /**
     * Initializes all spaces defined in the map
@@ -227,18 +226,26 @@ class CoveyGameScene extends Phaser.Scene {
     return Phaser.Geom.Intersects.RectangleToRectangle(boundsA, boundsB);
   }
 
+
+  /**
+   * Helper function to join a space
+   * @param space the space to join
+   */
   async joinSpace(space: Phaser.GameObjects.Zone) {    
     const { spaceApiClient, myPlayerID } = this.spaceCreateInfo;
     this.inSpace = space;
-    console.log("joining space");
 
     await spaceApiClient.joinSpace({ playerID: myPlayerID, coveySpaceID: space.name });
   }
 
+
+  /**
+   * Helper function to leave a space
+   * @param space the space to leave
+   */
   async leaveSpace(space: Phaser.GameObjects.Zone) {
     const { spaceApiClient, myPlayerID } = this.spaceCreateInfo;
     this.inSpace = undefined;
-    console.log("leaving space");
 
     await spaceApiClient.leaveSpace({ coveySpaceID: space.name, playerID: myPlayerID });
   }
@@ -516,6 +523,7 @@ class CoveyGameScene extends Phaser.Scene {
       }
     }
 
+    // Handles which space the player is in
     this.spaces.forEach(space => {
       if(this.checkOverlap(space) && this.inSpace === undefined) {
         this.joinSpace(space);
@@ -525,22 +533,6 @@ class CoveyGameScene extends Phaser.Scene {
         this.leaveSpace(space);
       }
     });
-
-    
-    // this.spaces.forEach(async (space) => {
-    //   if(this.checkOverlap(space)) {
-    //     // only add the player to the space if they are not already in one
-    //     if(!this.inSpace) {
-    //       this.inSpace = true;
-    //       await spaceApiClient.joinSpace({ playerID: myPlayerID, coveySpaceID: space.name });
-    //       console.log(`inSpace = ${space.name}`);
-    //     }
-    //   } else if (this.inSpace) {  
-    //     this.inSpace = false;
-    //     await spaceApiClient.leaveSpace({ coveySpaceID: space.name, playerID: myPlayerID });
-    //     console.log(this.inSpace);
-    //   }
-    // });
   }
 
   pause() {
