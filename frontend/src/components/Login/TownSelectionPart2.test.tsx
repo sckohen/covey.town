@@ -9,6 +9,7 @@ import TownsServiceClient, { TownListResponse } from '../../classes/TownsService
 import TownSelection from './TownSelection';
 import Video from '../../classes/Video/Video';
 import CoveyAppContext from '../../contexts/CoveyAppContext';
+import SpacesServiceClient from '../../classes/SpacesServiceClient'
 
 const mockConnect = jest.fn(() => Promise.resolve());
 
@@ -100,6 +101,8 @@ function wrappedTownSelection() {
     emitMovement: () => {
     },
     apiClient: new TownsServiceClient(),
+    spaceApiClient: new SpacesServiceClient(),
+    currentSpace: undefined,
   }}>
     <TownSelection doLogin={doLoginMock}/></CoveyAppContext.Provider></ChakraProvider>;
 }
