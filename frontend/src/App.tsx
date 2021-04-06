@@ -28,7 +28,7 @@ import Video from './classes/Video/Video';
 import SpacesServiceClient from './classes/SpacesServiceClient';
 
 type CoveyAppUpdate =
-  | { action: 'doConnect'; data: { userName: string, townFriendlyName: string, townID: string,townIsPubliclyListed:boolean, sessionToken: string, myPlayerID: string, socket: Socket, players: Player[], emitMovement: (location: UserLocation) => void } }
+  | { action: 'doConnect'; data: { userName: string, townFriendlyName: string, townID: string,townIsPubliclyListed:boolean, sessionToken: string, myPlayerID: string, socket: Socket, players: Player[], emitMovement: (location: UserLocation) => void, currentSpace: undefined } }
   | { action: 'addPlayer'; player: Player }
   | { action: 'playerMoved'; player: Player }
   | { action: 'playerDisconnect'; player: Player }
@@ -54,6 +54,7 @@ function defaultAppState(): CoveyAppState {
     },
     apiClient: new TownsServiceClient(),
     spaceApiClient: new SpacesServiceClient(),
+    currentSpace: undefined,
   };
 }
 function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyAppState {
@@ -71,6 +72,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     emitMovement: state.emitMovement,
     apiClient: state.apiClient,
     spaceApiClient: state.spaceApiClient,
+    currentSpace: state.currentSpace,
   };
 
   function calculateNearbyPlayers(players: Player[], currentLocation: UserLocation) {
@@ -109,6 +111,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       nextState.emitMovement = update.data.emitMovement;
       nextState.socket = update.data.socket;
       nextState.players = update.data.players;
+      nextState.currentSpace = update.data.currentSpace;
       break;
     case 'addPlayer':
       nextState.players = nextState.players.concat([update.player]);
@@ -201,6 +204,7 @@ async function GameController(initData: TownJoinResponse,
       emitMovement,
       socket,
       players: initData.currentPlayers.map((sp) => Player.fromServerPlayer(sp)),
+      currentSpace: undefined, //TODO: not sure if this init is good
     },
   });
   return true;

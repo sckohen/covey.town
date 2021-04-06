@@ -30,4 +30,5 @@ export type CoveyAppState = {
   socket: Socket | null,
   apiClient: TownsServiceClient,
   spaceApiClient: SpacesServiceClient,
+  currentSpace: string | undefined,
 };
