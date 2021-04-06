@@ -204,7 +204,7 @@ async function GameController(initData: TownJoinResponse,
       emitMovement,
       socket,
       players: initData.currentPlayers.map((sp) => Player.fromServerPlayer(sp)),
-      currentSpace: undefined, //TODO: not sure if this init is good
+      currentSpace: undefined, // TODO: not sure if this init is good
     },
   });
   return true;

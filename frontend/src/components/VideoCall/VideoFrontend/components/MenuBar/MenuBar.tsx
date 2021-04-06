@@ -68,13 +68,14 @@ function ClaimSpace() {
 
   return (
     <Button
-      onClick={async () => {
+      onClick= { async () => {
         if (currentSpace !== undefined) {
-          console.log('claiming space');
-          const claimRequest = await spaceApiClient.claimSpace({ coveySpaceID: currentSpace, newHostPlayerID: myPlayerID });
-          console.log(claimRequest);
-        }
-      }}
+          console.log(currentSpace);
+      //     console.log('claiming space');
+      //     const claimRequest = await spaceApiClient.claimSpace({ coveySpaceID: currentSpace, newHostPlayerID: myPlayerID });
+      //     console.log(claimRequest);
+      //   }
+      }}}
     >
       Claim Space
     </Button>
@@ -86,6 +87,7 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
   const { isSharingScreen, toggleScreenShare } = useVideoContext();
   const roomState = useRoomState();
   const isReconnecting = roomState === 'reconnecting';
+  const { currentSpace, spaceApiClient, myPlayerID } = useCoveyAppState();
 
   return (
     <>
@@ -111,7 +113,9 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
             <Grid style={{ flex: 1 }}>
               <Grid container justify="flex-end">
                 <TownSettings />
-                <ClaimSpace />
+                <Button onClick= {async () => {
+                  console.log(currentSpace)
+                }}> Claim Space </Button>
                 <Menu />
                 <EndCallButton />
               </Grid>

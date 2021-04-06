@@ -193,6 +193,7 @@ class CoveyGameScene extends Phaser.Scene {
     this.spaces.push(privateZone);
     return privateZone;
   }
+
   
    /**
     * Initializes all spaces defined in the map
