@@ -8,7 +8,7 @@ import { TargetElement } from '@testing-library/user-event';
 import TownSettings from './TownSettings';
 import TownsServiceClient from '../../classes/TownsServiceClient';
 import CoveyAppContext from '../../contexts/CoveyAppContext';
-import SpacesServiceClient from '../../classes/TownsServiceClient';
+import SpacesServiceClient from '../../classes/SpacesServiceClient';
 
 const mockUseCoveyAppState = jest.fn(() => (Promise.resolve()));
 const mockToast = jest.fn();
@@ -54,7 +54,7 @@ function wrappedTownSettings() {
     emitMovement: () => {
     },
     apiClient: new TownsServiceClient(),
-    spaceApiClient: new SpacesServiceClient(),
+    spaceApiClient: new SpacesServiceClient(process.env.REACT_APP_TOWNS_SERVICE_URL),
     currentSpace: undefined,
   }}>
     <TownSettings/></CoveyAppContext.Provider></ChakraProvider>;

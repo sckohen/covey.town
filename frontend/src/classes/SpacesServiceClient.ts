@@ -102,7 +102,7 @@ export default class SpacesServiceClient {
   private _axios: AxiosInstance;
 
   /**
-   * Construct a new Towns Service API client. Specify a serviceURL for testing, or otherwise
+   * Construct a new Spaces Service API client. Specify a serviceURL for testing, or otherwise
    * defaults to the URL at the environmental variable REACT_APP_ROOMS_SERVICE_URL
    * @param serviceURL
    */

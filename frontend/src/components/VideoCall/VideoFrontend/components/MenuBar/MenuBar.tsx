@@ -63,24 +63,6 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
   },
 }));
 
-function ClaimSpace() {
-  const { currentSpace, spaceApiClient, myPlayerID } = useCoveyAppState();
-
-  return (
-    <Button
-      onClick= { async () => {
-        if (currentSpace !== undefined) {
-          console.log(currentSpace);
-      //     console.log('claiming space');
-      //     const claimRequest = await spaceApiClient.claimSpace({ coveySpaceID: currentSpace, newHostPlayerID: myPlayerID });
-      //     console.log(claimRequest);
-      //   }
-      }}}
-    >
-      Claim Space
-    </Button>
-  );
-}
 
 export default function MenuBar(props: { setMediaError?(error: Error): void }) {
   const classes = useStyles();
@@ -113,9 +95,6 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
             <Grid style={{ flex: 1 }}>
               <Grid container justify="flex-end">
                 <TownSettings />
-                <Button onClick= {async () => {
-                  console.log(currentSpace)
-                }}> Claim Space </Button>
                 <Menu />
                 <EndCallButton />
               </Grid>

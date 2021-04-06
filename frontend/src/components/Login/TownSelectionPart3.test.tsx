@@ -101,7 +101,7 @@ function wrappedTownSelection() {
     emitMovement: () => {
     },
     apiClient: new TownsServiceClient(),
-    spaceApiClient: new SpacesServiceClient(),
+    spaceApiClient: new SpacesServiceClient(process.env.REACT_APP_TOWNS_SERVICE_URL),
     currentSpace: undefined,
   }}>
     <TownSelection doLogin={doLoginMock}/></CoveyAppContext.Provider></ChakraProvider>;
