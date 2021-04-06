@@ -12,11 +12,6 @@ import { ServerPlayer } from './Player';
   coveySpaceID: string;
 }
 
-// /**
-//  * Response to a SpaceCreateRequest
-//  */
-// export interface SpaceCreateResponse {}
-
 /**
  * Payload sent by client to claim a space within a Town in Covey.Town
  */
@@ -26,14 +21,6 @@ export interface SpaceClaimRequest {
   /** The id for the new host (player) for the private space* */
   newHostPlayerID: string;
 }
-
-// /**
-// * Response from the server for a space claim request
-// */
-// export interface SpaceClaimResponse {
-//   // might not need to return anything here 
-//   // we could just send confirmation in the response envelope
-// }
 
 /**
  * The format of a request to join a space within a Town in Covey.Town, as dispatched by the server middleware
@@ -135,11 +122,11 @@ export default class SpacesServiceClient {
     throw new Error(`Error processing request: ${response.data.message}`);
   }
 
-  // async createSpace(requestData: SpaceCreateRequest): Promise<void> {
-  //   const { coveyTownID, coveySpaceID } = requestData;
-  //   const responseWrapper = await this._axios.post<ResponseEnvelope<void>>(`/spaces/${coveyTownID}/${coveySpaceID}`, requestData);
-  //   return SpacesServiceClient.unwrapOrThrowError(responseWrapper);
-  // }
+  async createSpace(requestData: SpaceCreateRequest): Promise<void> {
+    const { coveyTownID, coveySpaceID } = requestData;
+    const responseWrapper = await this._axios.post<ResponseEnvelope<void>>(`/spaces/${coveyTownID}/${coveySpaceID}`, requestData);
+    return SpacesServiceClient.unwrapOrThrowError(responseWrapper);
+  }
 
   async updateSpace(requestData: SpaceUpdateRequest): Promise<void> {
     const { coveySpaceID } = requestData;
@@ -174,5 +161,5 @@ export default class SpacesServiceClient {
     const { coveySpaceID } = requestData;
     const responseWrapper = await this._axios.patch<ResponseEnvelope<void>>(`/spaces/${coveySpaceID}`, requestData);
     return SpacesServiceClient.unwrapOrThrowError(responseWrapper, true);
-  }
+  } 
 }

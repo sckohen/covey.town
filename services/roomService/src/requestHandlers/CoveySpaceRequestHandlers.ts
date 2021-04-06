@@ -77,11 +77,10 @@ export interface ResponseEnvelope<T> {
 }
 
 /**
- * A handler to process the frontend's request to create a private space. 
- * @param requestData an object representing the frontend's request
+ * Handler for creating spaces
+ * @param requestData the townID and the spaceID for space to create
+ * @returns success or failure message
  */
-
-// john
 export async function spaceCreateHandler(requestData: SpaceCreateRequest): Promise<ResponseEnvelope<Record<string, null>>> {
   const spacesStore = CoveySpacesStore.getInstance();
 
@@ -99,10 +98,13 @@ export async function spaceCreateHandler(requestData: SpaceCreateRequest): Promi
     isOK: true,
     message: `Private Space ${coveySpaceID} was created`,
   };
-
 }
 
-// john
+/**
+ * Handler for joining a space
+ * @param requestData the playerID for the player and spaceID they want to join
+ * @returns success or failure message
+ */
 export async function spaceJoinHandler(requestData: SpaceJoinRequest): Promise<ResponseEnvelope<Record<string, null>>> {
   const spacesStore = CoveySpacesStore.getInstance();
   const { playerID, coveySpaceID } = requestData;
@@ -125,7 +127,11 @@ export async function spaceJoinHandler(requestData: SpaceJoinRequest): Promise<R
   };
 }
 
-// john
+/**
+ * Handler for leaving a space
+ * @param requestData the playerID for the player and which space they want to leave
+ * @returns success or failure message
+ */
 export async function spaceLeaveHandler(requestData: SpaceLeaveRequest): Promise<ResponseEnvelope<Record<string, null>>> {
   const spacesStore = CoveySpacesStore.getInstance();
   const { playerID, coveySpaceID } = requestData;
@@ -147,7 +153,11 @@ export async function spaceLeaveHandler(requestData: SpaceLeaveRequest): Promise
   };
 }
 
-// john
+
+/**
+ * Handler for listing spaces
+ * @returns list of all spaces (spaceID, currentPlayers, Whitelist, Host, Presenter)
+ */
 export async function spaceListHandler(): Promise<ResponseEnvelope<SpaceListResponse>> {
   const spacesStore = CoveySpacesStore.getInstance();
 
@@ -159,7 +169,12 @@ export async function spaceListHandler(): Promise<ResponseEnvelope<SpaceListResp
   };
 }
 
-// john
+
+/**
+ * Handler for claiming a space
+ * @param requestData spaceID for the space to be claimed and the playerID for the new host
+ * @returns success or failure message
+ */
 export async function spaceClaimHandler(requestData: SpaceClaimRequest): Promise<ResponseEnvelope<Record<string, null>>> {
   const spacesStore = CoveySpacesStore.getInstance();
 
@@ -180,32 +195,28 @@ export async function spaceClaimHandler(requestData: SpaceClaimRequest): Promise
   };
 }
 
-// Curtis
-export async function spaceDisbandHandler(requestData: SpaceDisbandRequest): Promise<ResponseEnvelope<Record<string, null>>> {
-  const spacesStore = CoveySpacesStore.getInstance();
-
-  spacesStore.disbandSpace(requestData.coveySpaceID);
-
-  return {
-    isOK: true,
-    message: `The space ${requestData.coveySpaceID} was disbanded.`,
-    response: {}
-  };
-}
-
-// anne
+/**
+ * Handler for updating spaces (also for disbanding private space)
+ * @param requestData spaceID to update, playerID of the new host for the space, playerID of the presenter for the space, new whitelist
+ * @returns success or failure message
+ */
 export async function spaceUpdateHandler(requestData: SpaceUpdateRequest): Promise<ResponseEnvelope<Record<string, null>>> {
   const spacesStore = CoveySpacesStore.getInstance();
+  const { coveySpaceID, newHost, newPresenter, newWhitelist } = requestData;
+
+  if (newHost === undefined) {
+    spacesStore.disbandSpace(coveySpaceID);
+  }
 
   spacesStore.updateSpace(
-    requestData.coveySpaceID, 
-    requestData.newHost, 
-    requestData.newPresenter, 
-    requestData.newWhitelist);
+    coveySpaceID, 
+    newHost, 
+    newPresenter, 
+    newWhitelist);
 
   return {
     isOK: true,
-    response: {},
     message: `The space ${requestData.coveySpaceID} was updated.`,
+    response: {}
   };
 }

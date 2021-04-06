@@ -83,6 +83,10 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       }
       return false;
     };
+
+    // TODO
+    // if the player is in a space, filter this list below by whoever else is in the space
+    // if the player is not in a space, filter out the players who are in a space
     return { nearbyPlayers: players.filter((p) => isWithinCallRadius(p, currentLocation)) };
   }
 

@@ -96,27 +96,6 @@ export default class CoveySpaceController {
     } else if (this._whiteList.includes(newPlayer)) {
       this._players.push(newPlayer);
     } // throw new Error(`The player ${newPlayer.userName} is not in the whitelist`);
-
-    
-  //  if (this._players.includes(newPlayer)){
-  //     // If the space is not private, add anyone to the space
-  //     if (this._isPrivate === false){
-  //     this._players.push(newPlayer);
-  //     // Notify other players that this player has joined
-  //     this._listeners.forEach((listener) => listener.onPlayerWalkedIn(newPlayer));
-  //   }
-
-  //     // If the space is private, check if they are in the whitelist
-  //     if (this._whiteList.includes(newPlayer)){
-  //       // Adds the new player to the list of players
-  //       this._players.push(newPlayer);
-  //       // Notify other players that this player has joined
-  //       this._listeners.forEach((listener) => listener.onPlayerWalkedIn(newPlayer));
-  //     } else {
-  //       // If the player is not in the whitelist, throw an error
-  //       throw new Error(`The player ${newPlayer.userName} is not in the whitelist`);
-  //   }
-  // }
 }
 
   /**
