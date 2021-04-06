@@ -68,6 +68,7 @@ export interface SpaceListResponse {
  */
 export interface SpaceDisbandRequest {
   coveySpaceID: string;
+  newHost: undefined;
 }
 
 /**
@@ -158,6 +159,12 @@ export default class SpacesServiceClient {
   }
 
   async claimSpace(requestData: SpaceClaimRequest): Promise<void> {
+    const { coveySpaceID } = requestData;
+    const responseWrapper = await this._axios.patch<ResponseEnvelope<void>>(`/spaces/${coveySpaceID}`, requestData);
+    return SpacesServiceClient.unwrapOrThrowError(responseWrapper, true);
+  }
+
+  async disbandSpace(requestData: SpaceDisbandRequest): Promise<void> {
     const { coveySpaceID } = requestData;
     const responseWrapper = await this._axios.patch<ResponseEnvelope<void>>(`/spaces/${coveySpaceID}`, requestData);
     return SpacesServiceClient.unwrapOrThrowError(responseWrapper, true);
