@@ -54,7 +54,6 @@ function defaultAppState(): CoveyAppState {
     },
     apiClient: new TownsServiceClient(),
     spaceApiClient: new SpacesServiceClient(),
-    currentSpace: undefined,
   };
 }
 function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyAppState {
@@ -72,7 +71,6 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     emitMovement: state.emitMovement,
     apiClient: state.apiClient,
     spaceApiClient: state.spaceApiClient,
-    currentSpace: state.currentSpace,
   };
 
   function calculateNearbyPlayers(players: Player[], currentLocation: UserLocation) {
@@ -111,7 +109,6 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       nextState.emitMovement = update.data.emitMovement;
       nextState.socket = update.data.socket;
       nextState.players = update.data.players;
-      nextState.currentSpace = update.data.currentSpace;
       break;
     case 'addPlayer':
       nextState.players = nextState.players.concat([update.player]);

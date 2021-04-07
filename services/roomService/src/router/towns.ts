@@ -5,7 +5,7 @@ import { Server } from 'http';
 import { StatusCodes } from 'http-status-codes';
 import { logError } from '../Utils';
 import { townCreateHandler, townDeleteHandler, townJoinHandler, townListHandler, townSubscriptionHandler, townUpdateHandler } from '../requestHandlers/CoveyTownRequestHandlers';
-import { spaceJoinHandler, spaceLeaveHandler, spaceListHandler, spaceUpdateHandler, spaceCreateHandler } from '../requestHandlers/CoveySpaceRequestHandlers';
+import { spaceJoinHandler, spaceLeaveHandler, spaceListHandler, spaceUpdateHandler, spaceCreateHandler, spaceGetForPlayerHandler } from '../requestHandlers/CoveySpaceRequestHandlers';
 
 export default function addTownRoutes(http: Server, app: Express): io.Server {
   /*
@@ -132,6 +132,25 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
   app.get('/spaces/', BodyParser.json(), async (_req, res) => {
     try {
       const result = await spaceListHandler();
+      res.status(StatusCodes.OK)
+        .json(result);
+    } catch (err) {
+      logError(err);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({
+          message: 'Internal server error, please see log in server for more details',
+        });
+    }
+  });
+
+  /**
+     * List the space for the given player
+     */
+   app.get('/spaces/:playerID', BodyParser.json(), async (req, res) => {
+    try {
+      const result = await spaceGetForPlayerHandler({
+        playerID: req.params.playerID,
+      });
       res.status(StatusCodes.OK)
         .json(result);
     } catch (err) {

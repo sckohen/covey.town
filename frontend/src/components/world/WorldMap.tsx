@@ -227,7 +227,6 @@ class CoveyGameScene extends Phaser.Scene {
     return Phaser.Geom.Intersects.RectangleToRectangle(boundsA, boundsB);
   }
 
-
   /**
    * Helper function to join a space
    * @param space the space to join
@@ -238,7 +237,6 @@ class CoveyGameScene extends Phaser.Scene {
 
     await spaceApiClient.joinSpace({ playerID: myPlayerID, coveySpaceID: space.name });
   }
-
 
   /**
    * Helper function to leave a space

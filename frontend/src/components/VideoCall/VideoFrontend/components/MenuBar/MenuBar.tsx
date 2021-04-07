@@ -63,13 +63,39 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
   },
 }));
 
+function ClaimSpace() {
+  const { spaceApiClient, myPlayerID, currentTownID } = useCoveyAppState();
+
+  return (
+    <Button
+      onClick= { async () => {
+        const spaces = await spaceApiClient.listSpaces();
+        const playerInSpace = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
+        console.log(spaces.spaces);
+        console.log(playerInSpace.spaces);
+
+        // if (playerInSpace.space !== undefined) {
+        //   console.log(playerInSpace.space.coveySpaceID);
+        // }
+        // console.log('Player not in space');
+          
+      //     console.log('claiming space');
+      //     const claimRequest = await spaceApiClient.claimSpace({ coveySpaceID: currentSpace, newHostPlayerID: myPlayerID });
+      //     console.log(claimRequest);
+      //   }
+      }}
+    >
+      Claim Space
+    </Button>
+  );
+}
 
 export default function MenuBar(props: { setMediaError?(error: Error): void }) {
   const classes = useStyles();
   const { isSharingScreen, toggleScreenShare } = useVideoContext();
   const roomState = useRoomState();
   const isReconnecting = roomState === 'reconnecting';
-  const { currentSpace, spaceApiClient, myPlayerID } = useCoveyAppState();
+  const { spaceApiClient, myPlayerID } = useCoveyAppState();
 
   return (
     <>
@@ -95,6 +121,7 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
             <Grid style={{ flex: 1 }}>
               <Grid container justify="flex-end">
                 <TownSettings />
+                <ClaimSpace />
                 <Menu />
                 <EndCallButton />
               </Grid>

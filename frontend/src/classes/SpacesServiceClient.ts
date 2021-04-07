@@ -59,8 +59,14 @@ export interface SpaceLeaveRequest {
  * Response from the server for a space list request
  */
 export interface SpaceListResponse {
-  // might not need this, may remove or use for added functionality
-  spaces: CoveySpaceInfo;
+  spaces: CoveySpaceInfo[];
+}
+
+/**
+ * Response to the server to get info on a space
+ */
+ export interface SpaceGetForPlayerRequest {
+  playerID: string;
 }
 
 /**
@@ -167,6 +173,12 @@ export default class SpacesServiceClient {
   async disbandSpace(requestData: SpaceDisbandRequest): Promise<void> {
     const { coveySpaceID } = requestData;
     const responseWrapper = await this._axios.patch<ResponseEnvelope<void>>(`/spaces/${coveySpaceID}`, requestData);
+    return SpacesServiceClient.unwrapOrThrowError(responseWrapper, true);
+  } 
+
+  async getSpaceForPlayer(requestData: SpaceGetForPlayerRequest): Promise<SpaceListResponse> {
+    const { playerID } = requestData;
+    const responseWrapper = await this._axios.get<ResponseEnvelope<SpaceListResponse>>(`/spaces/${playerID}`);
     return SpacesServiceClient.unwrapOrThrowError(responseWrapper, true);
   } 
 }

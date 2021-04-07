@@ -1,4 +1,5 @@
-import { CoveySpaceList } from '../CoveyTypes';
+import { response } from 'express';
+import { CoveySpace } from '../CoveyTypes';
 import Player from '../types/Player';
 import CoveySpaceController  from './CoveySpaceController';
 import CoveyTownsStore from './CoveyTownsStore';
@@ -29,14 +30,35 @@ export default class CoveySpacesStore {
    * Gets the list of all private spaces
    * TODO: revisit what should be returned in the CoveySpaceList
    */
-  getSpaces(): CoveySpaceList {
+  getSpaces(): CoveySpace[] {
     return this._spaces.map(spaceController => ({
       coveySpaceID: spaceController.coveySpaceID, 
-      currentPlayers: spaceController.players.map(player => player.userName),
-      whiteList: spaceController.whiteList.map(player => player.userName),
+      currentPlayers: spaceController.players.map(player => player.id),
+      whiteList: spaceController.whiteList.map(player => player.id),
       hostID: spaceController.spaceHostID,
       presenterID: spaceController.presenterID,
     }));
+  }
+
+  /**
+   * Gets space where the given player is in
+   */
+   getSpaceForPlayer(playerID: string): CoveySpace[] {
+    const specificSpace = this._spaces.find(space => space.playerFromID(playerID) !== undefined);
+
+    if (specificSpace !== undefined) {
+      const response = {
+        coveySpaceID: specificSpace.coveySpaceID,
+        currentPlayers: specificSpace.players.map(player => player.id),
+        whiteList: specificSpace.whiteList.map(player => player.id),
+        hostID: specificSpace.spaceHostID,
+        presenterID: specificSpace.presenterID,
+      }
+      return [response];
+    }
+
+    return []
+    
   }
 
   /**

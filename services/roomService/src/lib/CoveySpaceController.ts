@@ -69,12 +69,8 @@ export default class CoveySpaceController {
    * @param playerID the ID for the player wanted
    * @returns player object with the given ID
    */
-  playerFromID(playerID: string): Player {
+  playerFromID(playerID: string): Player | undefined {
     const player = this._coveyTownController.players.find(p => p.id === playerID);
-    
-    if (!player) {
-      throw new Error(`Player ${playerID} not found.`);
-    }
 
     return player;
   }
@@ -87,14 +83,16 @@ export default class CoveySpaceController {
   addPlayer(newPlayerID: string): void {
     const newPlayer = this.playerFromID(newPlayerID);
 
-    if (this._players.includes(newPlayer)) {
-      return;
+    if (newPlayer !== undefined) {
+      if (this._players.includes(newPlayer)) {
+        return;
+      }
+      if (this._isPrivate === false) {
+        this._players.push(newPlayer);
+      } else if (this._whiteList.includes(newPlayer)) {
+        this._players.push(newPlayer);
+      } 
     }
-    if (this._isPrivate === false) {
-      this._players.push(newPlayer);
-    } else if (this._whiteList.includes(newPlayer)) {
-      this._players.push(newPlayer);
-    } 
   }
 
   /**
@@ -105,8 +103,10 @@ export default class CoveySpaceController {
   removePlayer(playerID: string): void {
     const player = this.playerFromID(playerID);
 
-    this._players = this._players.filter((p) => p.id !== player.id);
-    this._listeners.forEach((listener) => listener.onPlayerWalkedOut(player));
+    if (player !== undefined) {
+      this._players = this._players.filter((p) => p.id !== player.id);
+      this._listeners.forEach((listener) => listener.onPlayerWalkedOut(player));
+    }
   }
 
   /**
@@ -117,13 +117,15 @@ export default class CoveySpaceController {
   addPlayerToWhiteList(newPlayerID: string): Player[] {
     const newPlayer = this.playerFromID(newPlayerID);
 
-    // If the whitespace already includes the newPlayer, don't add the player, else add the player
-    if (this._whiteList.includes(newPlayer)){
+    if (newPlayer !== undefined) {
+      // If the whitespace already includes the newPlayer, don't add the player, else add the player
+      if (this._whiteList.includes(newPlayer)){
+        return this._whiteList;
+      } 
+      this._whiteList.push(newPlayer);
       return this._whiteList;
-    } 
-    this._whiteList.push(newPlayer);
+    }
     return this._whiteList;
-    
   }
 
   /**
@@ -134,7 +136,9 @@ export default class CoveySpaceController {
   removePlayerFromWhiteList(playerID: string): void {
     const player = this.playerFromID(playerID);
 
-    this._whiteList = this._whiteList.filter((p) => p.id !== player.id);
+    if (player !== undefined) {
+      this._whiteList = this._whiteList.filter((p) => p.id !== player.id);
+    }
   }
 
   /**
