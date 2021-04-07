@@ -1,4 +1,4 @@
-import CoveySpaceListener from '../types/CoveySpaceListener';
+import { throws } from 'assert';
 import Player from '../types/Player';
 import CoveyTownController from './CoveyTownController';
 
@@ -19,16 +19,12 @@ export default class CoveySpaceController {
     return this._players;
   }
 
-  get occupancy(): number {
-    return this._listeners.length;
-  }
-
   get coveySpaceID(): string {
     return this._coveySpaceID;
   }
 
-  get whiteList(): Player[] {
-    return this._whiteList;
+  get whitelist(): Player[] {
+    return this._whitelist;
   }
 
 
@@ -37,9 +33,6 @@ export default class CoveySpaceController {
 
   /** The list of players currently in the space * */
   private _players: Player[] = [];
-
-  /** The list of CoveyTownListeners that are subscribed to events in this town * */
-  private _listeners: CoveySpaceListener[] = [];
 
   /** The ID given to this space (based on it's declaration on the map) * */
   private readonly _coveySpaceID: string;
@@ -51,7 +44,7 @@ export default class CoveySpaceController {
   private _presenterID: string | null;
 
   /** The list of players that are allowed to join this private space * */
-  private _whiteList: Player[] = [];
+  private _whitelist: Player[] = [];
 
   /** Whether the space is private or not (starts as not private) */
   private _isPrivate = false;
@@ -96,16 +89,28 @@ export default class CoveySpaceController {
     const newPlayer = this.playerFromID(newPlayerID);
 
     if (newPlayer !== undefined) {
+      // If player is already on the list dont do anything
       if (this._players.includes(newPlayer)) {
-        return;
+        return; 
       }
+
+      // If the space is not private
       if (this._isPrivate === false) {
         this._players.push(newPlayer);
-      } else if (this._whiteList.includes(newPlayer) || this.spaceHostID == newPlayerID) {
-        this._players.push(newPlayer);
       } 
+      
+      // If the space is private and the spaceHost is defined
+      if (this._spaceHostID !== null) {
+          // If the host is no longer in the game
+          if (this.playerFromID(this._spaceHostID) === undefined) {
+            this.publicizeSpace();
+            this._players.push(newPlayer);
+          } else if (this._whitelist.includes(newPlayer) || this.spaceHostID == newPlayerID) {
+            this._players.push(newPlayer);
+          }
+        }
+      }
     }
-  }
 
   /**
    * Remove the player specified from the space
@@ -117,7 +122,6 @@ export default class CoveySpaceController {
 
     if (player !== undefined) {
       this._players = this._players.filter((p) => p.id !== player.id);
-      this._listeners.forEach((listener) => listener.onPlayerWalkedOut(player));
     }
   }
 
@@ -131,13 +135,13 @@ export default class CoveySpaceController {
 
     if (newPlayer !== undefined) {
       // If the whitespace already includes the newPlayer, don't add the player, else add the player
-      if (this._whiteList.includes(newPlayer)){
-        return this._whiteList;
+      if (this._whitelist.includes(newPlayer)){
+        return this._whitelist;
       } 
-      this._whiteList.push(newPlayer);
-      return this._whiteList;
+      this._whitelist.push(newPlayer);
+      return this._whitelist;
     }
-    return this._whiteList;
+    return this._whitelist;
   }
 
   /**
@@ -149,7 +153,7 @@ export default class CoveySpaceController {
     const player = this.playerFromID(playerID);
 
     if (player !== undefined) {
-      this._whiteList = this._whiteList.filter((p) => p.id !== player.id);
+      this._whitelist = this._whitelist.filter((p) => p.id !== player.id);
     }
   }
 
@@ -170,9 +174,9 @@ export default class CoveySpaceController {
   }
   
   /**
-      * Changes the presenter for this space
-      * @param newPresenter the player that is the new presenter
-      */
+    * Changes the presenter for this space
+    * @param newPresenter the player that is the new presenter
+    */
   updatePresenter(newPresenterID: string | null): void {
     this._presenterID = newPresenterID;
   }
@@ -182,14 +186,32 @@ export default class CoveySpaceController {
    * @param newWhitelist the list of players that are allowed to enter a given space
    */
   updateWhitelist(newWhitelist: string[]): void {
-    console.log(newWhitelist);
+    //get a list of IDs and return a list of player and update it
+    let stringToPlayers: Player[] = [];
+    for(let i = 0; i < newWhitelist.length; i++){
+      const player = this.playerFromID(newWhitelist[i]);
+      if (player) {
+        stringToPlayers.push(player);
+      }
+    }
+    this._whitelist = stringToPlayers;
+  }
+
+
+  /**
+   * TODO
+   */
+  publicizeSpace(): void {
+    this._isPrivate = false;
+    this._presenterID = null;
+    this._spaceHostID = null;
+    this._whitelist = [];
   }
 
   /**
-   * Disconnects all players that are listen
+   * Remove all players from space
    */
   disconnectAllPlayers(): void {
     this._players = [];
-    this._listeners.forEach((listener) => listener.onSpaceDisbanded());
   }
 }

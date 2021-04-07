@@ -81,6 +81,7 @@ export interface SpaceListResponse {
  */
 export interface SpaceDisbandRequest {
   coveySpaceID: string;
+  hostID: null;
 }
 
 /**

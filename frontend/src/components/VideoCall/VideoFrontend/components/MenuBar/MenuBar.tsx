@@ -13,6 +13,7 @@ import ToggleAudioButton from '../Buttons/ToggleAudioButton/ToggleAudioButton';
 import ToggleVideoButton from '../Buttons/ToggleVideoButton/ToggleVideoButton';
 import ToggleScreenShareButton from '../Buttons/ToogleScreenShareButton/ToggleScreenShareButton';
 import TownSettings from '../../../../Login/TownSettings';
+import SpaceControls from '../../../../Login/SpaceControls';
 import MenuContainer from '@material-ui/core/Menu';
 import useCoveyAppState from '../../../../../hooks/useCoveyAppState';
 
@@ -68,26 +69,23 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
  * The claim space button
  * @returns  the button to claim a space
  */
-function ClaimSpace() {
+function ClaimAndDisbandSpace() {
   const { spaceApiClient, myPlayerID } = useCoveyAppState();
 
-  return (
-    <Button
-      onClick= { async () => {
-        const playerInSpace = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
-        const spaceIDPlayerIsIn = playerInSpace.space.coveySpaceID;
+  const claimSpace = async () => {
+    const playerInSpace = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
+    const spaceIDPlayerIsIn = playerInSpace.space.coveySpaceID;
 
-        if (spaceIDPlayerIsIn !== undefined) {
-          console.log(spaceIDPlayerIsIn);
-          spaceApiClient.claimSpace({ coveySpaceID: spaceIDPlayerIsIn , hostID: myPlayerID });
-        } else {
-          console.log('Player not in space');
-        }
-      }
+    if (spaceIDPlayerIsIn !== undefined) {
+      console.log(spaceIDPlayerIsIn);
+      spaceApiClient.claimSpace({ coveySpaceID: spaceIDPlayerIsIn , hostID: myPlayerID });
+    } else {
+      console.log('Player not in space');
     }
-    >
-      Claim Space
-    </Button>
+  }
+
+  return (
+    <Button onClick= { claimSpace }> Claim Space </Button>
   );
 }
 
@@ -121,7 +119,8 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
             <Grid style={{ flex: 1 }}>
               <Grid container justify="flex-end">
                 <TownSettings />
-                <ClaimSpace />
+                <ClaimAndDisbandSpace />
+                <SpaceControls />
                 <Menu />
                 <EndCallButton />
               </Grid>

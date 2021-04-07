@@ -33,7 +33,7 @@ export default class CoveySpacesStore {
     return this._spaces.map(spaceController => ({
       coveySpaceID: spaceController.coveySpaceID, 
       currentPlayers: spaceController.players.map(player => player.id),
-      whiteList: spaceController.whiteList.map(player => player.id),
+      whiteList: spaceController.whitelist.map(player => player.id),
       hostID: spaceController.spaceHostID,
       presenterID: spaceController.presenterID,
     }));
@@ -49,7 +49,7 @@ export default class CoveySpacesStore {
       return {
         coveySpaceID: spaceForPlayer.coveySpaceID,
         currentPlayers: spaceForPlayer.players.map(player => player.id),
-        whiteList: spaceForPlayer.whiteList.map(player => player.id),
+        whiteList: spaceForPlayer.whitelist.map(player => player.id),
         hostID: spaceForPlayer.spaceHostID,
         presenterID: spaceForPlayer.presenterID,
       }

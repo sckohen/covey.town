@@ -203,8 +203,8 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
   });
   
   /**
-     * Update a space, also used to:
-     * - claim space
+     * Update a space, also called when we want to:
+     * - claim a space
      * - disband a space
      * - change hosts
      * - change presenters

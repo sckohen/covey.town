@@ -72,6 +72,8 @@ describe('CoveySpaceController', () => {
       });
   });
 
+  
+
   // describe('space listeners and events', () => {
   //   let testingSpace: CoveySpaceController;
   //   let testingTown: CoveyTownController;
