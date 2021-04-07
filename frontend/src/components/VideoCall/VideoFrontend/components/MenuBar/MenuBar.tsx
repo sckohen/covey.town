@@ -66,7 +66,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 
 /**
  * The claim space button
- * @returns  
+ * @returns  the button to claim a space
  */
 function ClaimSpace() {
   const { spaceApiClient, myPlayerID } = useCoveyAppState();

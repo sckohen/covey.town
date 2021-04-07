@@ -74,13 +74,6 @@ class CoveyGameScene extends Phaser.Scene {
       this.updatePlayerLocation(p);
       const playerSpace = await this.getSpaceForPlayer(p.id);
 
-      this.input.keyboard.on('keydown-P', () => {
-        if(p.id !== this.id) {
-          console.log(`${p.userName} space: ${playerSpace}`);
-          console.log(`My space: ${this.inSpace}`);
-        }
-      });
-
       if (playerSpace !== this.inSpace) {
         p.sprite?.setAlpha(0);
         p.label?.setAlpha(0);
