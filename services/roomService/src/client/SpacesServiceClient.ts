@@ -123,6 +123,14 @@ export default class SpacesServiceClient {
     this._axios = axios.create({ baseURL });
   }
 
+  /**
+   * EXISTING
+   * Unwraps the response envelope, If all the data in response is ok then returns the data, otherwise throws a processing request error
+   * 
+   * @param response 
+   * @param ignoreResponse 
+   * @returns The response data within the given response envelope
+   */
   static unwrapOrThrowError<T>(response: AxiosResponse<ResponseEnvelope<T>>, ignoreResponse = false): T {
     if (response.data.isOK) {
       if (ignoreResponse) {
@@ -134,35 +142,67 @@ export default class SpacesServiceClient {
     throw new Error(`Error processing request: ${response.data.message}`);
   }
 
+  /**
+   * Takes the coveyTownId and coveySpaceId from a given SpaceCreateRequest, wraps it and turns it into a Space create response promise
+   * 
+   * @param requestData 
+   * @returns A SpaceCreateResponse promise made from the wrapped request data that was given
+   */
   async createSpace(requestData: SpaceCreateRequest): Promise<SpaceCreateResponse> {
     const { coveyTownID, coveySpaceID } = requestData;
     const responseWrapper = await this._axios.post<ResponseEnvelope<SpaceCreateResponse>>(`/spaces/${coveyTownID}/${coveySpaceID}`, requestData);
     return SpacesServiceClient.unwrapOrThrowError(responseWrapper);
   }
 
+  /**
+   * Takes the coveySpaceId from a given SpaceUpdateRequest, wraps it and turns it into a void promise to update the space
+   * 
+   * @param requestData 
+   * @returns A SpaceCreateResponse promise made from the wrapped request data that was given
+   */
   async updateSpace(requestData: SpaceUpdateRequest): Promise<void> {
     const { coveySpaceID } = requestData;
     const responseWrapper = await this._axios.patch<ResponseEnvelope<void>>(`/spaces/${coveySpaceID}`, requestData);
     return SpacesServiceClient.unwrapOrThrowError(responseWrapper, true);
   }
 
+  /**
+   * Takes the coveySpaceId from a given SpaceDisbandRequest, wraps it and turns it into a void promise to delete the space
+   * 
+   * @param requestData 
+   * @returns A SpaceCreateResponse promise made from the wrapped request data that was given
+   */
   async deleteSpace(requestData: SpaceDisbandRequest): Promise<void> {
     const { coveySpaceID } = requestData;
     const responseWrapper = await this._axios.delete<ResponseEnvelope<void>>(`/spaces/${coveySpaceID}`);
     return SpacesServiceClient.unwrapOrThrowError(responseWrapper, true);
   }
 
+  /**
+   * gets the response envelope of the space list response and wraps it to create a space list response promise
+   * @returns A SpaceListResponse promise 
+   */
   async listSpaces(): Promise<SpaceListResponse> {
     const responseWrapper = await this._axios.get<ResponseEnvelope<SpaceListResponse>>('/spaces');
     return SpacesServiceClient.unwrapOrThrowError(responseWrapper);
   }
-
+  
+  /**
+   * Takes a Space Join Request, wraps the covey space Id and player Id and creates a Space Join Response promise
+   * @param requestData 
+   * @returns A SpaceJoinResponse promise
+   */
   async joinSpace(requestData: SpaceJoinRequest): Promise<SpaceJoinResponse> {
     const { coveySpaceID, playerID } = requestData;
     const responseWrapper = await this._axios.post(`/spaces/${coveySpaceID}/${playerID}`, requestData);
     return SpacesServiceClient.unwrapOrThrowError(responseWrapper);
   }
 
+  /**
+   * Takes a SpaceClaimRequest, wraps the covey space Id and player Id and creates a void promise to claim the space
+   * @param requestData 
+   * @returns A void promise to claim the space
+   */
   async claimSpace(requestData: SpaceClaimRequest): Promise<void> {
     const { coveySpaceID } = requestData;
     const responseWrapper = await this._axios.patch<ResponseEnvelope<void>>(`/spaces/${coveySpaceID}`, requestData);
