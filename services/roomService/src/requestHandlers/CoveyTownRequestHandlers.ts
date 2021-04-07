@@ -4,6 +4,7 @@ import Player from '../types/Player';
 import { CoveyTownList, UserLocation } from '../CoveyTypes';
 import CoveyTownListener from '../types/CoveyTownListener';
 import CoveyTownsStore from '../lib/CoveyTownsStore';
+import CoveySpacesStore from '../lib/CoveySpacesStore';
 
 /**
  * The format of a request to join a Town in Covey.Town, as dispatched by the server middleware
@@ -132,6 +133,7 @@ export async function townListHandler(): Promise<ResponseEnvelope<TownListRespon
 
 export async function townCreateHandler(requestData: TownCreateRequest): Promise<ResponseEnvelope<TownCreateResponse>> {
   const townsStore = CoveyTownsStore.getInstance();
+  const spacesStore = CoveySpacesStore.getInstance();
   if (requestData.friendlyName.length === 0) {
     return {
       isOK: false,
@@ -139,6 +141,11 @@ export async function townCreateHandler(requestData: TownCreateRequest): Promise
     };
   }
   const newTown = townsStore.createTown(requestData.friendlyName, requestData.isPubliclyListed);
+  
+  // Creates pre-defined spaces in the town
+  spacesStore.createSpace('1', newTown.coveyTownID);
+  spacesStore.createSpace('2', newTown.coveyTownID);
+  
   return {
     isOK: true,
     response: {

@@ -1,4 +1,5 @@
-import { CoveySpaceList } from '../CoveyTypes';
+import { response } from 'express';
+import { CoveySpace } from '../CoveyTypes';
 import Player from '../types/Player';
 import CoveySpaceController  from './CoveySpaceController';
 import CoveyTownsStore from './CoveyTownsStore';
@@ -21,20 +22,40 @@ export default class CoveySpacesStore {
   * @param coveySpaceID The ID number for a covey space
   */
   getControllerForSpace(coveySpaceID: string): CoveySpaceController | undefined {
-    return this._spaces.find(space => space.coveySpaceID == coveySpaceID); 
+    return this._spaces.find(space => space.coveySpaceID === coveySpaceID); 
 
   }
 
   /**
-   * Gets the list of all private spaces
-   * TODO: revisit what should be returned in the CoveySpaceList
+   * List all spaces
    */
-  getSpaces(): CoveySpaceList {
+  listSpaces(): CoveySpace[] {
     return this._spaces.map(spaceController => ({
       coveySpaceID: spaceController.coveySpaceID, 
-      currentPlayers: spaceController.players}));
+      currentPlayers: spaceController.players.map(player => player.id),
+      whiteList: spaceController.whiteList.map(player => player.id),
+      hostID: spaceController.spaceHostID,
+      presenterID: spaceController.presenterID,
+    }));
   }
 
+  /**
+   * Gets space where the given player is in
+   */
+   getSpaceForPlayer(playerID: string): CoveySpace | undefined {
+    const spaceForPlayer = this._spaces.find((space) => space.isPlayerInSpace(playerID));
+
+    if (spaceForPlayer !== undefined) {
+      return {
+        coveySpaceID: spaceForPlayer.coveySpaceID,
+        currentPlayers: spaceForPlayer.players.map(player => player.id),
+        whiteList: spaceForPlayer.whiteList.map(player => player.id),
+        hostID: spaceForPlayer.spaceHostID,
+        presenterID: spaceForPlayer.presenterID,
+      }
+    }
+    return undefined;
+  }
 
   /**
    * Creates a new space
@@ -50,7 +71,10 @@ export default class CoveySpacesStore {
       throw new Error('Town not found.');
     }
 
-    const newSpace = new CoveySpaceController(newSpaceID, townController);
+    // The uniqueID for the space is combination of townControllerID and the spaceID
+    const uniqueID = `${townControllerID}_${newSpaceID}`;
+
+    const newSpace = new CoveySpaceController(uniqueID, townController);
     this._spaces.push(newSpace);
     return newSpace;
   }
@@ -61,14 +85,14 @@ export default class CoveySpacesStore {
    * @param spaceHost the desired host of a space that may or maynot be updated
    * @param whitelist the desired whitelist of a space that may or maynot be updated
    */
-  updateSpace(coveySpaceID: string, spaceHost?: Player, spacePresenter?: Player, whitelist?: Player[]): void {
+  updateSpace(coveySpaceID: string, spaceHostID?: string | null, spacePresenterID?: string | null, whitelist?: string[]): void {
     const hostedSpace = this.getControllerForSpace(coveySpaceID);
     if (hostedSpace){
-      if (spaceHost !== undefined) {
-        hostedSpace.updateSpaceHost(spaceHost.id);
+      if (spaceHostID !== undefined) {
+        hostedSpace.updateSpaceHost(spaceHostID);
       }
-      if (spacePresenter !== undefined) {
-        hostedSpace.updatePresenter(spacePresenter.id);
+      if (spacePresenterID !== undefined) {
+        hostedSpace.updatePresenter(spacePresenterID);
       }
       if (whitelist !== undefined) {
         hostedSpace.updateWhitelist(whitelist);
@@ -79,6 +103,7 @@ export default class CoveySpacesStore {
   /**
   * Removes all players from the space in means to disband the space (returns back to original state)
   * @param spaceID the spaceID for the space they would like to leave
+  * @returns success as a boolean
   */
   disbandSpace(spaceID: string): boolean {
     const spaceController = this.getControllerForSpace(spaceID);

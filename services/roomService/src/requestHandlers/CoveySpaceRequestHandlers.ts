@@ -1,9 +1,5 @@
-import assert from 'assert';
-import { Socket } from 'socket.io';
 import Player from '../types/Player';
-import { CoveySpaceList, UserLocation } from '../CoveyTypes';
-import CoveyTownListener from '../types/CoveyTownListener';
-import CoveyTownsStore from '../lib/CoveyTownsStore';
+import { CoveySpace } from '../CoveyTypes';
 import CoveySpacesStore from '../lib/CoveySpacesStore';
 
 /**
@@ -17,28 +13,13 @@ export interface SpaceCreateRequest {
 }
 
 /**
- * Response to a SpaceCreateRequest
- */
-export interface SpaceCreateResponse {
-  // unimplemented
-}
-
-/**
  * Payload sent by client to claim a space within a Town in Covey.Town
  */
 export interface SpaceClaimRequest {
   /** The id for the space that is to be claimed* */
   coveySpaceID: string;
   /** The id for the new host (player) for the private space* */
-  newHostPlayerID: string;
-}
-
-/**
-* Response from the server for a space claim request
-*/
-export interface SpaceClaimResponse {
-  // might not need to return anything here 
-  // we could just send confirmation in the response envelope
+  hostID: string;
 }
 
 /**
@@ -52,22 +33,9 @@ export interface SpaceJoinRequest {
 }
 
 /**
- * The format of a response to join a Town in Covey.Town, as returned by the handler to the server
- * middleware
- */
-export interface SpaceJoinResponse {
-  /** current players in a space */
-  currentPlayers: Player[];
-  /** the id for the player who is the current host of this space * */
-  currentHostID: string | undefined;
-  /** the id for the player who is the current presenter in this space */
-  currentPresenterID: string | undefined;
-}
-
-/**
  * The format of a request to leave a space within a Town in Covey.Town, as dispatched by the server middleware
  */
- export interface SpaceLeaveRequest {
+export interface SpaceLeaveRequest {
   /** the id for the player that would like to join * */
   playerID: string;
   /** ID of the space that the player would like to join * */
@@ -79,7 +47,27 @@ export interface SpaceJoinResponse {
  */
 export interface SpaceListResponse {
   // might not need this, may remove or use for added functionality
-  spaces: CoveySpaceList;
+  spaces: CoveySpace[];
+}
+
+/**
+ * Response to the server to get info on a space
+ */
+ export interface SpaceGetForPlayerRequest {
+  playerID: string;
+}
+
+/**
+ * Response from the server for a space request
+ */
+ export interface SpaceInfoResponse {
+  space: {
+    coveySpaceID: string; 
+    currentPlayers?: string[]; 
+    whiteList?: string[]; 
+    hostID?: string | null; 
+    presenterID?: string | null;
+  };
 }
 
 /**
@@ -94,9 +82,9 @@ export interface SpaceDisbandRequest {
  */
 export interface SpaceUpdateRequest {
   coveySpaceID: string;
-  newHost: Player;
-  newPresenter: Player;
-  newWhitelist: Player[];
+  hostID: string | null;
+  presenterID: string | null;
+  whitelist: string[];
 }
 
 /**
@@ -109,15 +97,14 @@ export interface ResponseEnvelope<T> {
 }
 
 /**
- * A handler to process the frontend's request to create a private space. 
- * @param requestData an object representing the frontend's request
+ * Handler for creating spaces
+ * @param requestData the townID and the spaceID for space to create
+ * @returns success or failure message
  */
-
-// john
-export async function spaceCreateHandler(requestData: SpaceCreateRequest): Promise<ResponseEnvelope<SpaceCreateResponse>> {
+export async function spaceCreateHandler(requestData: SpaceCreateRequest): Promise<ResponseEnvelope<Record<string, null>>> {
   const spacesStore = CoveySpacesStore.getInstance();
 
-  const {coveySpaceID, coveyTownID} = requestData;
+  const { coveySpaceID, coveyTownID } = requestData;
 
   if (coveySpaceID.length === 0) {
     return {
@@ -130,40 +117,44 @@ export async function spaceCreateHandler(requestData: SpaceCreateRequest): Promi
   return {
     isOK: true,
     message: `Private Space ${coveySpaceID} was created`,
-    // currently not returning a SpaceCreateResponse, but we can change it when we identify what is neccesary to return here 
   };
-
 }
 
-// john
-export async function spaceJoinHandler(requestData: SpaceJoinRequest): Promise<ResponseEnvelope<SpaceJoinResponse>> {
+/**
+ * Handler for joining a space
+ * @param requestData the playerID for the player and spaceID they want to join
+ * @returns success or failure message
+ */
+export async function spaceJoinHandler(requestData: SpaceJoinRequest): Promise<ResponseEnvelope<Record<string, null>>> {
   const spacesStore = CoveySpacesStore.getInstance();
-  const {playerID, coveySpaceID} = requestData;
+  const { playerID, coveySpaceID } = requestData;
   const coveySpaceController = spacesStore.getControllerForSpace(coveySpaceID);
-
+  
   if (!coveySpaceController) {
     return {
       isOK: false,
       message: 'Error: No such space',
+      response: {},
     };
-  }
-
+  }  
+  
   coveySpaceController.addPlayer(playerID);
-
+  
   return {
     isOK: true,
-    response: {
-      currentPlayers: coveySpaceController.players,
-      currentHostID: coveySpaceController.spaceHostID,
-      currentPresenterID: coveySpaceController.presenterID,
-    },
+    message: `Player ID${playerID} has joined space ${coveySpaceID}`,
+    response: {},
   };
 }
 
-// john
+/**
+ * Handler for leaving a space
+ * @param requestData the playerID for the player and which space they want to leave
+ * @returns success or failure message
+ */
 export async function spaceLeaveHandler(requestData: SpaceLeaveRequest): Promise<ResponseEnvelope<Record<string, null>>> {
   const spacesStore = CoveySpacesStore.getInstance();
-  const {playerID, coveySpaceID} = requestData;
+  const { playerID, coveySpaceID } = requestData;
   const coveySpaceController = spacesStore.getControllerForSpace(coveySpaceID);
 
   if (!coveySpaceController) {
@@ -173,26 +164,65 @@ export async function spaceLeaveHandler(requestData: SpaceLeaveRequest): Promise
     };
   }
 
-  coveySpaceController.addPlayer(playerID);
+  coveySpaceController.removePlayer(playerID);
 
   return {
     isOK: true,
     message: `Player ID${playerID} has left space ${coveySpaceID}`,
+    response: {},
   };
 }
 
-// john
+
+/**
+ * Handler for listing spaces
+ * @returns list of all spaces (spaceID, currentPlayers, Whitelist, Host, Presenter)
+ */
 export async function spaceListHandler(): Promise<ResponseEnvelope<SpaceListResponse>> {
   const spacesStore = CoveySpacesStore.getInstance();
 
   return {
     isOK: true,
-    response: { spaces: spacesStore.getSpaces() },
+    response: { 
+      spaces: spacesStore.listSpaces(), 
+    },
   };
 }
 
-// john
-export async function spaceClaimHandler(requestData: SpaceClaimRequest): Promise<ResponseEnvelope<SpaceClaimResponse>> {
+/**
+ * Handler for getting a specific space
+ * @returns listing of the specific space (spaceID, currentPlayers, Whitelist, Host, Presenter)
+ */
+ export async function spaceGetForPlayerHandler(requestData: SpaceGetForPlayerRequest): Promise<ResponseEnvelope<SpaceInfoResponse>> {
+  const spacesStore = CoveySpacesStore.getInstance();
+
+   let spaceResponse = spacesStore.getSpaceForPlayer(requestData.playerID)
+
+   if (spaceResponse === undefined) {
+     return {
+       isOK: true,
+       response: {
+         space: { 
+           coveySpaceID: "World"
+        },
+       },
+     };
+   }
+
+  return {
+    isOK: true,
+    response: { 
+      space: spaceResponse,
+    },
+  };
+}
+
+/**
+ * Handler for claiming a space
+ * @param requestData spaceID for the space to be claimed and the playerID for the new host
+ * @returns success or failure message
+ */
+export async function spaceClaimHandler(requestData: SpaceClaimRequest): Promise<ResponseEnvelope<Record<string, null>>> {
   const spacesStore = CoveySpacesStore.getInstance();
 
   const coveySpaceController = spacesStore.getControllerForSpace(requestData.coveySpaceID);
@@ -200,62 +230,40 @@ export async function spaceClaimHandler(requestData: SpaceClaimRequest): Promise
     return {
       isOK: false,
       message: 'Error: No such space',
+      response: {},
     };
   }
 
-  coveySpaceController.updateSpaceHost(requestData.newHostPlayerID);
+  coveySpaceController.updateSpaceHost(requestData.hostID);
   return {
     isOK: true,
-    message: `The host was update to be player with ID ${requestData.newHostPlayerID}`,
-  };
-}
-
-// Curtis
-export async function spaceDisbandHandler(requestData: SpaceDisbandRequest): Promise<ResponseEnvelope<Record<string, null>>> {
-  const spacesStore = CoveySpacesStore.getInstance();
-
-  spacesStore.disbandSpace(requestData.coveySpaceID);
-
-  return {
-    isOK: true,
+    message: `The host was update to be player with ID ${requestData.hostID} and the space is now private`,
     response: {},
-    message: `The space ${requestData.coveySpaceID} was disbanded.`,
   };
 }
 
-// anne
+/**
+ * Handler for updating spaces (also for disbanding private space)
+ * @param requestData spaceID to update, playerID of the new host for the space, playerID of the presenter for the space, new whitelist
+ * @returns success or failure message
+ */
 export async function spaceUpdateHandler(requestData: SpaceUpdateRequest): Promise<ResponseEnvelope<Record<string, null>>> {
   const spacesStore = CoveySpacesStore.getInstance();
+  const { coveySpaceID, hostID, presenterID, whitelist } = requestData;
+
+  if (hostID === null) {
+    spacesStore.disbandSpace(coveySpaceID);
+  }
 
   spacesStore.updateSpace(
-    requestData.coveySpaceID, 
-    requestData.newHost, 
-    requestData.newPresenter, 
-    requestData.newWhitelist);
+    coveySpaceID, 
+    hostID, 
+    presenterID, 
+    whitelist);
 
   return {
     isOK: true,
-    response: {},
     message: `The space ${requestData.coveySpaceID} was updated.`,
+    response: {},
   };
-}
-
-
-/**
- * An adapter between CoveyTownController's event interface (CoveyTownListener)
- * and the low-level network communication protocol
- *
- * @param socket the Socket object that we will use to communicate with the player
- */
-function spaceSocketAdapter(socket: Socket): CoveySpaceListener {
-  
-}
-
-/**
- * A handler to process a remote player's subscription to updates for a town
- *
- * @param socket the Socket object that we will use to communicate with the player
- */
-export function spaceSubscriptionHandler(socket: Socket): void {
-  
 }

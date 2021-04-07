@@ -3,9 +3,9 @@ import BodyParser from 'body-parser';
 import io from 'socket.io';
 import { Server } from 'http';
 import { StatusCodes } from 'http-status-codes';
-import { spaceListHandler } from '../requestHandlers/CoveySpaceRequestHandlers';
 import { logError } from '../Utils';
 import { townCreateHandler, townDeleteHandler, townJoinHandler, townListHandler, townSubscriptionHandler, townUpdateHandler } from '../requestHandlers/CoveyTownRequestHandlers';
+import { spaceJoinHandler, spaceLeaveHandler, spaceListHandler, spaceUpdateHandler, spaceCreateHandler, spaceGetForPlayerHandler } from '../requestHandlers/CoveySpaceRequestHandlers';
 
 export default function addTownRoutes(http: Server, app: Express): io.Server {
   /*
@@ -104,22 +104,126 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
     }
   });
 
+  // This is where the space routing starts
+
   /**
-  * List the spaces in a town
-  */
-  app.get('/space/:townID/:spaceID', BodyParser.json(), async (_req, res) => {
+   * Create a new space
+   */
+  app.post('/spaces/:townID/:spaceID', BodyParser.json(), async (req, res) => {
     try {
-      const result = await spaceListHandler({
-        coveyTownID: _req.params.townID,
-        coveySpaceID: _req.params.spaceID,
+      const result = await spaceCreateHandler({
+        coveyTownID: req.params.townID,
+        coveySpaceID: req.params.spaceID,
       });
-      res.status(200)
+      res.status(StatusCodes.OK)
         .json(result);
     } catch (err) {
       logError(err);
-      res.status(500)
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
         .json({
-          message: 'Internal server error, please see log in server for details',
+          message: 'Internal server error, please see log in server for more details',
+        });
+    }
+  });
+  
+  /**
+     * List all Spaces
+     */
+  app.get('/spaces/', BodyParser.json(), async (_req, res) => {
+    try {
+      const result = await spaceListHandler();
+      res.status(StatusCodes.OK)
+        .json(result);
+    } catch (err) {
+      logError(err);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({
+          message: 'Internal server error, please see log in server for more details',
+        });
+    }
+  });
+
+  /**
+     * List the space for the given player
+     */
+   app.get('/spaces/:playerID', BodyParser.json(), async (req, res) => {
+    try {
+      const result = await spaceGetForPlayerHandler({
+        playerID: req.params.playerID,
+      });
+      res.status(StatusCodes.OK)
+        .json(result);
+    } catch (err) {
+      logError(err);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({
+          message: 'Internal server error, please see log in server for more details',
+        });
+    }
+  });
+  
+  /**
+     * Join a space
+     */
+  app.put('/spaces/:spaceID/:playerID', BodyParser.json(), async (req, res) => {
+    try {
+      const result = await spaceJoinHandler({
+        playerID: req.params.playerID,
+        coveySpaceID: req.params.spaceID,
+      });
+      res.status(StatusCodes.OK)
+        .json(result);
+    } catch (err) {
+      logError(err);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({
+          message: 'Internal server error, please see log in server for more details',
+        });
+    }
+  });
+
+  /**
+     * Leave a space
+     */
+  app.delete('/spaces/:spaceID/:playerID', BodyParser.json(), async (req, res) => {
+    try {
+      const result = await spaceLeaveHandler({
+        playerID: req.params.playerID,
+        coveySpaceID: req.params.spaceID,
+      });
+      res.status(StatusCodes.OK)
+        .json(result);
+    } catch (err) {
+      logError(err);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({
+          message: 'Internal server error, please see log in server for more details',
+        });
+    }
+  });
+  
+  /**
+     * Update a space, also used to:
+     * - claim space
+     * - disband a space
+     * - change hosts
+     * - change presenters
+     */
+  app.patch('/spaces/:spaceID', BodyParser.json(), async (req, res) => {
+    try {
+      const result = await spaceUpdateHandler({
+        coveySpaceID: req.params.spaceID,
+        hostID: req.body.hostID,
+        presenterID: req.body.presenterID,
+        whitelist: req.body.whitelist,
+      });
+      res.status(StatusCodes.OK)
+        .json(result);
+    } catch (err) {
+      logError(err);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({
+          message: 'Internal server error, please see log in server for more details',
         });
     }
   });
