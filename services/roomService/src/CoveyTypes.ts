@@ -1,4 +1,5 @@
-import Player from '../src/types/Player';
+import Player from './types/Player';
+
 export type Direction = 'front' | 'back' | 'left' | 'right';
 export type UserLocation = {
   x: number;

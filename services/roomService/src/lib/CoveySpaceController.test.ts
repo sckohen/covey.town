@@ -10,6 +10,8 @@ import PlayerSession from '../types/PlayerSession';
 import {townSubscriptionHandler} from '../requestHandlers/CoveyTownRequestHandlers';
 import CoveyTownsStore from './CoveyTownsStore';
 import * as TestUtils from '../client/TestUtils';
+import CoveySpaceController from './CoveySpaceController';
+import CoveySpaceListener from '../types/CoveySpaceListener';
 
 jest.mock('./TwilioVideo');
 
@@ -29,37 +31,60 @@ function generateTestLocation(): UserLocation {
   };
 }
 
-describe('CoveyTownController', () => {
+describe('CoveySpaceController', () => {
   beforeEach(() => {
     mockGetTokenForTown.mockClear();
   });
-  it('constructor should set the friendlyName property', () => { // Included in handout
+  it('constructor should set the CoveySpaceID and the CoveyTownController', () => { // Included in handout
+    //const townName = `FriendlyNameTest-${nanoid()}`;
+    //const townController = new CoveyTownController(townName, false);
+    //expect(townController.friendlyName)
+    //  .toBe(townName);
+    const spaceID = `SpaceIDTest-${nanoid()}`;
     const townName = `FriendlyNameTest-${nanoid()}`;
     const townController = new CoveyTownController(townName, false);
-    expect(townController.friendlyName)
-      .toBe(townName);
+    const spaceController = new CoveySpaceController(spaceID, townController);
+    expect(spaceController.coveySpaceID)
+    .toBe(spaceID);
+
   });
   describe('addPlayer', () => { // Included in handout
-    it('should use the coveyTownID and player ID properties when requesting a video token',
+    it('should check if the player is on the whitelist before added',
       async () => {
+        //const townName = `FriendlyNameTest-${nanoid()}`;
+        //const townController = new CoveySpaceController(townName, false);
+        //const newPlayerSession = await townController.addPlayer(new Player(nanoid()));
+        //expect(mockGetTokenForTown).toBeCalledTimes(1);
+        //expect(mockGetTokenForTown).toBeCalledWith(townController.coveyTownID, newPlayerSession.player.id);
+
+        const spaceID = `SpaceIDTest-${nanoid()}`;
         const townName = `FriendlyNameTest-${nanoid()}`;
         const townController = new CoveyTownController(townName, false);
-        const newPlayerSession = await townController.addPlayer(new Player(nanoid()));
-        expect(mockGetTokenForTown).toBeCalledTimes(1);
-        expect(mockGetTokenForTown).toBeCalledWith(townController.coveyTownID, newPlayerSession.player.id);
+        await townController.addPlayer(new Player('1'));
+        await townController.addPlayer(new Player('2'));
+        const spaceController = new CoveySpaceController(spaceID, townController);
+        spaceController.addPlayer('1');
+        expect(spaceController.players.length)
+        .toBe(1);
+        spaceController.addPlayer('2');
+        expect(spaceController.players.length)
+        .toBe(1);
       });
   });
 
-  describe('town listeners and events', () => {
+  describe('space listeners and events', () => {
+    let testingSpace: CoveySpaceController;
     let testingTown: CoveyTownController;
-    const mockListeners = [mock<CoveyTownListener>(),
-      mock<CoveyTownListener>(),
-      mock<CoveyTownListener>()];
+    const mockListeners = [mock<CoveySpaceListener>(),
+      mock<CoveySpaceListener>(),
+      mock<CoveySpaceListener>()];
     beforeEach(() => {
+      const spaceName = `space listeners and events tests ${nanoid()}`;
       const townName = `town listeners and events tests ${nanoid()}`;
       testingTown = new CoveyTownController(townName, false);
+      testingSpace = new CoveySpaceController(spaceName, testingTown);
       mockListeners.forEach(mockReset);
-    });
+    });/*
     it('should notify added listeners of player movement when updatePlayerLocation is called', async () => {
       const player = new Player('test player');
       await testingTown.addPlayer(player);
@@ -75,13 +100,13 @@ describe('CoveyTownController', () => {
       mockListeners.forEach(listener => testingTown.addTownListener(listener));
       testingTown.destroySession(session);
       mockListeners.forEach(listener => expect(listener.onPlayerDisconnected).toBeCalledWith(player));
-    });
+    });*/
     it('should notify added listeners of new players when addPlayer is called', async () => {
-      mockListeners.forEach(listener => testingTown.addTownListener(listener));
-
+      mockListeners.forEach(listener => testingSpace.addSpaceListener(listener));
       const player = new Player('test player');
-      await testingTown.addPlayer(player);
-      mockListeners.forEach(listener => expect(listener.onPlayerJoined).toBeCalledWith(player));
+      testingTown.addPlayer(new Player('1'));
+      testingSpace.addPlayer('1');
+      mockListeners.forEach(listener => expect(listener.onPlayerWalkedIn).toBeCalledWith(player));
 
     });
     it('should notify added listeners that the town is destroyed when disconnectAllPlayers is called', async () => {

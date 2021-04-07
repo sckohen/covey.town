@@ -1,11 +1,11 @@
 import { customAlphabet, nanoid } from 'nanoid';
-import { CoveySpaceList, UserLocation } from '../CoveyTypes';
+import { UserLocation } from '../CoveyTypes';
 import CoveyTownListener from '../types/CoveyTownListener';
 import Player from '../types/Player';
 import PlayerSession from '../types/PlayerSession';
 import TwilioVideo from './TwilioVideo';
 import IVideoClient from './IVideoClient';
-import CoveySpaceController  from './CoveySpaceController';
+import CoveySpacesStore  from './CoveySpacesStore';
 
 
 const friendlyNanoID = customAlphabet('1234567890ABCDEF', 8);
@@ -18,6 +18,7 @@ export default class CoveyTownController {
   get capacity(): number {
     return this._capacity;
   }
+
   set isPubliclyListed(value: boolean) {
     this._isPubliclyListed = value;
   }
@@ -50,15 +51,15 @@ export default class CoveyTownController {
     return this._coveyTownID;
   }
 
-  get privateSpaces(): CoveySpaceController[] {
+  get privateSpaces(): CoveySpacesStore {
     return this._privateSpaces;
   }
 
   /** The list of players currently in the town * */
   private _players: Player[] = [];
   
-  /** The list of spaces in the town * */
-  private _privateSpaces: CoveySpaceController[] = [];
+  /** The all private spaces in this town * */
+  private _privateSpaces: CoveySpacesStore;
 
   /** The list of valid sessions for this town * */
   private _sessions: PlayerSession[] = [];
@@ -85,7 +86,7 @@ export default class CoveyTownController {
     this._townUpdatePassword = nanoid(24);
     this._isPubliclyListed = isPubliclyListed;
     this._friendlyName = friendlyName;
-    this._privateSpaces = []; // Initialize with no spaces
+    this._privateSpaces = CoveySpacesStore.getInstance();
   }
 
 
@@ -164,88 +165,5 @@ export default class CoveyTownController {
 
   disconnectAllPlayers(): void {
     this._listeners.forEach((listener) => listener.onTownDestroyed());
-  }
-
-  // This is where the private space storing begins
-
-  /**
-   * Create a new private space 
-   * @param newSpaceID  the ID for the new space
-   */
-  addPrivateSpace(newSpaceID: string): CoveySpaceController {
-    const newSpace = new CoveySpaceController(newSpaceID); 
-    this._privateSpaces.push(newSpace);
-    return newSpace;
-  }
-
-  /**
-   * Updates a private space based on the host's request
-   * @param coveySpaceId the ID number for a covey space
-   * @param spaceHost the desired host of a space that may or maynot be updated
-   * @param whitelist the desired whitelist of a space that may or maynot be updated
-   */
-  updateCoveySpace(coveySpaceID: string, spaceHost: Player, spacePresenter: Player, whitelist: Player[]): void {
-    const hostedSpace = this.getControllerForSpace(coveySpaceID);
-    if ( spaceHost.id !== hostedSpace?.spaceHostID) {
-      hostedSpace?.updateSpaceHost(spaceHost.id);
-    }
-    if ( spacePresenter.id !== hostedSpace?.presenterID) {
-      hostedSpace?.updatePresenter(spacePresenter.id);
-    }
-    if (whitelist !== hostedSpace?.whiteList) {
-      hostedSpace?.updateWhitelist(whitelist);
-    }
-  }
-
-  /**
-   * gets a specific private space controller from a given covey space ID
-   * @param coveySpaceID The ID number for a covey space
-   */
-  getControllerForSpace(coveySpaceID: string): CoveySpaceController | undefined {
-    return this._privateSpaces.find((v) => v.coveySpaceID == coveySpaceID); 
-
-  }
-
-  /**
-   * Gets the list of all private spaces
-   */
-  getSpaces(): CoveySpaceList {
-    return this._privateSpaces.map(spaceController => ({
-      coveySpaceID: spaceController.coveySpaceID, 
-      currentPlayers: spaceController.players}));
-  }
-
-  /**
-   * Adds the player to the space they requested to join
-   * @param newPlayerID the ID for the player that would like to join the space
-   * @param spaceID the spaceID for the space they would like to join
-   * @returns the controller for the space the player joined
-   */
-  joinSpace(newPlayerID: string, spaceID: string): CoveySpaceController {
-    const spaceController = this.getControllerForSpace(spaceID);
-    const newPlayerFromID = this.players.find(p => p.id === newPlayerID);
-    
-    if (!spaceController || !newPlayerFromID) {
-      throw new Error("Space controller or newPlayer not found");
-    }
-
-    spaceController.addPlayer(newPlayerFromID);
-    return spaceController;
-  }
-
-  /**
-   * Removes the player from the space they requested to leave
-   * @param playerID the the ID for the player that would like to leave the space
-   * @param spaceID the spaceID for the space they would like to leave
-   */
-   leaveSpace(playerID: string, spaceID: string): void {
-    const spaceController = this.getControllerForSpace(spaceID);
-    const playerFromID = this.players.find(p => p.id === playerID);
-    
-    if (!spaceController || !playerFromID) {
-      throw new Error("Space controller or player not found");
-    }
-
-    spaceController.removePlayer(playerFromID);
   }
 }
