@@ -40,6 +40,13 @@ class CoveyGameScene extends Phaser.Scene {
 
   private spaces: Phaser.GameObjects.Zone[];
 
+  /**
+   * Constructs the map taking in required arguments needed to 'play the game'
+   * 
+   * @param video 
+   * @param emitMovement the location of the user, or void
+   * @param spaceCreateInfo the information needed to create a space
+   */
   constructor(video: Video, emitMovement: (loc: UserLocation) => void, spaceCreateInfo: SpaceCreationInfo) {
     super('PlayGame');
     this.video = video;
@@ -56,6 +63,13 @@ class CoveyGameScene extends Phaser.Scene {
     this.load.atlas('atlas', '/assets/atlas/atlas.png', '/assets/atlas/atlas.json');
   }
 
+  /**
+   * updates the location of a group of given players that are moving. 
+   * Also removes players from the space that have disconnedcted by detroying their sprite and label
+   * 
+   * @param players the list of players that are to be updated
+   * @returns 
+   */
   updatePlayersLocations(players: Player[]) {
     if (!this.ready) {
       this.players = players;
@@ -84,6 +98,11 @@ class CoveyGameScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * updates the location of a single player. Moves the location of their sprite based on how, or if, they move
+   * @param player 
+   * @returns 
+   */
   updatePlayerLocation(player: Player) {
     let myPlayer = this.players.find((p) => p.id === player.id);
     if (!myPlayer) {
@@ -130,6 +149,10 @@ class CoveyGameScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * Finds the direction the player is moving in based on the key they pressed
+   * @returns the direction to move in as a string or undefined
+   */
   getNewMovementDirection() {
     if (this.cursors.find(keySet => keySet.left?.isDown)) {
       return 'left';
@@ -302,6 +325,9 @@ class CoveyGameScene extends Phaser.Scene {
       }
     });
 
+    /**
+     * allows the 'wasd' keys and 'hjkl' keys to be viable movement keys
+     */
     const cursorKeys = this.input.keyboard.createCursorKeys();
     this.cursors.push(cursorKeys);
     this.cursors.push(this.input.keyboard.addKeys({
@@ -451,6 +477,10 @@ class CoveyGameScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * updates the visuals based on the direction the sprite moves in. shows an animation of the sprite walking in the direction.
+   * @returns 
+   */
   update() {
     if (this.paused) {
       return;
@@ -553,6 +583,7 @@ type SpaceCreationInfo = {
   myPlayerID: string,
   currentTownID: string,
 }
+
 
 export default function WorldMap(): JSX.Element {
   const video = Video.instance();
