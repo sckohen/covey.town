@@ -171,7 +171,7 @@ export async function spaceListHandler(): Promise<ResponseEnvelope<SpaceListResp
   return {
     isOK: true,
     response: { 
-      spaces: spacesStore.getSpaces(), 
+      spaces: spacesStore.listSpaces(), 
     },
   };
 }

@@ -27,10 +27,9 @@ export default class CoveySpacesStore {
   }
 
   /**
-   * Gets the list of all private spaces
-   * TODO: revisit what should be returned in the CoveySpaceList
+   * List all spaces
    */
-  getSpaces(): CoveySpace[] {
+  listSpaces(): CoveySpace[] {
     return this._spaces.map(spaceController => ({
       coveySpaceID: spaceController.coveySpaceID, 
       currentPlayers: spaceController.players.map(player => player.id),
