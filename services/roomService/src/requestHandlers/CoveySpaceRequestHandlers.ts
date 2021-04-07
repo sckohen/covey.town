@@ -19,7 +19,7 @@ export interface SpaceClaimRequest {
   /** The id for the space that is to be claimed* */
   coveySpaceID: string;
   /** The id for the new host (player) for the private space* */
-  newHostPlayerID: string;
+  hostID: string;
 }
 
 /**
@@ -58,6 +58,19 @@ export interface SpaceListResponse {
 }
 
 /**
+ * Response from the server for a space request
+ */
+ export interface SpaceInfoResponse {
+  space: {
+    coveySpaceID: string; 
+    currentPlayers?: string[]; 
+    whiteList?: string[]; 
+    hostID?: string | null; 
+    presenterID?: string | null;
+  };
+}
+
+/**
  * Payload sent by the client to delete a Town
  */
 export interface SpaceDisbandRequest {
@@ -69,9 +82,9 @@ export interface SpaceDisbandRequest {
  */
 export interface SpaceUpdateRequest {
   coveySpaceID: string;
-  newHost: Player;
-  newPresenter: Player;
-  newWhitelist: Player[];
+  hostID: string | null;
+  presenterID: string | null;
+  whitelist: string[];
 }
 
 /**
@@ -180,13 +193,26 @@ export async function spaceListHandler(): Promise<ResponseEnvelope<SpaceListResp
  * Handler for getting a specific space
  * @returns listing of the specific space (spaceID, currentPlayers, Whitelist, Host, Presenter)
  */
- export async function spaceGetForPlayerHandler(requestData: SpaceGetForPlayerRequest): Promise<ResponseEnvelope<SpaceListResponse>> {
+ export async function spaceGetForPlayerHandler(requestData: SpaceGetForPlayerRequest): Promise<ResponseEnvelope<SpaceInfoResponse>> {
   const spacesStore = CoveySpacesStore.getInstance();
+
+   let spaceResponse = spacesStore.getSpaceForPlayer(requestData.playerID)
+
+   if (spaceResponse === undefined) {
+     return {
+       isOK: true,
+       response: {
+         space: { 
+           coveySpaceID: "World"
+        },
+       },
+     };
+   }
 
   return {
     isOK: true,
     response: { 
-      spaces: spacesStore.getSpaceForPlayer(requestData.playerID), 
+      space: spaceResponse,
     },
   };
 }
@@ -208,10 +234,10 @@ export async function spaceClaimHandler(requestData: SpaceClaimRequest): Promise
     };
   }
 
-  coveySpaceController.updateSpaceHost(requestData.newHostPlayerID);
+  coveySpaceController.updateSpaceHost(requestData.hostID);
   return {
     isOK: true,
-    message: `The host was update to be player with ID ${requestData.newHostPlayerID} and the space is now private`,
+    message: `The host was update to be player with ID ${requestData.hostID} and the space is now private`,
     response: {},
   };
 }
@@ -223,17 +249,17 @@ export async function spaceClaimHandler(requestData: SpaceClaimRequest): Promise
  */
 export async function spaceUpdateHandler(requestData: SpaceUpdateRequest): Promise<ResponseEnvelope<Record<string, null>>> {
   const spacesStore = CoveySpacesStore.getInstance();
-  const { coveySpaceID, newHost, newPresenter, newWhitelist } = requestData;
+  const { coveySpaceID, hostID, presenterID, whitelist } = requestData;
 
-  if (newHost === undefined) {
+  if (hostID === null) {
     spacesStore.disbandSpace(coveySpaceID);
   }
 
   spacesStore.updateSpace(
     coveySpaceID, 
-    newHost, 
-    newPresenter, 
-    newWhitelist);
+    hostID, 
+    presenterID, 
+    whitelist);
 
   return {
     isOK: true,

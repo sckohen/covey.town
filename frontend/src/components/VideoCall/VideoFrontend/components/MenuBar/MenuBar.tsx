@@ -63,27 +63,28 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
   },
 }));
 
+
+/**
+ * The claim space button
+ * @returns  
+ */
 function ClaimSpace() {
-  const { spaceApiClient, myPlayerID, currentTownID } = useCoveyAppState();
+  const { spaceApiClient, myPlayerID } = useCoveyAppState();
 
   return (
     <Button
       onClick= { async () => {
-        const spaces = await spaceApiClient.listSpaces();
         const playerInSpace = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
-        console.log(spaces.spaces);
-        console.log(playerInSpace.spaces);
+        const spaceIDPlayerIsIn = playerInSpace.space.coveySpaceID;
 
-        // if (playerInSpace.space !== undefined) {
-        //   console.log(playerInSpace.space.coveySpaceID);
-        // }
-        // console.log('Player not in space');
-          
-      //     console.log('claiming space');
-      //     const claimRequest = await spaceApiClient.claimSpace({ coveySpaceID: currentSpace, newHostPlayerID: myPlayerID });
-      //     console.log(claimRequest);
-      //   }
-      }}
+        if (spaceIDPlayerIsIn !== undefined) {
+          console.log(spaceIDPlayerIsIn);
+          spaceApiClient.claimSpace({ coveySpaceID: spaceIDPlayerIsIn , hostID: myPlayerID });
+        } else {
+          console.log('Player not in space');
+        }
+      }
+    }
     >
       Claim Space
     </Button>
@@ -95,7 +96,6 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
   const { isSharingScreen, toggleScreenShare } = useVideoContext();
   const roomState = useRoomState();
   const isReconnecting = roomState === 'reconnecting';
-  const { spaceApiClient, myPlayerID } = useCoveyAppState();
 
   return (
     <>

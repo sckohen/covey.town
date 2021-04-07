@@ -36,17 +36,17 @@ class CoveyGameScene extends Phaser.Scene {
 
   private spaceCreateInfo: SpaceCreationInfo;
 
-  private inSpace: Phaser.GameObjects.Zone | undefined;
+  private inSpace: string;
 
-  private spaces: Phaser.GameObjects.Zone[];
+  private allSpaces: Phaser.GameObjects.Zone[];
 
   constructor(video: Video, emitMovement: (loc: UserLocation) => void, spaceCreateInfo: SpaceCreationInfo) {
     super('PlayGame');
     this.video = video;
     this.emitMovement = emitMovement;
     this.spaceCreateInfo = spaceCreateInfo;
-    this.inSpace = undefined;
-    this.spaces = [];
+    this.inSpace = "World";
+    this.allSpaces = [];
   }
 
   preload() {
@@ -56,14 +56,40 @@ class CoveyGameScene extends Phaser.Scene {
     this.load.atlas('atlas', '/assets/atlas/atlas.png', '/assets/atlas/atlas.json');
   }
 
+  // get space by player
+  async getSpaceForPlayer(playerID: string): Promise<string> {
+    const { spaceApiClient } = this.spaceCreateInfo;
+    const playerSpace = await spaceApiClient.getSpaceForPlayer({ playerID });
+    return playerSpace.space.coveySpaceID;
+  }
+
   updatePlayersLocations(players: Player[]) {
     if (!this.ready) {
       this.players = players;
       return;
     }
-    players.forEach((p) => {
+
+    // TODO: Add documentation
+    players.forEach(async (p) => {
       this.updatePlayerLocation(p);
+      const playerSpace = await this.getSpaceForPlayer(p.id);
+
+      this.input.keyboard.on('keydown-P', () => {
+        if(p.id !== this.id) {
+          console.log(`${p.userName} space: ${playerSpace}`);
+          console.log(`My space: ${this.inSpace}`);
+        }
+      });
+
+      if (playerSpace !== this.inSpace) {
+        p.sprite?.setAlpha(0);
+        p.label?.setAlpha(0);
+      } else {
+        p.sprite?.setAlpha(100);
+        p.label?.setAlpha(100);
+      }
     });
+
     // Remove disconnected players from board
     const disconnectedPlayers = this.players.filter(
       (player) => !players.find((p) => p.id === player.id),
@@ -84,7 +110,8 @@ class CoveyGameScene extends Phaser.Scene {
     }
   }
 
-  updatePlayerLocation(player: Player) {
+
+  async updatePlayerLocation(player: Player) {
     let myPlayer = this.players.find((p) => p.id === player.id);
     if (!myPlayer) {
       let { location } = player;
@@ -99,8 +126,10 @@ class CoveyGameScene extends Phaser.Scene {
       myPlayer = new Player(player.id, player.userName, location);
       this.players.push(myPlayer);
     }
+
     if (this.id !== myPlayer.id && this.physics && player.location) {
       let { sprite } = myPlayer;
+
       if (!sprite) {
         sprite = this.physics.add
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -113,6 +142,7 @@ class CoveyGameScene extends Phaser.Scene {
           color: '#000000',
           backgroundColor: '#ffffff',
         });
+        
         myPlayer.label = label;
         myPlayer.sprite = sprite;
       }
@@ -190,7 +220,7 @@ class CoveyGameScene extends Phaser.Scene {
         size.height);
     }
     
-    this.spaces.push(privateZone);
+    this.allSpaces.push(privateZone);
     return privateZone;
   }
 
@@ -233,7 +263,7 @@ class CoveyGameScene extends Phaser.Scene {
    */
   async joinSpace(space: Phaser.GameObjects.Zone) {    
     const { spaceApiClient, myPlayerID } = this.spaceCreateInfo;
-    this.inSpace = space;
+    this.inSpace = space.name;
 
     await spaceApiClient.joinSpace({ playerID: myPlayerID, coveySpaceID: space.name });
   }
@@ -244,7 +274,7 @@ class CoveyGameScene extends Phaser.Scene {
    */
   async leaveSpace(space: Phaser.GameObjects.Zone) {
     const { spaceApiClient, myPlayerID } = this.spaceCreateInfo;
-    this.inSpace = undefined;
+    this.inSpace = "World";
 
     await spaceApiClient.leaveSpace({ coveySpaceID: space.name, playerID: myPlayerID });
   }
@@ -523,12 +553,12 @@ class CoveyGameScene extends Phaser.Scene {
     }
 
     // Handles which space the player is in
-    this.spaces.forEach(space => {
-      if(this.checkOverlap(space) && this.inSpace === undefined) {
+    this.allSpaces.forEach(space => {
+      if(this.checkOverlap(space) && this.inSpace === 'World') {
         this.joinSpace(space);
       }
 
-      if(!this.checkOverlap(space) && this.inSpace === space) {
+      if(!this.checkOverlap(space) && this.inSpace === space.name) {
         this.leaveSpace(space);
       }
     });

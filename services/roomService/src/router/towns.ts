@@ -213,9 +213,9 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
     try {
       const result = await spaceUpdateHandler({
         coveySpaceID: req.params.spaceID,
-        newHost: req.body.host,
-        newPresenter: req.body.presenters,
-        newWhitelist: req.body.players,
+        hostID: req.body.hostID,
+        presenterID: req.body.presenterID,
+        whitelist: req.body.whitelist,
       });
       res.status(StatusCodes.OK)
         .json(result);

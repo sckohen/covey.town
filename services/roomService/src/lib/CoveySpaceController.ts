@@ -7,11 +7,11 @@ import CoveyTownController from './CoveyTownController';
  * can occur (e.g. joining a town, moving, leaving a town)
  */
 export default class CoveySpaceController {
-  get spaceHostID(): string | undefined {
+  get spaceHostID(): string | null {
     return this._spaceHostID;
   }
 
-  get presenterID(): string | undefined {
+  get presenterID(): string | null {
     return this._presenterID;
   }
 
@@ -45,10 +45,10 @@ export default class CoveySpaceController {
   private readonly _coveySpaceID: string;
 
   /** The id for the player who is the designated host for this space * */
-  private _spaceHostID: string | undefined;
+  private _spaceHostID: string | null;
 
   /** The id for the player who is the designated by the host to be the presenter * */
-  private _presenterID: string | undefined;
+  private _presenterID: string | null;
 
   /** The list of players that are allowed to join this private space * */
   private _whiteList: Player[] = [];
@@ -59,8 +59,8 @@ export default class CoveySpaceController {
   constructor(coveySpaceID: string, townController: CoveyTownController) {
     this._coveySpaceID = coveySpaceID;
     this._coveyTownController = townController;
-    this._spaceHostID = undefined; // start off as no player until first player enters space
-    this._presenterID = undefined; // start off as no player until host chooses the presenter
+    this._spaceHostID = null; // start off as no player until first player enters space
+    this._presenterID = null; // start off as no player until host chooses the presenter
   }
 
   
@@ -73,6 +73,18 @@ export default class CoveySpaceController {
     const player = this._coveyTownController.players.find(p => p.id === playerID);
 
     return player;
+  }
+
+
+  /**
+   * Determines whether player in this space
+   * @param playerID the player ID to find the space
+   * @returns boolean value for the presence of the player
+   */
+  isPlayerInSpace(playerID: string): boolean {
+    const playerInSpace = this._players.find((player) => player.id === playerID);
+
+    return (playerInSpace !== undefined);
   }
 
   /**
@@ -89,7 +101,7 @@ export default class CoveySpaceController {
       }
       if (this._isPrivate === false) {
         this._players.push(newPlayer);
-      } else if (this._whiteList.includes(newPlayer)) {
+      } else if (this._whiteList.includes(newPlayer) || this.spaceHostID == newPlayerID) {
         this._players.push(newPlayer);
       } 
     }
@@ -145,12 +157,12 @@ export default class CoveySpaceController {
     * Changes the host for this space
     * @param newHost ID of the player that is the new host
     */
-  updateSpaceHost(newHostID: string | undefined): void {
+  updateSpaceHost(newHostID: string | null): void {
     // Updates the spacehost
     this._spaceHostID = newHostID;
 
     // If the new host is not undefined space is set to private, else it is not private
-    if (newHostID !== undefined) {
+    if (newHostID !== null) {
       this._isPrivate = true;
     } else {
       this._isPrivate = false;
@@ -161,16 +173,16 @@ export default class CoveySpaceController {
       * Changes the presenter for this space
       * @param newPresenter the player that is the new presenter
       */
-  updatePresenter(newPresenter: string | undefined): void {
-    this._presenterID = newPresenter;
+  updatePresenter(newPresenterID: string | null): void {
+    this._presenterID = newPresenterID;
   }
 
   /**
    * Changes the whitelist to the desired list given by the host
    * @param newWhitelist the list of players that are allowed to enter a given space
    */
-  updateWhitelist(newWhitelist: Player[]): void {
-    this._whiteList = newWhitelist;
+  updateWhitelist(newWhitelist: string[]): void {
+    console.log(newWhitelist);
   }
 
   /**

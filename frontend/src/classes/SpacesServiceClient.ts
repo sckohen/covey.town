@@ -19,7 +19,7 @@ export interface SpaceClaimRequest {
   /** The id for the space that is to be claimed* */
   coveySpaceID: string;
   /** The id for the new host (player) for the private space* */
-  newHostPlayerID: string;
+  hostID: string;
 }
 
 /**
@@ -70,11 +70,17 @@ export interface SpaceListResponse {
 }
 
 /**
+ * Response from the server for a space request
+ */
+ export interface SpaceInfoResponse {
+  space: CoveySpaceInfo;
+}
+
+/**
  * Payload sent by the client to delete a Town
  */
 export interface SpaceDisbandRequest {
   coveySpaceID: string;
-  newHost: undefined;
 }
 
 /**
@@ -82,9 +88,9 @@ export interface SpaceDisbandRequest {
  */
 export interface SpaceUpdateRequest {
   coveySpaceID: string;
-  newHost: ServerPlayer;
-  newPresenter: ServerPlayer;
-  newWhitelist: ServerPlayer[];
+  newHostID: string | null;
+  newPresenterID: string | null;
+  newWhitelist: string[];
 }
 
 /**
@@ -100,8 +106,8 @@ export type CoveySpaceInfo = {
   coveySpaceID: string; 
   currentPlayers: ServerPlayer[]; 
   whiteList: ServerPlayer[]; 
-  hostID: string | undefined; 
-  presenterID: string | undefined[];
+  hostID: string | null; 
+  presenterID: string | null;
 };
 
 export default class SpacesServiceClient {
@@ -155,13 +161,13 @@ export default class SpacesServiceClient {
   async joinSpace(requestData: SpaceJoinRequest): Promise<void> {
     const { coveySpaceID, playerID } = requestData;
     const responseWrapper = await this._axios.put(`/spaces/${coveySpaceID}/${playerID}`);
-    return SpacesServiceClient.unwrapOrThrowError(responseWrapper);
+    return SpacesServiceClient.unwrapOrThrowError(responseWrapper, true);
   }
 
   async leaveSpace(requestData: SpaceLeaveRequest): Promise<void> {
     const { coveySpaceID, playerID } = requestData;
     const responseWrapper = await this._axios.delete(`/spaces/${coveySpaceID}/${playerID}`);
-    return SpacesServiceClient.unwrapOrThrowError(responseWrapper);
+    return SpacesServiceClient.unwrapOrThrowError(responseWrapper, true);
   }
 
   async claimSpace(requestData: SpaceClaimRequest): Promise<void> {
@@ -176,9 +182,9 @@ export default class SpacesServiceClient {
     return SpacesServiceClient.unwrapOrThrowError(responseWrapper, true);
   } 
 
-  async getSpaceForPlayer(requestData: SpaceGetForPlayerRequest): Promise<SpaceListResponse> {
+  async getSpaceForPlayer(requestData: SpaceGetForPlayerRequest): Promise<SpaceInfoResponse> {
     const { playerID } = requestData;
-    const responseWrapper = await this._axios.get<ResponseEnvelope<SpaceListResponse>>(`/spaces/${playerID}`);
-    return SpacesServiceClient.unwrapOrThrowError(responseWrapper, true);
+    const responseWrapper = await this._axios.get<ResponseEnvelope<SpaceInfoResponse>>(`/spaces/${playerID}`);
+    return SpacesServiceClient.unwrapOrThrowError(responseWrapper);
   } 
 }

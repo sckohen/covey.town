@@ -14,6 +14,7 @@ const mockConnect = jest.fn(() => Promise.resolve());
 
 const mockToast = jest.fn();
 jest.mock('../../classes/TownsServiceClient');
+jest.mock('../../classes/SpacessServiceClient');
 jest.mock('../../classes/Video/Video');
 jest.mock('../VideoCall/VideoFrontend/hooks/useVideoContext/useVideoContext.ts', () => ({
   __esModule: true, // this property makes it work
@@ -101,7 +102,6 @@ function wrappedTownSelection() {
     },
     apiClient: new TownsServiceClient(),
     spaceApiClient: new SpacesServiceClient(process.env.REACT_APP_TOWNS_SERVICE_URL),
-    currentSpace: undefined,
   }}>
     <TownSelection doLogin={doLoginMock}/></CoveyAppContext.Provider></ChakraProvider>;
 }
