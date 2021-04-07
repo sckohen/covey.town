@@ -186,26 +186,6 @@ export default class CoveySpaceController {
   }
 
   /**
-   * Subscribe to events from this space. Callers should make sure to
-   * unsubscribe when they no longer want those events by calling removeSpaceListener
-   *
-   * @param listener New listener
-   */
-  addSpaceListener(listener: CoveySpaceListener): void {
-    this._listeners.push(listener);
-  }
-
-  /**
-   * Unsubscribe from events in this space.
-   *
-   * @param listener The listener to unsubscribe, must be a listener that was registered
-   * with addSpaceListener, or otherwise will be a no-op
-   */
-  removeSpaceListener(listener: CoveySpaceListener): void {
-    this._listeners = this._listeners.filter((v) => v !== listener);
-  }
-
-  /**
    * Disconnects all players that are listen
    */
   disconnectAllPlayers(): void {
