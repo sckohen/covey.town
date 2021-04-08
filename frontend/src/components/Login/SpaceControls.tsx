@@ -32,23 +32,20 @@ import Player from '../../classes/Player';
 const SpaceControls: React.FunctionComponent = () => {
   const {isOpen, onOpen, onClose} = useDisclosure();
   const video = useMaybeVideo();
-  const { spaceApiClient, myPlayerID, currentTownID, players } = useCoveyAppState();
-  const [currentWhitelist, setCurrentWhitelist] = useState<string[]>([]);
-  const [isInSpace, setIsInSpace] = useState<{spaceID: string, hostID: string | null}>({ spaceID: 'World', hostID: null })
+  const { spaceApiClient, myPlayerID, players, currentSpace } = useCoveyAppState();
+  const [whitelist, setWhitelist] = useState<string[]>([]);
+  const [presenter, setPresenter] = useState<string | null>(null);
 
-  // Get the information on the current space in which the player is (which spaceID, who is the host)
-  const getCurrentSpace = async () => {
-    const currentSpace = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
-    setIsInSpace({ spaceID: currentSpace.space.coveySpaceID, hostID: currentSpace.space.hostID });
-  }
+  const getCurrentWhitelist = async () => {
+    const spaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
+    setWhitelist(spaceInfo.space.whitelist);
+  } 
 
   // Gets the names of the players in the whitelist by matching the IDs
-  const getCurrentWhitelistPlayers = async () => {
-    const currentSpace = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
-    const whitelistOfID = currentSpace.space.whitelist;
+  const getCurrentWhitelistedPlayers = async () => {
     const whitelistOfPlayers: Player[] = [];
 
-    whitelistOfID.forEach(id => {
+    whitelist.forEach(id => {
       const playerWithID = players.find(player => player.id === id);
       if (playerWithID !== undefined){
         whitelistOfPlayers.push(playerWithID);
@@ -91,11 +88,10 @@ const SpaceControls: React.FunctionComponent = () => {
   }, [onClose, video]);
 
   const toast = useToast()
-  const processUpdates = async (action: string) =>{
-    if (action === 'delete') {
+  const processUpdates = async (action: string) => {
+    if (action === 'disband') {
       try {
-        const currentSpace = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
-        await spaceApiClient.disbandSpace({ coveySpaceID: currentSpace.space.coveySpaceID, hostID: null });
+        await spaceApiClient.disbandSpace({ coveySpaceID: currentSpace, hostID: null });
         toast({
           title: 'Space disbanded',
           status: 'success'
@@ -108,8 +104,28 @@ const SpaceControls: React.FunctionComponent = () => {
           status: 'error'
         });
       }
+    } else {
+      try {
+        await spaceApiClient.updateSpace({
+          coveySpaceID: currentSpace,
+          newHostID: myPlayerID,
+          newPresenterID: presenter,
+          newWhitelist: whitelist,
+        });
+        toast({
+          title: 'Space updated',
+          status: 'success'
+        })
+        closeControls();
+      }catch(err){
+        toast({
+          title: 'Unable to update space',
+          description: err.toString(),
+          status: 'error'
+        });
+      }
     }
-  }
+  };
 
   return <>
     <MenuItem data-testid='openMenuButton' onClick={openControls}>
@@ -118,7 +134,7 @@ const SpaceControls: React.FunctionComponent = () => {
     <Modal isOpen={isOpen} onClose={closeControls}>
       <ModalOverlay/>
       <ModalContent>
-        <ModalHeader> Edit Space </ModalHeader>
+        <ModalHeader> Space Controls </ModalHeader>
         <ModalCloseButton/>
         <form onSubmit={(ev)=>{ev.preventDefault(); processUpdates('edit')}}>
           <ModalBody pb={6}>
@@ -134,7 +150,7 @@ const SpaceControls: React.FunctionComponent = () => {
           </ModalBody>
 
           <ModalFooter>
-            <Button data-testid='deletebutton' colorScheme="red" mr={3} value="delete" name='action1' onClick={()=>processUpdates('disband')}>
+            <Button data-testid='disbandbutton' colorScheme="red" mr={3} value="disband" name='action1' onClick={()=>processUpdates('disband')}>
               Disband Space
             </Button>
             <Button data-testid='updatebutton' colorScheme="blue" mr={3} value="update" name='action2' onClick={()=>processUpdates('edit')}>
