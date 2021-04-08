@@ -34,6 +34,13 @@ const SpaceControls: React.FunctionComponent = () => {
   const video = useMaybeVideo();
   const { spaceApiClient, myPlayerID, currentTownID, players } = useCoveyAppState();
   const [currentWhitelist, setCurrentWhitelist] = useState<string[]>([]);
+  const [isInSpace, setIsInSpace] = useState<{spaceID: string, hostID: string | null}>({ spaceID: 'World', hostID: null })
+
+  // Get the information on the current space in which the player is (which spaceID, who is the host)
+  const getCurrentSpace = async () => {
+    const currentSpace = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
+    setIsInSpace({ spaceID: currentSpace.space.coveySpaceID, hostID: currentSpace.space.hostID });
+  }
 
   // Gets the names of the players in the whitelist by matching the IDs
   const getCurrentWhitelistPlayers = async () => {

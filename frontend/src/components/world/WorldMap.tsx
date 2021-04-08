@@ -32,7 +32,7 @@ class CoveyGameScene extends Phaser.Scene {
 
   private video: Video;
 
-  private emitMovement: (loc: UserLocation) => void;
+  private emitMovement: (loc: UserLocation, space: string) => void;
 
   private spaceCreateInfo: SpaceCreationInfo;
 
@@ -47,7 +47,7 @@ class CoveyGameScene extends Phaser.Scene {
    * @param emitMovement the location of the user, or void
    * @param spaceCreateInfo the information needed to create a space
    */
-  constructor(video: Video, emitMovement: (loc: UserLocation) => void, spaceCreateInfo: SpaceCreationInfo) {
+  constructor(video: Video, emitMovement: (loc: UserLocation, space: string) => void, spaceCreateInfo: SpaceCreationInfo) {
     super('PlayGame');
     this.video = video;
     this.emitMovement = emitMovement;
@@ -403,7 +403,7 @@ class CoveyGameScene extends Phaser.Scene {
           this.player.sprite.y = target.y;
           this.lastLocation.x = target.x;
           this.lastLocation.y = target.y;
-          this.emitMovement(this.lastLocation);
+          this.emitMovement(this.lastLocation, this.inSpace);
         }
         else{
           throw new Error(`Unable to find target object ${target}`);
@@ -418,7 +418,7 @@ class CoveyGameScene extends Phaser.Scene {
       // @ts-ignore - JB todo
       x: spawnPoint.x,
       y: spawnPoint.y,
-    });
+    }, this.inSpace);
 
     // Watch the player and worldLayer for collisions, for the duration of the scene:
     this.physics.add.collider(sprite, worldLayer);
@@ -571,7 +571,7 @@ class CoveyGameScene extends Phaser.Scene {
         this.lastLocation.y = body.y;
         this.lastLocation.rotation = primaryDirection || 'front';
         this.lastLocation.moving = isMoving;
-        this.emitMovement(this.lastLocation);
+        this.emitMovement(this.lastLocation, this.inSpace);
       }
     }
 
