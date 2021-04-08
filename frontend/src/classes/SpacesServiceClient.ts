@@ -33,19 +33,6 @@ export interface SpaceJoinRequest {
 }
 
 /**
- * The format of a response to join a Town in Covey.Town, as returned by the handler to the server
- * middleware
- */
-export interface SpaceJoinResponse {
-  /** current players in a space */
-  currentPlayers: ServerPlayer[];
-  /** the id for the player who is the current host of this space * */
-  currentHostID: string | undefined;
-  /** the id for the player who is the current presenter in this space */
-  currentPresenterID: string | undefined;
-}
-
-/**
  * The format of a request to leave a space within a Town in Covey.Town, as dispatched by the server middleware
  */
 export interface SpaceLeaveRequest {
@@ -105,8 +92,8 @@ export interface ResponseEnvelope<T> {
 
 export type CoveySpaceInfo = {
   coveySpaceID: string; 
-  currentPlayers: ServerPlayer[]; 
-  whiteList: ServerPlayer[]; 
+  currentPlayers: string[]; 
+  whitelist: string[]; 
   hostID: string | null; 
   presenterID: string | null;
 };
