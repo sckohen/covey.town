@@ -73,22 +73,33 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     spaceApiClient: state.spaceApiClient,
   };
 
+  // TODO: Add Comments
   function calculateNearbyPlayers(players: Player[], currentLocation: UserLocation) {
-    const isWithinCallRadius = (p: Player, location: UserLocation) => {
-      if (p.location && location) {
-        const dx = p.location.x - location.x;
-        const dy = p.location.y - location.y;
-        const d = Math.sqrt(dx * dx + dy * dy);
-        return d < 80;
-      }
-      return false;
-    };
+      const playersInSameSpace: Player[] = []; // List of all players in the same space as this player
+      
+      // Existing code
+      const isWithinCallRadius = (p: Player, location: UserLocation) => {
+        if (p.location && location) {
+          const dx = p.location.x - location.x;
+          const dy = p.location.y - location.y;
+          const d = Math.sqrt(dx * dx + dy * dy);
+          return d < 80;
+        }
+        return false;
+      };
 
-    // TODO
-    // if the player is in a space, filter this list below by whoever else is in the space
-    // if the player is not in a space, filter out the players who are in a space
-    return { nearbyPlayers: players.filter((p) => isWithinCallRadius(p, currentLocation)) };
-  }
+      // Find all players in the same space as the current player
+      players.forEach(player => {
+        if(player.location && currentLocation.space !== 'World') {
+          if(player.location.space === currentLocation.space){
+            playersInSameSpace.push(player);
+          }
+        }
+      });
+      
+      // Return all players in the same space and whoever else may be nearby 
+      return { nearbyPlayers: playersInSameSpace.concat(players.filter((p) => isWithinCallRadius(p, currentLocation))) }
+    }
 
   function samePlayers(a1: NearbyPlayers, a2: NearbyPlayers) {
     if (a1.nearbyPlayers.length !== a2.nearbyPlayers.length) return false;

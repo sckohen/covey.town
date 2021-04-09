@@ -89,12 +89,14 @@ class CoveyGameScene extends Phaser.Scene {
       this.updatePlayerLocation(p);
       const playerSpace = p.location?.space;
 
-      if (playerSpace !== this.inSpace) {
-        p.sprite?.setAlpha(0);
-        p.label?.setAlpha(0);
-      } else {
-        p.sprite?.setAlpha(100);
-        p.label?.setAlpha(100);
+      if (p.sprite && playerSpace){
+        if (playerSpace !== this.inSpace) {
+          p.sprite.setAlpha(0);
+          p.label?.setAlpha(0);
+        } else {
+          p.sprite.setAlpha(100);
+          p.label?.setAlpha(100);
+        }
       }
     });
 
