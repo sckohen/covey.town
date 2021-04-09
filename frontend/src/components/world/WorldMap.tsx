@@ -32,7 +32,7 @@ class CoveyGameScene extends Phaser.Scene {
 
   private video: Video;
 
-  private emitMovement: (loc: UserLocation, space: string) => void;
+  private emitMovement: (loc: UserLocation) => void;
 
   private spaceCreateInfo: SpaceCreationInfo;
 
@@ -47,7 +47,7 @@ class CoveyGameScene extends Phaser.Scene {
    * @param emitMovement the location of the user, or void
    * @param spaceCreateInfo the information needed to create a space
    */
-  constructor(video: Video, emitMovement: (loc: UserLocation, space: string) => void, spaceCreateInfo: SpaceCreationInfo) {
+  constructor(video: Video, emitMovement: (loc: UserLocation) => void, spaceCreateInfo: SpaceCreationInfo) {
     super('PlayGame');
     this.video = video;
     this.emitMovement = emitMovement;
@@ -87,7 +87,7 @@ class CoveyGameScene extends Phaser.Scene {
     // TODO: Add documentation
     players.forEach(async (p) => {
       this.updatePlayerLocation(p);
-      const playerSpace = await this.getSpaceForPlayer(p.id);
+      const playerSpace = p.location?.space;
 
       if (playerSpace !== this.inSpace) {
         p.sprite?.setAlpha(0);
@@ -133,6 +133,7 @@ class CoveyGameScene extends Phaser.Scene {
           moving: false,
           x: 0,
           y: 0,
+          space: 'World',
         };
       }
       myPlayer = new Player(player.id, player.userName, location);
@@ -403,7 +404,8 @@ class CoveyGameScene extends Phaser.Scene {
           this.player.sprite.y = target.y;
           this.lastLocation.x = target.x;
           this.lastLocation.y = target.y;
-          this.emitMovement(this.lastLocation, this.inSpace);
+          this.lastLocation.space = this.inSpace;
+          this.emitMovement(this.lastLocation);
         }
         else{
           throw new Error(`Unable to find target object ${target}`);
@@ -418,7 +420,8 @@ class CoveyGameScene extends Phaser.Scene {
       // @ts-ignore - JB todo
       x: spawnPoint.x,
       y: spawnPoint.y,
-    }, this.inSpace);
+      space: 'World'
+    });
 
     // Watch the player and worldLayer for collisions, for the duration of the scene:
     this.physics.add.collider(sprite, worldLayer);
@@ -565,13 +568,15 @@ class CoveyGameScene extends Phaser.Scene {
             y: body.y,
             rotation: primaryDirection || 'front',
             moving: isMoving,
+            space: this.inSpace,
           };
         }
         this.lastLocation.x = body.x;
         this.lastLocation.y = body.y;
         this.lastLocation.rotation = primaryDirection || 'front';
         this.lastLocation.moving = isMoving;
-        this.emitMovement(this.lastLocation, this.inSpace);
+        this.lastLocation.space = this.inSpace;
+        this.emitMovement(this.lastLocation);
       }
     }
 

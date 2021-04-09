@@ -28,11 +28,11 @@ import Video from './classes/Video/Video';
 import SpacesServiceClient from './classes/SpacesServiceClient';
 
 type CoveyAppUpdate =
-  | { action: 'doConnect'; data: { userName: string, townFriendlyName: string, townID: string,townIsPubliclyListed:boolean, sessionToken: string, myPlayerID: string, socket: Socket, players: Player[], emitMovement: (location: UserLocation, spaceID: string) => void } }
+  | { action: 'doConnect'; data: { userName: string, townFriendlyName: string, townID: string,townIsPubliclyListed:boolean, sessionToken: string, myPlayerID: string, socket: Socket, players: Player[], emitMovement: (location: UserLocation) => void } }
   | { action: 'addPlayer'; player: Player }
   | { action: 'playerMoved'; player: Player }
   | { action: 'playerDisconnect'; player: Player }
-  | { action: 'weMoved'; location: UserLocation, spaceID: string }
+  | { action: 'weMoved'; location: UserLocation }
   | { action: 'disconnect' }
   ;
 
@@ -48,13 +48,12 @@ function defaultAppState(): CoveyAppState {
     userName: '',
     socket: null,
     currentLocation: {
-      x: 0, y: 0, rotation: 'front', moving: false,
+      x: 0, y: 0, rotation: 'front', moving: false, space: 'World',
     },
     emitMovement: () => {
     },
     apiClient: new TownsServiceClient(),
     spaceApiClient: new SpacesServiceClient(),
-    currentSpace: 'World',
   };
 }
 function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyAppState {
@@ -72,7 +71,6 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     emitMovement: state.emitMovement,
     apiClient: state.apiClient,
     spaceApiClient: state.spaceApiClient,
-    currentSpace: state.currentSpace,
   };
 
   function calculateNearbyPlayers(players: Player[], currentLocation: UserLocation) {
@@ -132,7 +130,6 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       nextState.currentLocation = update.location;
       nextState.nearbyPlayers = calculateNearbyPlayers(nextState.players,
         nextState.currentLocation);
-      nextState.currentSpace = update.spaceID;
       if (samePlayers(nextState.nearbyPlayers, state.nearbyPlayers)) {
         nextState.nearbyPlayers = state.nearbyPlayers;
       }
@@ -187,9 +184,9 @@ async function GameController(initData: TownJoinResponse,
   socket.on('disconnect', () => {
     dispatchAppUpdate({ action: 'disconnect' });
   });
-  const emitMovement = (location: UserLocation, spaceID: string) => {
-    socket.emit('playerMovement', { location, spaceID } );
-    dispatchAppUpdate({ action: 'weMoved', location, spaceID });
+  const emitMovement = (location: UserLocation) => {
+    socket.emit('playerMovement', location );
+    dispatchAppUpdate({ action: 'weMoved', location });
   };
 
   dispatchAppUpdate({
