@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 
 import Button from '@material-ui/core/Button';
@@ -17,6 +17,7 @@ import SpaceControls from '../../../../Login/SpaceControls';
 import MenuContainer from '@material-ui/core/Menu';
 import useCoveyAppState from '../../../../../hooks/useCoveyAppState';
 import { useToast } from '@chakra-ui/toast';
+import { CoveySpaceInfo } from '../../../../../classes/SpacesServiceClient';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   container: {
@@ -71,18 +72,25 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
   const { isSharingScreen, toggleScreenShare } = useVideoContext();
   const roomState = useRoomState();
   const isReconnecting = roomState === 'reconnecting';
-  const { spaceApiClient, myPlayerID, currentLocation, currentSpace } = useCoveyAppState();
+  const { spaceApiClient, myPlayerID, currentLocation } = useCoveyAppState();
   const [showClaimButton, setShowClaimButton] = useState<boolean>(false);
   const [showControls, setShowControls] = useState<boolean>(false);
+  // const [spaceInfo, setSpaceInfo] = useState<CoveySpaceInfo>({coveySpaceID: "World", currentPlayers: [], whitelist: [], hostID: null, presenterID: null});
   const toast = useToast();
 
-  const claimSpace = async () => {
-    const playerInSpace = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
-    const spaceIDPlayerIsIn = playerInSpace.space.coveySpaceID;
+  // Get the info on the current space (whitelist, hostID, presenterID)
+  // const getSpaceInfo = async () => {
+  //   const currentSpaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
+  //   setSpaceInfo(currentSpaceInfo.space);
+  // }
   
-    if (spaceIDPlayerIsIn !== 'World') {
+  const claimSpace = async () => {
+    const currentSpaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
+    const spaceInfo = currentSpaceInfo.space;
+    
+    if (spaceInfo.coveySpaceID !== 'World') { 
       try {
-        await spaceApiClient.claimSpace({ coveySpaceID: spaceIDPlayerIsIn , hostID: myPlayerID });
+        await spaceApiClient.claimSpace({ coveySpaceID: spaceInfo.coveySpaceID , hostID: myPlayerID });
         setShowClaimButton(false);
         setShowControls(true);
         toast({
@@ -101,8 +109,10 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
   }
 
   const handleClaimButton = async () => {
-    const spaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
-    if (spaceInfo.space.coveySpaceID !== 'World' && spaceInfo.space.hostID === null) {
+    const currentSpaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
+    const spaceInfo = currentSpaceInfo.space;
+
+    if (spaceInfo.coveySpaceID !== 'World' && spaceInfo.hostID === null) {
       setShowClaimButton(true);
     } else {
       setShowClaimButton(false);
@@ -110,8 +120,10 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
   }
 
   const handleSpaceControls = async () => {
-    const spaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
-    if (spaceInfo.space.hostID === myPlayerID) {
+    const currentSpaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
+    const spaceInfo = currentSpaceInfo.space;
+
+    if (spaceInfo.hostID === myPlayerID) {
       setShowControls(true);
     } else {
       setShowControls(false);
@@ -119,9 +131,11 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
   }
 
   useEffect(() => {
+    // getSpaceInfo();
+    // console.log(spaceInfo);
     handleClaimButton();
     handleSpaceControls();
-  }, [currentSpace]);
+  }, [currentLocation.space]);
 
   return (
     <>

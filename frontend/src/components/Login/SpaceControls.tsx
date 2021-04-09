@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import {
   Box,
@@ -25,24 +25,34 @@ import {
 } from '@chakra-ui/react';
 import MenuItem from '@material-ui/core/MenuItem';
 import Typography from '@material-ui/core/Typography';
+
 import useCoveyAppState from '../../hooks/useCoveyAppState';
 import useMaybeVideo from '../../hooks/useMaybeVideo';
 import Player from '../../classes/Player';
+import { CoveySpaceInfo } from '../../classes/SpacesServiceClient';
 
 const SpaceControls: React.FunctionComponent = () => {
   const {isOpen, onOpen, onClose} = useDisclosure();
   const video = useMaybeVideo();
-  const { spaceApiClient, myPlayerID, players, currentSpace } = useCoveyAppState();
+  const { spaceApiClient, myPlayerID, players, currentLocation } = useCoveyAppState();
+  const [spaceInfo, setSpaceInfo] = useState<CoveySpaceInfo>({coveySpaceID: "World", currentPlayers: [], whitelist: [], hostID: null, presenterID: null});
   const [whitelist, setWhitelist] = useState<string[]>([]);
   const [presenter, setPresenter] = useState<string | null>(null);
 
+  // Get the info on the current space (whitelist, hostID, presenterID)
+  const getSpaceInfo = async () => {
+    const currentSpaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
+    setSpaceInfo(currentSpaceInfo.space);
+  }
+
+  // Gets the current whitelist from the space
   const getCurrentWhitelist = async () => {
-    const spaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
-    setWhitelist(spaceInfo.space.whitelist);
+    getSpaceInfo();
+    setWhitelist(spaceInfo.whitelist);
   } 
 
   // Gets the names of the players in the whitelist by matching the IDs
-  const getCurrentWhitelistedPlayers = async () => {
+  const getCurrentWhitelistedPlayers = () => {
     const whitelistOfPlayers: Player[] = [];
 
     whitelist.forEach(id => {
@@ -55,27 +65,68 @@ const SpaceControls: React.FunctionComponent = () => {
     return whitelistOfPlayers;
   }
 
+  type PlayerSelected = {
+    id: string;
+    username: string;
+    selected: boolean;
+  }
+
   const WhitelistSelector = () => {
-    const [select, setSelected] = useState<boolean[]>([]);
+    const [data, setData] = useState<PlayerSelected[]>([])
+
+    const isInInWhitelist = (playerID: string) => {
+      const isIn = whitelist.includes(playerID);
+      return isIn;
+    }
+
+    const handleData = () => {
+      const playerIdAndName: PlayerSelected[] = [];
+      players.forEach((p) => playerIdAndName.push({id: p.id, username: p.userName, selected: isInInWhitelist(p.id)}));
+      setData(playerIdAndName);
+    }
+
+    const addToWhitelist = (playerID: string) => {
+      const currentList = whitelist;
+      currentList.push(playerID);
+      setWhitelist(currentList);
+    }
+
+    const getValue = (playerID: string) => {
+      const playerInfo = data.find(player => player.id === playerID);
+      let value = false;
+      if (playerInfo !== undefined) {
+        value = playerInfo.selected;
+      }
+      return value;
+    }
+
+    useEffect(() => {
+      handleData();
+    }, [players, handleData])
 
     return (
       <Box maxH="300px" overflowY="scroll">
-          <Table>
-              <TableCaption placement="bottom">Players In Town</TableCaption>
-              <Thead><Tr><Th>Player Name</Th><Th>Player ID</Th><Th>In Whitelist?</Th></Tr></Thead>
-              <Tbody>
-                {players.map((player) => (
-                  <Tr key={player.id}><Td role='cell'>{player.userName}</Td><Td
-                    role='cell'>{player.id}</Td>
-                     <Td role='cell'>{true}
-                      <Checkbox id='isInWhitelist' name='isInWhitelist' isChecked={false} />
-                      </Td></Tr>
-                  ))}
-                </Tbody>
-          </Table>
-        </Box>
+           <Table>
+               <TableCaption placement="bottom">Players In Town</TableCaption>
+               <Thead><Tr><Th>Player Name</Th><Th>Player ID</Th><Th>In Whitelist?</Th></Tr></Thead>
+               <Tbody>
+                 {data.map((player) => (
+                   <Tr key={player.id}><Td role='cell'>{player.username}</Td><Td
+                     role='cell'>{player.id}</Td>
+                      <Td role='cell'>{true}
+                       <Checkbox 
+                        id='isInWhitelist' 
+                        name='isInWhitelist'
+                        isChecked={isInInWhitelist(player.id)}
+                        onChange={()=>addToWhitelist(player.id)} />
+                      </Td>
+                    </Tr>
+                   ))}
+                 </Tbody>
+           </Table>
+      </Box>
     );
-  };
+  }
 
   const openControls = useCallback(()=>{
     onOpen(); 
@@ -91,7 +142,7 @@ const SpaceControls: React.FunctionComponent = () => {
   const processUpdates = async (action: string) => {
     if (action === 'disband') {
       try {
-        await spaceApiClient.disbandSpace({ coveySpaceID: currentSpace, hostID: null });
+        await spaceApiClient.disbandSpace({ coveySpaceID: currentLocation.space, hostID: null });
         toast({
           title: 'Space disbanded',
           status: 'success'
@@ -107,7 +158,7 @@ const SpaceControls: React.FunctionComponent = () => {
     } else {
       try {
         await spaceApiClient.updateSpace({
-          coveySpaceID: currentSpace,
+          coveySpaceID: currentLocation.space,
           newHostID: myPlayerID,
           newPresenterID: presenter,
           newWhitelist: whitelist,
