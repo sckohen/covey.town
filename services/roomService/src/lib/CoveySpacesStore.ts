@@ -1,5 +1,5 @@
 import { response } from 'express';
-import { CoveySpace } from '../CoveyTypes';
+import { CoveySpaceInfo } from '../CoveyTypes';
 import Player from '../types/Player';
 import CoveySpaceController  from './CoveySpaceController';
 import CoveyTownsStore from './CoveyTownsStore';
@@ -29,11 +29,11 @@ export default class CoveySpacesStore {
   /**
    * List all spaces
    */
-  listSpaces(): CoveySpace[] {
+  listSpaces(): CoveySpaceInfo[] {
     return this._spaces.map(spaceController => ({
       coveySpaceID: spaceController.coveySpaceID, 
       currentPlayers: spaceController.players.map(player => player.id),
-      whiteList: spaceController.whitelist.map(player => player.id),
+      whitelist: spaceController.whitelist.map(player => player.id),
       hostID: spaceController.spaceHostID,
       presenterID: spaceController.presenterID,
     }));
@@ -42,19 +42,25 @@ export default class CoveySpacesStore {
   /**
    * Gets space where the given player is in
    */
-   getSpaceForPlayer(playerID: string): CoveySpace | undefined {
+   getSpaceForPlayer(playerID: string): CoveySpaceInfo {
     const spaceForPlayer = this._spaces.find((space) => space.isPlayerInSpace(playerID));
 
     if (spaceForPlayer !== undefined) {
       return {
         coveySpaceID: spaceForPlayer.coveySpaceID,
         currentPlayers: spaceForPlayer.players.map(player => player.id),
-        whiteList: spaceForPlayer.whitelist.map(player => player.id),
+        whitelist: spaceForPlayer.whitelist.map(player => player.id),
         hostID: spaceForPlayer.spaceHostID,
         presenterID: spaceForPlayer.presenterID,
       }
     }
-    return undefined;
+    return {
+      coveySpaceID: 'World',
+      currentPlayers: [],
+      whitelist: [],
+      hostID: null,
+      presenterID: null,
+    }
   }
 
   /**
@@ -85,19 +91,21 @@ export default class CoveySpacesStore {
    * @param spaceHost the desired host of a space that may or maynot be updated
    * @param whitelist the desired whitelist of a space that may or maynot be updated
    */
-  updateSpace(coveySpaceID: string, spaceHostID?: string | null, spacePresenterID?: string | null, whitelist?: string[]): void {
+  updateSpace(coveySpaceID: string, spaceHostID?: string | null, spacePresenterID?: string | null, whitelist?: string[]): boolean {
     const hostedSpace = this.getControllerForSpace(coveySpaceID);
-    if (hostedSpace){
+    if (hostedSpace !== undefined){
       if (spaceHostID !== undefined) {
         hostedSpace.updateSpaceHost(spaceHostID);
-      }
+      } 
       if (spacePresenterID !== undefined) {
         hostedSpace.updatePresenter(spacePresenterID);
       }
       if (whitelist !== undefined) {
         hostedSpace.updateWhitelist(whitelist);
       }
+      return true;
     }
+    return false;
   }
   
   /**
@@ -109,7 +117,6 @@ export default class CoveySpacesStore {
     const spaceController = this.getControllerForSpace(spaceID);
 
     if (spaceController) {
-      spaceController.disconnectAllPlayers();
       spaceController.updateSpaceHost(null);
       spaceController.updatePresenter(null);
       spaceController.updateWhitelist([]);

@@ -1,5 +1,5 @@
 import Player from '../types/Player';
-import { CoveySpace } from '../CoveyTypes';
+import { CoveySpaceInfo } from '../CoveyTypes';
 import CoveySpacesStore from '../lib/CoveySpacesStore';
 
 /**
@@ -47,7 +47,7 @@ export interface SpaceLeaveRequest {
  */
 export interface SpaceListResponse {
   // might not need this, may remove or use for added functionality
-  spaces: CoveySpace[];
+  spaces: CoveySpaceInfo[];
 }
 
 /**
@@ -196,18 +196,7 @@ export async function spaceListHandler(): Promise<ResponseEnvelope<SpaceListResp
  export async function spaceGetForPlayerHandler(requestData: SpaceGetForPlayerRequest): Promise<ResponseEnvelope<SpaceInfoResponse>> {
   const spacesStore = CoveySpacesStore.getInstance();
 
-   let spaceResponse = spacesStore.getSpaceForPlayer(requestData.playerID)
-
-   if (spaceResponse === undefined) {
-     return {
-       isOK: true,
-       response: {
-         space: { 
-           coveySpaceID: "World"
-        },
-       },
-     };
-   }
+  let spaceResponse = spacesStore.getSpaceForPlayer(requestData.playerID)
 
   return {
     isOK: true,

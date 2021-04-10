@@ -6,5 +6,5 @@ export type UserLocation = {
   moving: boolean;
 };
 export type CoveyTownList = { friendlyName: string; coveyTownID: string; currentOccupancy: number; maximumOccupancy: number }[];
-export type CoveySpace = { coveySpaceID: string; currentPlayers: string[]; whiteList: string[]; hostID: string | null; presenterID: string | null};
+export type CoveySpaceInfo = { coveySpaceID: string; currentPlayers: string[]; whitelist: string[]; hostID: string | null; presenterID: string | null};
 

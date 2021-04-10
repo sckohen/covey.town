@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import assert from 'assert';
 import Player from '../types/Player';
-import { CoveySpace, UserLocation } from '../CoveyTypes';
+import { CoveySpaceInfo, UserLocation } from '../CoveyTypes';
 
 
 
@@ -80,7 +80,7 @@ export interface SpaceLeaveRequest {
  */
 export interface SpaceListResponse {
   // might not need this, may remove or use for added functionality
-  spaces: CoveySpace[];
+  spaces: CoveySpaceInfo[];
 }
 
 /**
