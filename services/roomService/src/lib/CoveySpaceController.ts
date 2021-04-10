@@ -168,6 +168,7 @@ export default class CoveySpaceController {
     // If the new host is not undefined space is set to private, else it is not private
     if (newHostID !== null) {
       this._isPrivate = true;
+      this.addPlayerToWhiteList(newHostID);
     } else {
       this._isPrivate = false;
     }
