@@ -98,6 +98,7 @@ function wrappedTownSelection() {
       y: 0,
       rotation: 'front',
       moving: false,
+      space: 'World',
     },
     emitMovement: () => {
     },
