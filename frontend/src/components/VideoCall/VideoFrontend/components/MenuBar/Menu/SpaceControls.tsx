@@ -1,9 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 import {
-  Box,
   Button,
-  Checkbox,
   FormControl,
   FormLabel,
   Modal,
@@ -13,31 +11,30 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Table,
-  TableCaption,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
   useDisclosure,
   useToast
 } from '@chakra-ui/react';
 import MenuItem from '@material-ui/core/MenuItem';
 import Typography from '@material-ui/core/Typography';
 
-import useCoveyAppState from '../../hooks/useCoveyAppState';
-import useMaybeVideo from '../../hooks/useMaybeVideo';
-import Player from '../../classes/Player';
-import { CoveySpaceInfo } from '../../classes/SpacesServiceClient';
+import useCoveyAppState from '../../../../../../hooks/useCoveyAppState';
+import useMaybeVideo from '../../../../../../hooks/useMaybeVideo';
+import Player from '../../../../../../classes/Player';
+import { CoveySpaceInfo } from '../../../../../../classes/SpacesServiceClient';
+import TransferList from '../Menu/TransferList';
 
-const SpaceControls: React.FunctionComponent = () => {
+type SpaceControlProps = {
+  initialSpaceInfo: CoveySpaceInfo;
+}
+
+export default function SpaceControls ({initialSpaceInfo}: SpaceControlProps) {
   const {isOpen, onOpen, onClose} = useDisclosure();
   const video = useMaybeVideo();
   const { spaceApiClient, myPlayerID, players, currentLocation } = useCoveyAppState();
   const [spaceInfo, setSpaceInfo] = useState<CoveySpaceInfo>({coveySpaceID: "World", currentPlayers: [], whitelist: [], hostID: null, presenterID: null});
-  const [whitelist, setWhitelist] = useState<string[]>([]);
-  const [presenter, setPresenter] = useState<string | null>(null);
+  const [whitelist, setWhitelist] = useState<string[]>(initialSpaceInfo.whitelist);
+  const [presenter, setPresenter] = useState<string | null>(initialSpaceInfo.presenterID);
+  const [whitelistOfPlayers, setWhitelistOfPlayers] = useState<Player[]>([]);
 
   // Get the info on the current space (whitelist, hostID, presenterID)
   const getSpaceInfo = async () => {
@@ -52,7 +49,7 @@ const SpaceControls: React.FunctionComponent = () => {
   } 
 
   // Gets the names of the players in the whitelist by matching the IDs
-  const getCurrentWhitelistedPlayers = () => {
+  const getCurrentWhitelistAsPlayers = () => {
     const whitelistOfPlayers: Player[] = [];
 
     whitelist.forEach(id => {
@@ -62,74 +59,12 @@ const SpaceControls: React.FunctionComponent = () => {
       }
     });
 
-    return whitelistOfPlayers;
-  }
-
-  type PlayerSelected = {
-    id: string;
-    username: string;
-    selected: boolean;
-  }
-
-  const WhitelistSelector = () => {
-    const [data, setData] = useState<PlayerSelected[]>([])
-
-    const isInInWhitelist = (playerID: string) => {
-      const isIn = whitelist.includes(playerID);
-      return isIn;
-    }
-
-    const handleData = () => {
-      const playerIdAndName: PlayerSelected[] = [];
-      players.forEach((p) => playerIdAndName.push({id: p.id, username: p.userName, selected: isInInWhitelist(p.id)}));
-      setData(playerIdAndName);
-    }
-
-    const addToWhitelist = (playerID: string) => {
-      const currentList = whitelist;
-      currentList.push(playerID);
-      setWhitelist(currentList);
-    }
-
-    const getValue = (playerID: string) => {
-      const playerInfo = data.find(player => player.id === playerID);
-      let value = false;
-      if (playerInfo !== undefined) {
-        value = playerInfo.selected;
-      }
-      return value;
-    }
-
-    useEffect(() => {
-      handleData();
-    }, [players, handleData])
-
-    return (
-      <Box maxH="300px" overflowY="scroll">
-           <Table>
-               <TableCaption placement="bottom">Players In Town</TableCaption>
-               <Thead><Tr><Th>Player Name</Th><Th>Player ID</Th><Th>In Whitelist?</Th></Tr></Thead>
-               <Tbody>
-                 {data.map((player) => (
-                   <Tr key={player.id}><Td role='cell'>{player.username}</Td><Td
-                     role='cell'>{player.id}</Td>
-                      <Td role='cell'>{true}
-                       <Checkbox 
-                        id='isInWhitelist' 
-                        name='isInWhitelist'
-                        isChecked={isInInWhitelist(player.id)}
-                        onChange={()=>addToWhitelist(player.id)} />
-                      </Td>
-                    </Tr>
-                   ))}
-                 </Tbody>
-           </Table>
-      </Box>
-    );
+    setWhitelistOfPlayers(whitelistOfPlayers);
   }
 
   const openControls = useCallback(()=>{
     onOpen(); 
+    console.log(whitelist);
     video?.pauseGame();
   }, [onOpen, video]);
 
@@ -155,7 +90,9 @@ const SpaceControls: React.FunctionComponent = () => {
           status: 'error'
         });
       }
-    } else {
+    } 
+    
+    if (action === 'edit') {
       try {
         await spaceApiClient.updateSpace({
           coveySpaceID: currentLocation.space,
@@ -163,6 +100,7 @@ const SpaceControls: React.FunctionComponent = () => {
           newPresenterID: presenter,
           newWhitelist: whitelist,
         });
+        console.log(whitelist);
         toast({
           title: 'Space updated',
           status: 'success'
@@ -182,7 +120,7 @@ const SpaceControls: React.FunctionComponent = () => {
     <MenuItem data-testid='openMenuButton' onClick={openControls}>
       <Typography variant="body1">Space Controls</Typography>
     </MenuItem>
-    <Modal isOpen={isOpen} onClose={closeControls}>
+    <Modal isOpen={isOpen} onClose={closeControls} size='xl'>
       <ModalOverlay/>
       <ModalContent>
         <ModalHeader> Space Controls </ModalHeader>
@@ -190,12 +128,12 @@ const SpaceControls: React.FunctionComponent = () => {
         <form onSubmit={(ev)=>{ev.preventDefault(); processUpdates('edit')}}>
           <ModalBody pb={6}>
             <FormControl>
-              <FormLabel htmlFor='friendlyName'>Whitelist</FormLabel>
-              <WhitelistSelector/>
+              <FormLabel htmlFor='whitelist'>Whitelist</FormLabel>
+              <TransferList whitelistOfIDs={whitelist} whitelistOfPlayers={whitelistOfPlayers} onWhitelistChange={setWhitelist}/>
             </FormControl>
 
             <FormControl mt={4}>
-              <FormLabel htmlFor='isPubliclyListed'>Presenter</FormLabel>
+              <FormLabel htmlFor='presenter'>Presenter</FormLabel>
               {/* <Checkbox id="isPubliclyListed" name="isPubliclyListed"  isChecked={isPubliclyListed} onChange={(e)=>setIsPubliclyListed(e.target.checked)} /> */}
             </FormControl>
           </ModalBody>
@@ -214,6 +152,3 @@ const SpaceControls: React.FunctionComponent = () => {
     </Modal>
   </>
 }
-
-
-export default SpaceControls;

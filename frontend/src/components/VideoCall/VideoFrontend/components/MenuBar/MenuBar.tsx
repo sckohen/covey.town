@@ -13,7 +13,7 @@ import ToggleAudioButton from '../Buttons/ToggleAudioButton/ToggleAudioButton';
 import ToggleVideoButton from '../Buttons/ToggleVideoButton/ToggleVideoButton';
 import ToggleScreenShareButton from '../Buttons/ToogleScreenShareButton/ToggleScreenShareButton';
 import TownSettings from '../../../../Login/TownSettings';
-import SpaceControls from '../../../../Login/SpaceControls';
+import SpaceControls from './Menu/SpaceControls';
 import MenuContainer from '@material-ui/core/Menu';
 import useCoveyAppState from '../../../../../hooks/useCoveyAppState';
 import { useToast } from '@chakra-ui/toast';
@@ -75,14 +75,14 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
   const { spaceApiClient, myPlayerID, currentLocation } = useCoveyAppState();
   const [showClaimButton, setShowClaimButton] = useState<boolean>(false);
   const [showControls, setShowControls] = useState<boolean>(false);
-  // const [spaceInfo, setSpaceInfo] = useState<CoveySpaceInfo>({coveySpaceID: "World", currentPlayers: [], whitelist: [], hostID: null, presenterID: null});
+  const [spaceInfo, setSpaceInfo] = useState<CoveySpaceInfo>({coveySpaceID: "World", currentPlayers: [], whitelist: [], hostID: null, presenterID: null});
   const toast = useToast();
 
   // Get the info on the current space (whitelist, hostID, presenterID)
-  // const getSpaceInfo = async () => {
-  //   const currentSpaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
-  //   setSpaceInfo(currentSpaceInfo.space);
-  // }
+  const getSpaceInfo = async () => {
+    const currentSpaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
+    setSpaceInfo(currentSpaceInfo.space);
+  }
   
   const claimSpace = async () => {
     const currentSpaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
@@ -131,10 +131,10 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
   }
 
   useEffect(() => {
-    // getSpaceInfo();
     // console.log(spaceInfo);
     handleClaimButton();
     handleSpaceControls();
+    getSpaceInfo();
   }, [currentLocation.space]);
 
   return (
@@ -162,7 +162,7 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
               <Grid container justify="flex-end">
                 <TownSettings />
                 {showClaimButton? <Button onClick= { claimSpace } > Claim Space </Button> : null}
-                {showControls? <SpaceControls /> : null}
+                {showControls? <SpaceControls initialSpaceInfo={spaceInfo} /> : null}
                 <Menu />
                 <EndCallButton />
               </Grid>

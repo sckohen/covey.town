@@ -237,7 +237,7 @@ export async function spaceClaimHandler(requestData: SpaceClaimRequest): Promise
   coveySpaceController.updateSpaceHost(requestData.hostID);
   return {
     isOK: true,
-    message: `The host was update to be player with ID ${requestData.hostID} and the space is now private`,
+    message: `The host is now player with ID ${requestData.hostID} and the space is now private`,
     response: {},
   };
 }
