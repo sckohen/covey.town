@@ -85,12 +85,9 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
   }
   
   const claimSpace = async () => {
-    const currentSpaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
-    const spaceInfo = currentSpaceInfo.space;
-    
-    if (spaceInfo.coveySpaceID !== 'World') { 
+    if (currentLocation.space !== 'World') { 
       try {
-        await spaceApiClient.claimSpace({ coveySpaceID: spaceInfo.coveySpaceID , hostID: myPlayerID });
+        await spaceApiClient.claimSpace({ coveySpaceID: currentLocation.space , hostID: myPlayerID });
         setShowClaimButton(false);
         setShowControls(true);
         toast({
@@ -98,12 +95,11 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
           description: 'You can use the space controls in the menu bar',
           status: 'success',
           isClosable: true,
-        })
-      } catch (error) {
+        });     } catch (error) {
         toast({
           title: 'Unable to claim space',
           status: 'error',
-        })
+        });
       }
     } 
   }
@@ -131,7 +127,6 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
   }
 
   useEffect(() => {
-    // console.log(spaceInfo);
     handleClaimButton();
     handleSpaceControls();
     getSpaceInfo();

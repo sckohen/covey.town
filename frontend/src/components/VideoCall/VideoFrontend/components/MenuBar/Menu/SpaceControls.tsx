@@ -27,44 +27,43 @@ type SpaceControlProps = {
   initialSpaceInfo: CoveySpaceInfo;
 }
 
-export default function SpaceControls ({initialSpaceInfo}: SpaceControlProps) {
+export default function SpaceControls ({initialSpaceInfo} : SpaceControlProps) {
   const {isOpen, onOpen, onClose} = useDisclosure();
   const video = useMaybeVideo();
   const { spaceApiClient, myPlayerID, players, currentLocation } = useCoveyAppState();
-  const [spaceInfo, setSpaceInfo] = useState<CoveySpaceInfo>({coveySpaceID: "World", currentPlayers: [], whitelist: [], hostID: null, presenterID: null});
   const [whitelist, setWhitelist] = useState<string[]>(initialSpaceInfo.whitelist);
   const [presenter, setPresenter] = useState<string | null>(initialSpaceInfo.presenterID);
-  const [whitelistOfPlayers, setWhitelistOfPlayers] = useState<Player[]>([]);
-
-  // Get the info on the current space (whitelist, hostID, presenterID)
-  const getSpaceInfo = async () => {
-    const currentSpaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
-    setSpaceInfo(currentSpaceInfo.space);
-  }
 
   // Gets the current whitelist from the space
   const getCurrentWhitelist = async () => {
-    getSpaceInfo();
+    const currentSpaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
+    const spaceInfo = currentSpaceInfo.space;
     setWhitelist(spaceInfo.whitelist);
-  } 
+    console.log(`This da whitelist: ${whitelist}`);
+  }
 
   // Gets the names of the players in the whitelist by matching the IDs
-  const getCurrentWhitelistAsPlayers = () => {
-    const whitelistOfPlayers: Player[] = [];
+  function idListToPlayerList (idList: string[]): Player[] {
+    const playerList: Player[] = [];
 
-    whitelist.forEach(id => {
+    idList.forEach(id => {
       const playerWithID = players.find(player => player.id === id);
       if (playerWithID !== undefined){
-        whitelistOfPlayers.push(playerWithID);
+        playerList.push(playerWithID);
       }
     });
 
-    setWhitelistOfPlayers(whitelistOfPlayers);
+    return playerList;
   }
 
+  useEffect(() => {
+    getCurrentWhitelist();
+    console.log(`When setWhitelist: ${whitelist}`);
+    console.log(`Player version: ${idListToPlayerList(whitelist)}`);
+  }, [isOpen])
+
   const openControls = useCallback(()=>{
-    onOpen(); 
-    console.log(whitelist);
+    onOpen();
     video?.pauseGame();
   }, [onOpen, video]);
 
@@ -94,13 +93,13 @@ export default function SpaceControls ({initialSpaceInfo}: SpaceControlProps) {
     
     if (action === 'edit') {
       try {
+        console.log(`Editing whitelist:${whitelist}`);
         await spaceApiClient.updateSpace({
           coveySpaceID: currentLocation.space,
           newHostID: myPlayerID,
           newPresenterID: presenter,
           newWhitelist: whitelist,
         });
-        console.log(whitelist);
         toast({
           title: 'Space updated',
           status: 'success'
@@ -129,7 +128,7 @@ export default function SpaceControls ({initialSpaceInfo}: SpaceControlProps) {
           <ModalBody pb={6}>
             <FormControl>
               <FormLabel htmlFor='whitelist'>Whitelist</FormLabel>
-              <TransferList whitelistOfIDs={whitelist} whitelistOfPlayers={whitelistOfPlayers} onWhitelistChange={setWhitelist}/>
+              <TransferList whitelistOfPlayers={idListToPlayerList(whitelist)} onWhitelistChange={e => setWhitelist(e)}/>
             </FormControl>
 
             <FormControl mt={4}>

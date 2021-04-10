@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import List from '@material-ui/core/List';
@@ -11,7 +11,6 @@ import Paper from '@material-ui/core/Paper';
 
 import useCoveyAppState from '../../../../../../hooks/useCoveyAppState';
 import Player from '../../../../../../classes/Player';
-import { CoveySpaceInfo } from '../../../../../../classes/SpacesServiceClient';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -38,19 +37,16 @@ function intersection(a: Player[], b: Player[]) {
 }
 
 type TransferListProps = {
-  whitelistOfIDs: string[];
   whitelistOfPlayers : Player[];
   onWhitelistChange: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
-export default function TransferList({whitelistOfIDs, whitelistOfPlayers, onWhitelistChange}: TransferListProps) {
-  const { spaceApiClient, myPlayerID, players } = useCoveyAppState();
+export default function TransferList({whitelistOfPlayers, onWhitelistChange}: TransferListProps) {
+  const { players } = useCoveyAppState();
   const classes = useStyles();
-  const [checked, setChecked] = React.useState<Player[]>([]);
-  const [notSelected, setNotSelected] = React.useState<Player[]>(players.filter(player => !whitelistOfPlayers.includes(player)));
-  const [newWhitelist, setNewWhitelist] = React.useState<Player[]>(whitelistOfPlayers);
-  const [spaceInfo, setSpaceInfo] = React.useState<CoveySpaceInfo>({coveySpaceID: "World", currentPlayers: [], whitelist: [], hostID: null, presenterID: null});
-  const [whitelist, setWhitelist] = React.useState<string[]>(whitelistOfIDs);
+  const [checked, setChecked] = useState<Player[]>([]);
+  const [notSelected, setNotSelected] = useState<Player[]>(players.filter((p) => !whitelistOfPlayers.includes(p)));
+  const [newWhitelist, setNewWhitelist] = useState<Player[]>(whitelistOfPlayers);
 
   const leftChecked = intersection(checked, notSelected);
   const rightChecked = intersection(checked, newWhitelist);
@@ -90,12 +86,12 @@ export default function TransferList({whitelistOfIDs, whitelistOfPlayers, onWhit
     setNewWhitelist([]);
   };
 
-  function handleChange() {
+  const handleChange = () => {
     const newWhitelistOfIDs = newWhitelist.map(p => p.id);
     onWhitelistChange(newWhitelistOfIDs);
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     handleChange();
   }, [newWhitelist])
 
