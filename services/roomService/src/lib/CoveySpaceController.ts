@@ -170,7 +170,7 @@ export default class CoveySpaceController {
       this._isPrivate = true;
       this.addPlayerToWhiteList(newHostID);
     } else {
-      this._isPrivate = false;
+      this.publicizeSpace();
     }
   }
   
@@ -187,15 +187,20 @@ export default class CoveySpaceController {
    * @param newWhitelist the list of players that are allowed to enter a given space
    */
   updateWhitelist(newWhitelist: string[]): void {
+    console.log(newWhitelist);
     //get a list of IDs and return a list of player and update it
-    let stringToPlayers: Player[] = [];
-    for(let i = 0; i < newWhitelist.length; i++){
-      const player = this.playerFromID(newWhitelist[i]);
-      if (player) {
-        stringToPlayers.push(player);
+    let idWhitelistToPlayerWhitelist: Player[] = [];
+
+    newWhitelist.forEach(playerID => {
+      const player = this.playerFromID(playerID);
+
+      if (player !== undefined) {
+        idWhitelistToPlayerWhitelist.push(player);
       }
-    }
-    this._whitelist = stringToPlayers;
+    });
+
+    this._whitelist = idWhitelistToPlayerWhitelist;
+    console.log(this._whitelist);
   }
 
 
