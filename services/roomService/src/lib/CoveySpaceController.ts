@@ -163,6 +163,7 @@ export default class CoveySpaceController {
     */
   updateSpaceHost(newHostID: string | null): void {
     // Updates the spacehost
+    console.log(`HostID: ${newHostID}`)
     this._spaceHostID = newHostID;
 
     // If the new host is not undefined space is set to private, else it is not private

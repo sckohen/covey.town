@@ -38,8 +38,9 @@ export default function SpaceControls ({initialSpaceInfo} : SpaceControlProps) {
   const getCurrentWhitelist = async () => {
     const currentSpaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
     const spaceInfo = currentSpaceInfo.space;
+    console.log(`While setting whitelist: ${spaceInfo.whitelist}`);
     setWhitelist(spaceInfo.whitelist);
-    console.log(`This da whitelist: ${whitelist}`);
+    console.log(`After setWhitelist: ${whitelist}`);
   }
 
   // Gets the names of the players in the whitelist by matching the IDs
@@ -56,19 +57,25 @@ export default function SpaceControls ({initialSpaceInfo} : SpaceControlProps) {
     return playerList;
   }
 
-  useEffect(() => {
-    getCurrentWhitelist();
-    console.log(`When setWhitelist: ${whitelist}`);
-    console.log(`Player version: ${idListToPlayerList(whitelist)}`);
-  }, [isOpen])
+  // useEffect(() => {
+  //   console.log(`Before calling getCurrentWhitelist: ${whitelist}`);
+  //   getCurrentWhitelist();
+  //   console.log(`After calling getCurrentWhitelist: ${whitelist}`);
+  // }, [isOpen])
 
   const openControls = useCallback(()=>{
     onOpen();
+
+    console.log(`Before calling getCurrentWhitelist onOpen: ${whitelist}`);
+    getCurrentWhitelist();
+    console.log(`After calling getCurrentWhitelist onOpen: ${whitelist}`);
+
     video?.pauseGame();
   }, [onOpen, video]);
 
   const closeControls = useCallback(()=>{
     onClose();
+
     video?.unPauseGame();
   }, [onClose, video]);
 
@@ -93,7 +100,7 @@ export default function SpaceControls ({initialSpaceInfo} : SpaceControlProps) {
     
     if (action === 'edit') {
       try {
-        console.log(`Editing whitelist:${whitelist}`);
+        console.log(`Edit: ${currentLocation.space}, ${myPlayerID}, ${presenter}, [${whitelist}]`);
         await spaceApiClient.updateSpace({
           coveySpaceID: currentLocation.space,
           newHostID: myPlayerID,

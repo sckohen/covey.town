@@ -91,18 +91,13 @@ export default class CoveySpacesStore {
    * @param spaceHost the desired host of a space that may or maynot be updated
    * @param whitelist the desired whitelist of a space that may or maynot be updated
    */
-  updateSpace(coveySpaceID: string, spaceHostID?: string | null, spacePresenterID?: string | null, whitelist?: string[]): boolean {
+  updateSpace(coveySpaceID: string, spaceHostID: string | null, spacePresenterID: string | null, whitelist: string[]): boolean {
     const hostedSpace = this.getControllerForSpace(coveySpaceID);
+    console.log(`updateSpace is called in SpaceStore: ${coveySpaceID}, ${spaceHostID}, ${spacePresenterID}, ${whitelist}`);
     if (hostedSpace !== undefined){
-      if (spaceHostID !== undefined) {
-        hostedSpace.updateSpaceHost(spaceHostID);
-      } 
-      if (spacePresenterID !== undefined) {
-        hostedSpace.updatePresenter(spacePresenterID);
-      }
-      if (whitelist !== undefined) {
-        hostedSpace.updateWhitelist(whitelist);
-      }
+      hostedSpace.updateSpaceHost(spaceHostID);
+      hostedSpace.updateWhitelist(whitelist);
+      hostedSpace.updatePresenter(spacePresenterID);
       return true;
     }
     return false;
@@ -117,9 +112,7 @@ export default class CoveySpacesStore {
     const spaceController = this.getControllerForSpace(spaceID);
 
     if (spaceController) {
-      spaceController.updateSpaceHost(null);
-      spaceController.updatePresenter(null);
-      spaceController.updateWhitelist([]);
+      spaceController.publicizeSpace();
       return true;
     }
     return false;

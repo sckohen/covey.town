@@ -239,16 +239,27 @@ export async function spaceClaimHandler(requestData: SpaceClaimRequest): Promise
 export async function spaceUpdateHandler(requestData: SpaceUpdateRequest): Promise<ResponseEnvelope<Record<string, null>>> {
   const spacesStore = CoveySpacesStore.getInstance();
   const { coveySpaceID, hostID, presenterID, whitelist } = requestData;
+  console.log(`Update request data: ${coveySpaceID}, ${hostID}, ${presenterID}, ${whitelist}`);
 
   if (hostID === null) {
     spacesStore.disbandSpace(coveySpaceID);
+  } else if (whitelist === undefined && presenterID === undefined) { // when claim space is called
+    console.log(`Claim space was called: ${coveySpaceID}, ${hostID}`)
+    spacesStore.updateSpace(
+      coveySpaceID, 
+      hostID, 
+      null, 
+      [],
+    );
+  } else {
+    console.log(`Update space was called: ${coveySpaceID}, ${hostID}, ${presenterID}, ${whitelist}`)
+    spacesStore.updateSpace(
+      coveySpaceID, 
+      hostID,
+      presenterID, 
+      whitelist,
+    );
   }
-
-  spacesStore.updateSpace(
-    coveySpaceID, 
-    hostID, 
-    presenterID, 
-    whitelist);
 
   return {
     isOK: true,

@@ -11,6 +11,7 @@ import Paper from '@material-ui/core/Paper';
 
 import useCoveyAppState from '../../../../../../hooks/useCoveyAppState';
 import Player from '../../../../../../classes/Player';
+import { useDisclosure } from '@chakra-ui/hooks';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -42,6 +43,7 @@ type TransferListProps = {
 }
 
 export default function TransferList({whitelistOfPlayers, onWhitelistChange}: TransferListProps) {
+  const {onClose} = useDisclosure(); // If we want to do action based on opening or closing of the element
   const { players } = useCoveyAppState();
   const classes = useStyles();
   const [checked, setChecked] = useState<Player[]>([]);
