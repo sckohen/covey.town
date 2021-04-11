@@ -75,9 +75,9 @@ export interface SpaceDisbandRequest {
  */
 export interface SpaceUpdateRequest {
   coveySpaceID: string;
-  newHostID: string | null;
-  newPresenterID: string | null;
-  newWhitelist: string[];
+  hostID: string | null;
+  presenterID: string | null;
+  whitelist: string[];
 }
 
 /**

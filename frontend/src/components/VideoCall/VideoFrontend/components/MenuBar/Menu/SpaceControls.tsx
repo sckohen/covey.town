@@ -11,6 +11,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Select,
   useDisclosure,
   useToast
 } from '@chakra-ui/react';
@@ -20,28 +21,32 @@ import Typography from '@material-ui/core/Typography';
 import useCoveyAppState from '../../../../../../hooks/useCoveyAppState';
 import useMaybeVideo from '../../../../../../hooks/useMaybeVideo';
 import Player from '../../../../../../classes/Player';
-import { CoveySpaceInfo } from '../../../../../../classes/SpacesServiceClient';
 import TransferList from '../Menu/TransferList';
 
-type SpaceControlProps = {
-  initialSpaceInfo: CoveySpaceInfo;
-}
-
-export default function SpaceControls ({initialSpaceInfo} : SpaceControlProps) {
+export default function SpaceControls () {
   const {isOpen, onOpen, onClose} = useDisclosure();
   const video = useMaybeVideo();
   const { spaceApiClient, myPlayerID, players, currentLocation } = useCoveyAppState();
-  const [whitelist, setWhitelist] = useState<string[]>(initialSpaceInfo.whitelist);
-  const [presenter, setPresenter] = useState<string | null>(initialSpaceInfo.presenterID);
+  const [whitelist, setWhitelist] = useState<string[]>([]);
+  const [presenter, setPresenter] = useState<string>('');
 
   // Gets the current whitelist from the space
-  const getCurrentWhitelist = async () => {
+  const getCurrentWhitelistAndPresenter = async () => {
     const currentSpaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
     const spaceInfo = currentSpaceInfo.space;
-    console.log(`While setting whitelist: ${spaceInfo.whitelist}`);
+
+    if (spaceInfo.presenterID === null) {
+      setPresenter('');
+    } else {
+      setPresenter(spaceInfo.presenterID);
+    }
+
     setWhitelist(spaceInfo.whitelist);
-    console.log(`After setWhitelist: ${whitelist}`);
   }
+
+  useEffect(() => {
+    getCurrentWhitelistAndPresenter();
+  }, [])
 
   // Gets the names of the players in the whitelist by matching the IDs
   function idListToPlayerList (idList: string[]): Player[] {
@@ -57,18 +62,20 @@ export default function SpaceControls ({initialSpaceInfo} : SpaceControlProps) {
     return playerList;
   }
 
-  // useEffect(() => {
-  //   console.log(`Before calling getCurrentWhitelist: ${whitelist}`);
-  //   getCurrentWhitelist();
-  //   console.log(`After calling getCurrentWhitelist: ${whitelist}`);
-  // }, [isOpen])
+  const PresenterSelector: React.FunctionComponent = () => {
+    const whitelistOfPlayers: Player[] = idListToPlayerList(whitelist);
+
+    return (
+      <Select id='presenterSelector' placeholder={presenter? presenter : 'Select player'} defaultValue='' value={presenter} onChange={e => setPresenter(e.target.value)}>
+        {whitelistOfPlayers.map((player) => (
+          <option value={player.id}> {`${player.userName}`} </option>
+        ))}
+      </Select>
+    );
+  }
 
   const openControls = useCallback(()=>{
     onOpen();
-
-    console.log(`Before calling getCurrentWhitelist onOpen: ${whitelist}`);
-    getCurrentWhitelist();
-    console.log(`After calling getCurrentWhitelist onOpen: ${whitelist}`);
 
     video?.pauseGame();
   }, [onOpen, video]);
@@ -100,12 +107,16 @@ export default function SpaceControls ({initialSpaceInfo} : SpaceControlProps) {
     
     if (action === 'edit') {
       try {
-        console.log(`Edit: ${currentLocation.space}, ${myPlayerID}, ${presenter}, [${whitelist}]`);
+        let presenterActual: string | null = presenter;
+        if (presenter === '') {
+          presenterActual = null;
+        }
+        console.log(`Edit: ${currentLocation.space}, ${myPlayerID}, ${presenterActual}, [${whitelist}]`);
         await spaceApiClient.updateSpace({
           coveySpaceID: currentLocation.space,
-          newHostID: myPlayerID,
-          newPresenterID: presenter,
-          newWhitelist: whitelist,
+          hostID: myPlayerID,
+          presenterID: presenterActual,
+          whitelist: whitelist,
         });
         toast({
           title: 'Space updated',
@@ -140,7 +151,7 @@ export default function SpaceControls ({initialSpaceInfo} : SpaceControlProps) {
 
             <FormControl mt={4}>
               <FormLabel htmlFor='presenter'>Presenter</FormLabel>
-              {/* <Checkbox id="isPubliclyListed" name="isPubliclyListed"  isChecked={isPubliclyListed} onChange={(e)=>setIsPubliclyListed(e.target.checked)} /> */}
+              <PresenterSelector/>
             </FormControl>
           </ModalBody>
 

@@ -37,18 +37,32 @@ function intersection(a: Player[], b: Player[]) {
   return a.filter((value) => b.indexOf(value) !== -1);
 }
 
+// The props for up-to-date whitelist in the backend, as well as the onChange function
 type TransferListProps = {
   whitelistOfPlayers : Player[];
   onWhitelistChange: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
+// Based on the Transfer List component of MaterialUI: https://material-ui.com/components/transfer-list/
+// Modified to take props which allows it to lift up the state to SpaceControls for the form to be controlled
 export default function TransferList({whitelistOfPlayers, onWhitelistChange}: TransferListProps) {
-  const {onClose} = useDisclosure(); // If we want to do action based on opening or closing of the element
+  const {onOpen} = useDisclosure(); // If we want to do action based on opening or closing of the element
   const { players } = useCoveyAppState();
   const classes = useStyles();
   const [checked, setChecked] = useState<Player[]>([]);
-  const [notSelected, setNotSelected] = useState<Player[]>(players.filter((p) => !whitelistOfPlayers.includes(p)));
-  const [newWhitelist, setNewWhitelist] = useState<Player[]>(whitelistOfPlayers);
+  const [notSelected, setNotSelected] = useState<Player[]>([]);
+  const [newWhitelist, setNewWhitelist] = useState<Player[]>([]);
+
+  // Initializes the current whitelist and not-selected players
+  const initializeWhitelist = () => {
+    setNewWhitelist(whitelistOfPlayers);
+    setNotSelected(players.filter((p) => !whitelistOfPlayers.includes(p)));
+  }
+
+  // Calls initializeWhitelist when controls are opened (on load of component)
+  useEffect (() => {
+    initializeWhitelist();
+  }, [onOpen])
 
   const leftChecked = intersection(checked, notSelected);
   const rightChecked = intersection(checked, newWhitelist);
@@ -88,11 +102,13 @@ export default function TransferList({whitelistOfPlayers, onWhitelistChange}: Tr
     setNewWhitelist([]);
   };
 
+  // The function to lift up the whitelist state to SpaceControls
   const handleChange = () => {
     const newWhitelistOfIDs = newWhitelist.map(p => p.id);
     onWhitelistChange(newWhitelistOfIDs);
   }
 
+  // Calls handleChange when the whitelist changes
   useEffect(() => {
     handleChange();
   }, [newWhitelist])
@@ -124,7 +140,7 @@ export default function TransferList({whitelistOfPlayers, onWhitelistChange}: Tr
 
   return (
     <Grid container spacing={2} justify="center" alignItems="center" className={classes.root}>
-      <Grid item>{customList(notSelected)}</Grid>
+      <Grid item> Available Players: {customList(notSelected)}</Grid>
       <Grid item>
         <Grid container direction="column" alignItems="center">
           <Button
@@ -169,7 +185,7 @@ export default function TransferList({whitelistOfPlayers, onWhitelistChange}: Tr
           </Button>
         </Grid>
       </Grid>
-      <Grid item>{customList(newWhitelist)}</Grid>
+      <Grid item>Players in Whitelist: {customList(newWhitelist)}</Grid>
     </Grid>
   );
 }

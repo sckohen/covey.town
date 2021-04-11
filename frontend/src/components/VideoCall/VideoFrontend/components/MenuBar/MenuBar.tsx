@@ -157,7 +157,7 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
               <Grid container justify="flex-end">
                 <TownSettings />
                 {showClaimButton? <Button onClick= { claimSpace } > Claim Space </Button> : null}
-                {showControls? <SpaceControls initialSpaceInfo={spaceInfo} /> : null}
+                {showControls? <SpaceControls /> : null}
                 <Menu />
                 <EndCallButton />
               </Grid>
