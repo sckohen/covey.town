@@ -62,6 +62,7 @@ export default function SpaceControls () {
     return playerList;
   }
 
+  // The presenter selector element to choose which presenter you want to designate
   const PresenterSelector: React.FunctionComponent = () => {
     const whitelistOfPlayers: Player[] = idListToPlayerList(whitelist);
 

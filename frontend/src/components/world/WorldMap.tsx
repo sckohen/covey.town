@@ -84,7 +84,7 @@ class CoveyGameScene extends Phaser.Scene {
       return;
     }
 
-    // TODO: Add documentation
+    // Hide the sprite and label of player that do not share the same space as the player
     players.forEach(async (p) => {
       this.updatePlayerLocation(p);
       const playerSpace = p.location?.space;
@@ -239,6 +239,7 @@ class CoveyGameScene extends Phaser.Scene {
         size.height);
     }
     
+    // Add the created space to allSpaces to keep track and return the created space
     this.allSpaces.push(privateZone);
     return privateZone;
   }
@@ -282,9 +283,13 @@ class CoveyGameScene extends Phaser.Scene {
    */
   async joinSpace(space: Phaser.GameObjects.Zone) {    
     const { spaceApiClient, myPlayerID } = this.spaceCreateInfo;
-    this.inSpace = space.name;
 
-    await spaceApiClient.joinSpace({ playerID: myPlayerID, coveySpaceID: space.name });
+    try {
+      await spaceApiClient.joinSpace({ coveySpaceID: space.name, playerID: myPlayerID });
+      this.inSpace = space.name;
+    } catch (error) {
+      this.inSpace = 'World'
+    }
   }
 
   /**
@@ -293,9 +298,12 @@ class CoveyGameScene extends Phaser.Scene {
    */
   async leaveSpace(space: Phaser.GameObjects.Zone) {
     const { spaceApiClient, myPlayerID } = this.spaceCreateInfo;
-    this.inSpace = "World";
-
-    await spaceApiClient.leaveSpace({ coveySpaceID: space.name, playerID: myPlayerID });
+    try {
+      await spaceApiClient.leaveSpace({ coveySpaceID: space.name, playerID: myPlayerID });
+      this.inSpace = "World";
+    } catch (error) {
+      this.inSpace = space.name;
+    }
   }
 
   create() {
