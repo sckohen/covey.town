@@ -84,32 +84,34 @@ export default class CoveySpaceController {
    * Adds a player to this space
    *
    * @param newPlayerID ID for the new player to add to the space
+   * @returns boolean for success or failure
    */
-  addPlayer(newPlayerID: string): void {
+  addPlayer(newPlayerID: string): boolean {
     const newPlayer = this.playerFromID(newPlayerID);
 
     if (newPlayer !== undefined) {
       // If player is already on the list dont do anything
       if (this._players.includes(newPlayer)) {
-        return; 
+        return false; 
       }
 
       // If the space is not private
       if (this._isPrivate === false) {
         this._players.push(newPlayer);
-      } 
-      
-      // If the space is private and the spaceHost is defined
-      if (this._spaceHostID !== null) {
-          // If the host is no longer in the game
-          if (this.playerFromID(this._spaceHostID) === undefined) {
+        return true;
+      } else if (this._spaceHostID !== null) { // If the space is private and the spaceHost is defined
+          if (this.playerFromID(this._spaceHostID) === undefined) { // If the host is no longer in the game
             this.publicizeSpace();
             this._players.push(newPlayer);
-          } else if (this._whitelist.includes(newPlayer) || this.spaceHostID == newPlayerID) {
+            return true;
+          } else if (this._whitelist.includes(newPlayer) || this.spaceHostID === newPlayerID) {
             this._players.push(newPlayer);
+            return true;
           }
+          return false;
         }
       }
+      return false;
     }
 
   /**

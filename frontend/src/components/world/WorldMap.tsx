@@ -283,12 +283,18 @@ class CoveyGameScene extends Phaser.Scene {
    */
   async joinSpace(space: Phaser.GameObjects.Zone) {    
     const { spaceApiClient, myPlayerID } = this.spaceCreateInfo;
-
+    
     try {
       await spaceApiClient.joinSpace({ coveySpaceID: space.name, playerID: myPlayerID });
       this.inSpace = space.name;
     } catch (error) {
-      this.inSpace = 'World'
+      if(this.lastLocation && this.player){
+        // Move the player to their last location (outside the space)
+        this.player.sprite.x = this.lastLocation.x;
+        this.player.sprite.y = this.lastLocation.y;
+        this.lastLocation.space = this.inSpace;
+        this.emitMovement(this.lastLocation);
+      }
     }
   }
 

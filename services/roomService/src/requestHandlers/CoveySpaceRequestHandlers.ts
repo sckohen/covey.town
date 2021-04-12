@@ -138,12 +138,12 @@ export async function spaceJoinHandler(requestData: SpaceJoinRequest): Promise<R
     };
   }  
   
-  coveySpaceController.addPlayer(playerID);
+  const success = coveySpaceController.addPlayer(playerID);
   
   return {
-    isOK: true,
-    message: `Player ID${playerID} has joined space ${coveySpaceID}`,
+    isOK: success,
     response: {},
+    message: !success ? `Player ID${playerID} can't join space` : undefined
   };
 }
 
