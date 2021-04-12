@@ -1,3 +1,5 @@
+
+
 import { customAlphabet, nanoid } from 'nanoid';
 import { UserLocation } from '../CoveyTypes';
 import CoveyTownListener from '../types/CoveyTownListener';
@@ -5,6 +7,8 @@ import Player from '../types/Player';
 import PlayerSession from '../types/PlayerSession';
 import TwilioVideo from './TwilioVideo';
 import IVideoClient from './IVideoClient';
+import CoveySpacesStore  from './CoveySpacesStore';
+
 
 const friendlyNanoID = customAlphabet('1234567890ABCDEF', 8);
 
@@ -16,6 +20,7 @@ export default class CoveyTownController {
   get capacity(): number {
     return this._capacity;
   }
+
   set isPubliclyListed(value: boolean) {
     this._isPubliclyListed = value;
   }
@@ -48,8 +53,15 @@ export default class CoveyTownController {
     return this._coveyTownID;
   }
 
+  get privateSpaces(): CoveySpacesStore {
+    return this._privateSpaces;
+  }
+
   /** The list of players currently in the town * */
   private _players: Player[] = [];
+  
+  /** All the private spaces in this town * */
+  private _privateSpaces: CoveySpacesStore;
 
   /** The list of valid sessions for this town * */
   private _sessions: PlayerSession[] = [];
@@ -76,7 +88,9 @@ export default class CoveyTownController {
     this._townUpdatePassword = nanoid(24);
     this._isPubliclyListed = isPubliclyListed;
     this._friendlyName = friendlyName;
+    this._privateSpaces = CoveySpacesStore.getInstance();
   }
+
 
   /**
    * Adds a player to this Covey Town, provisioning the necessary credentials for the

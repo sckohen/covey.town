@@ -25,6 +25,7 @@ import { Callback } from './components/VideoCall/VideoFrontend/types';
 import Player, { ServerPlayer, UserLocation } from './classes/Player';
 import TownsServiceClient, { TownJoinResponse } from './classes/TownsServiceClient';
 import Video from './classes/Video/Video';
+import SpacesServiceClient from './classes/SpacesServiceClient';
 
 type CoveyAppUpdate =
   | { action: 'doConnect'; data: { userName: string, townFriendlyName: string, townID: string,townIsPubliclyListed:boolean, sessionToken: string, myPlayerID: string, socket: Socket, players: Player[], emitMovement: (location: UserLocation) => void } }
@@ -47,11 +48,12 @@ function defaultAppState(): CoveyAppState {
     userName: '',
     socket: null,
     currentLocation: {
-      x: 0, y: 0, rotation: 'front', moving: false,
+      x: 0, y: 0, rotation: 'front', moving: false, space: 'World',
     },
     emitMovement: () => {
     },
     apiClient: new TownsServiceClient(),
+    spaceApiClient: new SpacesServiceClient(),
   };
 }
 function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyAppState {
@@ -68,20 +70,36 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     socket: state.socket,
     emitMovement: state.emitMovement,
     apiClient: state.apiClient,
+    spaceApiClient: state.spaceApiClient,
   };
 
+  // TODO: Add Comments
   function calculateNearbyPlayers(players: Player[], currentLocation: UserLocation) {
-    const isWithinCallRadius = (p: Player, location: UserLocation) => {
-      if (p.location && location) {
-        const dx = p.location.x - location.x;
-        const dy = p.location.y - location.y;
-        const d = Math.sqrt(dx * dx + dy * dy);
-        return d < 80;
-      }
-      return false;
-    };
-    return { nearbyPlayers: players.filter((p) => isWithinCallRadius(p, currentLocation)) };
-  }
+      const playersInSameSpace: Player[] = []; // List of all players in the same space as this player
+      
+      // Existing code
+      const isWithinCallRadius = (p: Player, location: UserLocation) => {
+        if (p.location && location) {
+          const dx = p.location.x - location.x;
+          const dy = p.location.y - location.y;
+          const d = Math.sqrt(dx * dx + dy * dy);
+          return d < 80;
+        }
+        return false;
+      };
+
+      // Find all players in the same space as the current player
+      players.forEach(player => {
+        if(player.location && currentLocation.space !== 'World') {
+          if(player.location.space === currentLocation.space){
+            playersInSameSpace.push(player);
+          }
+        }
+      });
+      
+      // Return all players in the same space and whoever else may be nearby 
+      return { nearbyPlayers: playersInSameSpace.concat(players.filter((p) => isWithinCallRadius(p, currentLocation))) }
+    }
 
   function samePlayers(a1: NearbyPlayers, a2: NearbyPlayers) {
     if (a1.nearbyPlayers.length !== a2.nearbyPlayers.length) return false;
@@ -178,7 +196,7 @@ async function GameController(initData: TownJoinResponse,
     dispatchAppUpdate({ action: 'disconnect' });
   });
   const emitMovement = (location: UserLocation) => {
-    socket.emit('playerMovement', location);
+    socket.emit('playerMovement', location );
     dispatchAppUpdate({ action: 'weMoved', location });
   };
 

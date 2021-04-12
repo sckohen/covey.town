@@ -3,6 +3,7 @@ import Phaser from 'phaser';
 import Player, { UserLocation } from '../../classes/Player';
 import Video from '../../classes/Video/Video';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
+import SpacesServiceClient from '../../classes/SpacesServiceClient';
 
 // https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
 class CoveyGameScene extends Phaser.Scene {
@@ -33,10 +34,26 @@ class CoveyGameScene extends Phaser.Scene {
 
   private emitMovement: (loc: UserLocation) => void;
 
-  constructor(video: Video, emitMovement: (loc: UserLocation) => void) {
+  private spaceCreateInfo: SpaceCreationInfo;
+
+  private inSpace: string;
+
+  private allSpaces: Phaser.GameObjects.Zone[];
+
+  /**
+   * Constructs the map taking in required arguments needed to 'play the game'
+   * 
+   * @param video 
+   * @param emitMovement the location of the user, or void
+   * @param spaceCreateInfo the information needed to create a space
+   */
+  constructor(video: Video, emitMovement: (loc: UserLocation) => void, spaceCreateInfo: SpaceCreationInfo) {
     super('PlayGame');
     this.video = video;
     this.emitMovement = emitMovement;
+    this.spaceCreateInfo = spaceCreateInfo;
+    this.inSpace = "World";
+    this.allSpaces = [];
   }
 
   preload() {
@@ -46,14 +63,43 @@ class CoveyGameScene extends Phaser.Scene {
     this.load.atlas('atlas', '/assets/atlas/atlas.png', '/assets/atlas/atlas.json');
   }
 
+  // get space by player
+  async getSpaceForPlayer(playerID: string): Promise<string> {
+    const { spaceApiClient } = this.spaceCreateInfo;
+    const playerSpace = await spaceApiClient.getSpaceForPlayer({ playerID });
+    return playerSpace.space.coveySpaceID;
+  }
+
+  /**
+   * EXISTING
+   * updates the location of a group of given players that are moving. 
+   * Also removes players from the space that have disconnedcted by detroying their sprite and label
+   * 
+   * @param players the list of players that are to be updated
+   * @returns 
+   */
   updatePlayersLocations(players: Player[]) {
     if (!this.ready) {
       this.players = players;
       return;
     }
-    players.forEach((p) => {
+
+    // Hide the sprite and label of player that do not share the same space as the player
+    players.forEach(async (p) => {
       this.updatePlayerLocation(p);
+      const playerSpace = p.location?.space;
+
+      if (p.sprite && playerSpace){
+        if (playerSpace !== this.inSpace) {
+          p.sprite.setAlpha(0);
+          p.label?.setAlpha(0);
+        } else {
+          p.sprite.setAlpha(100);
+          p.label?.setAlpha(100);
+        }
+      }
     });
+
     // Remove disconnected players from board
     const disconnectedPlayers = this.players.filter(
       (player) => !players.find((p) => p.id === player.id),
@@ -74,6 +120,11 @@ class CoveyGameScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * Updates the location of a single player. Moves the location of their sprite based on how, or if, they move
+   * @param player the player in question
+   * @returns void
+   */
   updatePlayerLocation(player: Player) {
     let myPlayer = this.players.find((p) => p.id === player.id);
     if (!myPlayer) {
@@ -84,13 +135,16 @@ class CoveyGameScene extends Phaser.Scene {
           moving: false,
           x: 0,
           y: 0,
+          space: 'World',
         };
       }
       myPlayer = new Player(player.id, player.userName, location);
       this.players.push(myPlayer);
     }
+
     if (this.id !== myPlayer.id && this.physics && player.location) {
       let { sprite } = myPlayer;
+
       if (!sprite) {
         sprite = this.physics.add
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -103,6 +157,7 @@ class CoveyGameScene extends Phaser.Scene {
           color: '#000000',
           backgroundColor: '#ffffff',
         });
+        
         myPlayer.label = label;
         myPlayer.sprite = sprite;
       }
@@ -120,6 +175,10 @@ class CoveyGameScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * Finds the direction the player is moving in based on the key they pressed
+   * @returns the direction to move in as a string or undefined
+   */
   getNewMovementDirection() {
     if (this.cursors.find(keySet => keySet.left?.isDown)) {
       return 'left';
@@ -136,16 +195,17 @@ class CoveyGameScene extends Phaser.Scene {
     return undefined;
   }
 
-
   /**
-   * Creates a zone for the defined private space (in the tilemap)
-   * @param spaceID the private space id given as the name of the object
+   * Creates a Phaser zone for the defined spaces (in the tilemap)
+   * @param spaceID the space id given as the name of the object
    * @param map map object for the current world
    * @param sprite sprite object for collision detection
    * @param [debug] optional param to enable rendering of the zone
-   * @returns  a zone object
+   * @returns  a zone object that detects players inside it
    */
-  createZoneForPrivateSpace(spaceID: number, map: Phaser.Tilemaps.Tilemap, sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, debug?: boolean) {
+  createZoneForSpace(spaceID: string, map: Phaser.Tilemaps.Tilemap, sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, debug?: boolean): Phaser.GameObjects.Zone {
+    const { currentTownID } = this.spaceCreateInfo;
+
     // Get the location of the private space drawed on the map as an object
     const location = map.findObject('Objects',
     (obj) => obj.name === `Private Space ${spaceID}`) as unknown as
@@ -153,18 +213,21 @@ class CoveyGameScene extends Phaser.Scene {
 
     // Get the dimensions for the private space drawed on the map
     const size = map.findObject('Objects',
-      (obj) => obj.name === `Private Space ${spaceID}`) as unknown as
-      Phaser.GameObjects.Components.Size;
+    (obj) => obj.name === `Private Space ${spaceID}`) as unknown as
+    Phaser.GameObjects.Components.Size;
 
     // Make a zone (hitbox) - origin is top left so correct by adding half the size
-    const privateZone = this.add.zone(location.x + (size.width/2),
+    const privateZone = this.add.zone(
+      location.x + (size.width/2),
       location.y + (size.height/2),
       size.width, 
-      size.height);
+      size.height
+      );
+  
+    privateZone.setName(`${currentTownID}_${spaceID}`);
 
-    // Enable the zone (hitbox)
-    this.physics.world.enable(privateZone);
-    this.physics.add.overlap(sprite, privateZone, ()=>console.log(`in Private Space ${spaceID}`));
+    // Adds a collider to check colision with the player
+    this.physics.add.collider(sprite, privateZone);
 
     if (debug === true) {
       // Draw graphics for debugging reasons
@@ -175,7 +238,72 @@ class CoveyGameScene extends Phaser.Scene {
         size.width, 
         size.height);
     }
+    
+    // Add the created space to allSpaces to keep track and return the created space
+    this.allSpaces.push(privateZone);
     return privateZone;
+  }
+
+  
+   /**
+    * Initializes all spaces defined in the map
+    * @param map the map for the game world
+    */
+   initializeSpaces(map: Phaser.Tilemaps.Tilemap) {
+    // Create zone for all Private Spaces using the createZoneForPrivateSpace function
+    if (this.player !== undefined) {
+      const spriteForPlayer = this.player.sprite;
+      // Get the a list of private space drawn on the map and create zones for all of them
+      const privateSpaces = map.filterObjects('Objects', (obj) => obj.name.includes('Private Space'));
+      privateSpaces.forEach(space => this.createZoneForSpace(space.name.slice(-1), map, spriteForPlayer, true));
+    }
+  }
+
+  /**
+   * Checks overlap between the sprite of the player and the different spaces
+   * @param zone the zone to check if the player is in
+   * @returns if these two objects overlap
+   */
+  checkOverlap(zone: Phaser.GameObjects.Zone) {
+    const player = this.player?.sprite;
+    
+    if (player === undefined) {
+      return false;
+    }
+    
+    const boundsA = player.getBounds();
+    const boundsB = zone.getBounds();
+
+    return Phaser.Geom.Intersects.RectangleToRectangle(boundsA, boundsB);
+  }
+
+  /**
+   * Helper function to join a space
+   * @param space the space to join
+   */
+  async joinSpace(space: Phaser.GameObjects.Zone) {    
+    const { spaceApiClient, myPlayerID } = this.spaceCreateInfo;
+
+    try {
+      await spaceApiClient.joinSpace({ coveySpaceID: space.name, playerID: myPlayerID });
+      this.inSpace = space.name;
+    } catch (error) {
+      this.inSpace = 'World'
+    }
+  }
+
+  /**
+   * Helper function to leave a space
+   * @param space the space to leave
+   */
+  async leaveSpace(space: Phaser.GameObjects.Zone) {
+    const { spaceApiClient, myPlayerID } = this.spaceCreateInfo;
+    try {
+      await spaceApiClient.leaveSpace({ coveySpaceID: space.name, playerID: myPlayerID });
+      this.inSpace = "World";
+    } catch (error) {
+      this.inSpace = space.name;
+    }
   }
 
   create() {
@@ -231,8 +359,9 @@ class CoveyGameScene extends Phaser.Scene {
       }
     });
 
-
-
+    /**
+     * allows the 'wasd' keys and 'hjkl' keys to be viable movement keys
+     */
     const cursorKeys = this.input.keyboard.createCursorKeys();
     this.cursors.push(cursorKeys);
     this.cursors.push(this.input.keyboard.addKeys({
@@ -247,8 +376,6 @@ class CoveyGameScene extends Phaser.Scene {
       'left': Phaser.Input.Keyboard.KeyCodes.K,
       'right': Phaser.Input.Keyboard.KeyCodes.L
     }, false) as Phaser.Types.Input.Keyboard.CursorKeys);
-
-
 
 
     // Create a sprite with physics enabled via the physics system. The image used for the sprite
@@ -287,6 +414,7 @@ class CoveyGameScene extends Phaser.Scene {
           this.player.sprite.y = target.y;
           this.lastLocation.x = target.x;
           this.lastLocation.y = target.y;
+          this.lastLocation.space = this.inSpace;
           this.emitMovement(this.lastLocation);
         }
         else{
@@ -302,14 +430,14 @@ class CoveyGameScene extends Phaser.Scene {
       // @ts-ignore - JB todo
       x: spawnPoint.x,
       y: spawnPoint.y,
+      space: 'World'
     });
 
     // Watch the player and worldLayer for collisions, for the duration of the scene:
     this.physics.add.collider(sprite, worldLayer);
 
-    // Create zone for Private Space 1 and 2 using the createZoneForPrivateSpace function
-    this.createZoneForPrivateSpace(1, map, this.player.sprite, true);
-    this.createZoneForPrivateSpace(2, map, this.player.sprite, true);
+    // Create a zone for all Private Spaces using the createZoneForPrivateSpace function
+    this.initializeSpaces(map);
 
     // Create the player's walking animations from the texture atlas. These are stored in the global
     // animation manager so any sprite can access them.
@@ -363,8 +491,6 @@ class CoveyGameScene extends Phaser.Scene {
     camera.startFollow(this.player.sprite);
     camera.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
 
-
-
     // Help text that has a "fixed" position on the screen
     this.add
       .text(16, 16, `Arrow keys to move, space to transport\nCurrent town: ${this.video.townFriendlyName} (${this.video.coveyTownID})`, {
@@ -387,6 +513,10 @@ class CoveyGameScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * updates the visuals based on the direction the sprite moves in. shows an animation of the sprite walking in the direction.
+   * @returns 
+   */
   update() {
     if (this.paused) {
       return;
@@ -448,15 +578,28 @@ class CoveyGameScene extends Phaser.Scene {
             y: body.y,
             rotation: primaryDirection || 'front',
             moving: isMoving,
+            space: this.inSpace,
           };
         }
         this.lastLocation.x = body.x;
         this.lastLocation.y = body.y;
         this.lastLocation.rotation = primaryDirection || 'front';
         this.lastLocation.moving = isMoving;
+        this.lastLocation.space = this.inSpace;
         this.emitMovement(this.lastLocation);
       }
     }
+
+    // Handles which space the player is in
+    this.allSpaces.forEach(space => {
+      if(this.checkOverlap(space) && this.inSpace === 'World') {
+        this.joinSpace(space);
+      }
+
+      if(!this.checkOverlap(space) && this.inSpace === space.name) {
+        this.leaveSpace(space);
+      }
+    });
   }
 
   pause() {
@@ -470,12 +613,24 @@ class CoveyGameScene extends Phaser.Scene {
     this.input.keyboard.addCapture(this.previouslyCapturedKeys);
     this.previouslyCapturedKeys = [];
   }
+  
 }
+
+type SpaceCreationInfo = {
+  spaceApiClient: SpacesServiceClient,
+  myPlayerID: string,
+  currentTownID: string,
+}
+
 
 export default function WorldMap(): JSX.Element {
   const video = Video.instance();
   const {
-    emitMovement, players,
+    emitMovement, 
+    players,
+    spaceApiClient,
+    myPlayerID,
+    currentTownID,
   } = useCoveyAppState();
   const [gameScene, setGameScene] = useState<CoveyGameScene>();
   useEffect(() => {
@@ -492,9 +647,11 @@ export default function WorldMap(): JSX.Element {
       },
     };
 
+    const spaceCreateInfo = { spaceApiClient, myPlayerID, currentTownID };
+
     const game = new Phaser.Game(config);
     if (video) {
-      const newGameScene = new CoveyGameScene(video, emitMovement);
+      const newGameScene = new CoveyGameScene(video, emitMovement, spaceCreateInfo);
       setGameScene(newGameScene);
       game.scene.add('coveyBoard', newGameScene, true);
       video.pauseGame = () => {
@@ -507,7 +664,7 @@ export default function WorldMap(): JSX.Element {
     return () => {
       game.destroy(true);
     };
-  }, [video, emitMovement]);
+  }, [video, emitMovement, spaceApiClient, myPlayerID, currentTownID]);
 
   const deepPlayers = JSON.stringify(players);
   useEffect(() => {

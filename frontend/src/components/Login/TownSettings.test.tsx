@@ -8,12 +8,14 @@ import { TargetElement } from '@testing-library/user-event';
 import TownSettings from './TownSettings';
 import TownsServiceClient from '../../classes/TownsServiceClient';
 import CoveyAppContext from '../../contexts/CoveyAppContext';
+import SpacesServiceClient from '../../classes/SpacesServiceClient';
 
 const mockUseCoveyAppState = jest.fn(() => (Promise.resolve()));
 const mockToast = jest.fn();
 const mockUseDisclosure = {isOpen: true, onOpen: jest.fn(), onClose: jest.fn()};
 
 jest.mock('../../classes/TownsServiceClient');
+jest.mock('../../classes/SpacesServiceClient');
 jest.mock('../../hooks/useCoveyAppState', () => ({
   __esModule: true, // this property makes it work
   default: () => (mockUseCoveyAppState)
@@ -32,6 +34,8 @@ TownsServiceClient.prototype.updateTown = mockUpdateTown;
 TownsServiceClient.prototype.deleteTown = mockDeleteTown;
 // @ts-ignore
 mockUseCoveyAppState.apiClient = new TownsServiceClient();
+// @ts-ignore
+mockUseCoveyAppState.spaceApiClient = new SpacesServiceClient();
 
 function wrappedTownSettings() {
   return <ChakraProvider><CoveyAppContext.Provider value={{
@@ -49,10 +53,12 @@ function wrappedTownSettings() {
       y: 0,
       rotation: 'front',
       moving: false,
+      space: 'World'
     },
     emitMovement: () => {
     },
     apiClient: new TownsServiceClient(),
+    spaceApiClient: new SpacesServiceClient(),
   }}>
     <TownSettings/></CoveyAppContext.Provider></ChakraProvider>;
 }

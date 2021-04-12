@@ -39,7 +39,6 @@ export default function TownSelection({ doLogin }: TownSelectionProps): JSX.Elem
   const toast = useToast();
 
   const updateTownListings = useCallback(() => {
-    // console.log(apiClient);
     apiClient.listTowns()
       .then((towns) => {
         setCurrentPublicTowns(towns.towns
@@ -111,6 +110,7 @@ export default function TownSelection({ doLogin }: TownSelectionProps): JSX.Elem
         friendlyName: newTownName,
         isPubliclyListed: newTownIsPublic
       });
+
       let privateMessage = <></>;
       if (!newTownIsPublic) {
         privateMessage =
@@ -126,6 +126,7 @@ export default function TownSelection({ doLogin }: TownSelectionProps): JSX.Elem
         isClosable: true,
         duration: null,
       })
+
       await handleJoin(newTownInfo.coveyTownID);
     } catch (err) {
       toast({

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 
 import Button from '@material-ui/core/Button';
@@ -13,7 +13,11 @@ import ToggleAudioButton from '../Buttons/ToggleAudioButton/ToggleAudioButton';
 import ToggleVideoButton from '../Buttons/ToggleVideoButton/ToggleVideoButton';
 import ToggleScreenShareButton from '../Buttons/ToogleScreenShareButton/ToggleScreenShareButton';
 import TownSettings from '../../../../Login/TownSettings';
+import SpaceControls from './Menu/SpaceControls';
 import MenuContainer from '@material-ui/core/Menu';
+import useCoveyAppState from '../../../../../hooks/useCoveyAppState';
+import { useToast } from '@chakra-ui/toast';
+import { CoveySpaceInfo } from '../../../../../classes/SpacesServiceClient';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   container: {
@@ -62,11 +66,71 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
   },
 }));
 
+
 export default function MenuBar(props: { setMediaError?(error: Error): void }) {
   const classes = useStyles();
   const { isSharingScreen, toggleScreenShare } = useVideoContext();
   const roomState = useRoomState();
   const isReconnecting = roomState === 'reconnecting';
+  const { spaceApiClient, myPlayerID, currentLocation } = useCoveyAppState();
+  const [showClaimButton, setShowClaimButton] = useState<boolean>(false);
+  const [showControls, setShowControls] = useState<boolean>(false);
+  const [spaceInfo, setSpaceInfo] = useState<CoveySpaceInfo>({coveySpaceID: "World", currentPlayers: [], whitelist: [], hostID: null, presenterID: null});
+  const toast = useToast();
+
+  // Get the info on the current space (whitelist, hostID, presenterID)
+  const getSpaceInfo = async () => {
+    const currentSpaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
+    setSpaceInfo(currentSpaceInfo.space);
+  }
+  
+  const claimSpace = async () => {
+    if (currentLocation.space !== 'World') { 
+      try {
+        await spaceApiClient.claimSpace({ coveySpaceID: currentLocation.space , hostID: myPlayerID });
+        setShowClaimButton(false);
+        setShowControls(true);
+        toast({
+          title: 'You are now the host of this space',
+          description: 'You can use the space controls in the menu bar',
+          status: 'success',
+          isClosable: true,
+        });     } catch (error) {
+        toast({
+          title: 'Unable to claim space',
+          status: 'error',
+        });
+      }
+    } 
+  }
+
+  const handleClaimButton = async () => {
+    const currentSpaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
+    const spaceInfo = currentSpaceInfo.space;
+
+    if (spaceInfo.coveySpaceID !== 'World' && spaceInfo.hostID === null) {
+      setShowClaimButton(true);
+    } else {
+      setShowClaimButton(false);
+    }
+  }
+
+  const handleSpaceControls = async () => {
+    const currentSpaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
+    const spaceInfo = currentSpaceInfo.space;
+
+    if (spaceInfo.hostID === myPlayerID) {
+      setShowControls(true);
+    } else {
+      setShowControls(false);
+    }
+  }
+
+  useEffect(() => {
+    handleClaimButton();
+    handleSpaceControls();
+    getSpaceInfo();
+  }, [currentLocation.space]);
 
   return (
     <>
@@ -92,7 +156,8 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
             <Grid style={{ flex: 1 }}>
               <Grid container justify="flex-end">
                 <TownSettings />
-
+                {showClaimButton? <Button onClick= { claimSpace } > Claim Space </Button> : null}
+                {showControls? <SpaceControls /> : null}
                 <Menu />
                 <EndCallButton />
               </Grid>
