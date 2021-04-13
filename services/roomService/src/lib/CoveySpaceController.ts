@@ -164,16 +164,23 @@ export default class CoveySpaceController {
     * 
     * @param newHost ID of the player that is the new host
     */
-  updateSpaceHost(newHostID: string | null): void {
+  updateSpaceHost(newHostID: string | null): boolean {
     // Updates the spacehost
-    this._spaceHostID = newHostID;
-
-    // If the new host is not undefined space is set to private, else it is not private
-    if (newHostID !== null) {
-      this._isPrivate = true;
-    } else {
+    // If the new host is not undefined space is set to private
+    if (newHostID !== null){
+      const hostPlayer = this.playerFromID(newHostID);
+      if (this.isPlayerInSpace(newHostID) && hostPlayer !== undefined) {
+        this._spaceHostID = newHostID;
+        this.disconnectAllPlayersExceptP(hostPlayer);
+        this._isPrivate = true;
+        return true;
+      }
+    } else { // Else it is not private
+      this._spaceHostID = newHostID;
       this.publicizeSpace();
+      return true;
     }
+    return false;
   }
   
   /**
@@ -219,7 +226,7 @@ export default class CoveySpaceController {
   /**
    * Remove all players from space
    */
-  disconnectAllPlayers(): void {
-    this._players = [];
+  disconnectAllPlayersExceptP(p: Player): void {
+    this._players = [p];
   }
 }

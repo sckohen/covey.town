@@ -223,11 +223,11 @@ export async function spaceClaimHandler(requestData: SpaceClaimRequest): Promise
     };
   }
 
-  coveySpaceController.updateSpaceHost(requestData.hostID);
+  const success = coveySpaceController.updateSpaceHost(requestData.hostID);
   return {
-    isOK: true,
-    message: `The host is now player with ID ${requestData.hostID} and the space is now private`,
+    isOK: success,
     response: {},
+    message: success? `Could not claim space` : undefined
   };
 }
 

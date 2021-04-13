@@ -104,7 +104,7 @@ export default class CoveySpacesStore {
         hostedSpace.updateWhitelist(whitelist);
       }
       if (spacePresenterID !== undefined) {
-        console.log('Updated whitelist');
+        console.log('Updated presenterID');
         hostedSpace.updatePresenter(spacePresenterID);
       }
       return true;
