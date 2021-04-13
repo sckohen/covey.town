@@ -95,7 +95,8 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
           description: 'You can use the space controls in the menu bar',
           status: 'success',
           isClosable: true,
-        });     } catch (error) {
+        });     
+      } catch (error) {
         toast({
           title: 'Unable to claim space',
           status: 'error',
@@ -108,10 +109,10 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
     const currentSpaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
     const spaceInfo = currentSpaceInfo.space;
 
-    if (spaceInfo.coveySpaceID !== 'World' && spaceInfo.hostID === null) {
-      setShowClaimButton(true);
-    } else {
+    if (currentLocation.space === 'World') {
       setShowClaimButton(false);
+    } else if(spaceInfo.hostID === null) {
+      setShowClaimButton(true);
     }
   }
 
@@ -119,7 +120,7 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
     const currentSpaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
     const spaceInfo = currentSpaceInfo.space;
 
-    if (spaceInfo.hostID === myPlayerID) {
+    if (currentLocation.space !== 'World' && spaceInfo.hostID === myPlayerID) {
       setShowControls(true);
     } else {
       setShowControls(false);
