@@ -112,7 +112,7 @@ export default function SpaceControls () {
         if (presenter === '') {
           presenterActual = null;
         }
-        console.log(`Edit: ${currentLocation.space}, ${myPlayerID}, ${myPlayerID}, ${presenterActual}, [${whitelist}]`);
+
         await spaceApiClient.updateSpace({
           coveySpaceID: currentLocation.space,
           playerID: myPlayerID,
@@ -120,11 +120,14 @@ export default function SpaceControls () {
           presenterID: presenterActual,
           whitelist: whitelist,
         });
+
         toast({
           title: 'Space updated',
           status: 'success'
         })
+
         closeControls();
+
       }catch(err){
         toast({
           title: 'Unable to update space',

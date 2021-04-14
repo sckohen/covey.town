@@ -73,7 +73,6 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     spaceApiClient: state.spaceApiClient,
   };
 
-  // TODO: Add Comments
   function calculateNearbyPlayers(players: Player[], currentLocation: UserLocation) {
       const playersInSameSpace: Player[] = []; // List of all players in the same space as this player
       
