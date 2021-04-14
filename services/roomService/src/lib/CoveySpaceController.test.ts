@@ -11,7 +11,6 @@ import {townSubscriptionHandler} from '../requestHandlers/CoveyTownRequestHandle
 import CoveyTownsStore from './CoveyTownsStore';
 import * as TestUtils from '../client/TestUtils';
 import CoveySpaceController from './CoveySpaceController';
-import CoveySpaceListener from '../types/CoveySpaceListener';
 
 jest.mock('./TwilioVideo');
 
