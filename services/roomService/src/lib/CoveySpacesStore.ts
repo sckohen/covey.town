@@ -1,6 +1,4 @@
-import { response } from 'express';
 import { CoveySpaceInfo } from '../CoveyTypes';
-import Player from '../types/Player';
 import CoveySpaceController  from './CoveySpaceController';
 import CoveyTownsStore from './CoveyTownsStore';
 
@@ -42,7 +40,7 @@ export default class CoveySpacesStore {
   /**
    * Gets space where the given player is in
    */
-   getSpaceForPlayer(playerID: string): CoveySpaceInfo {
+  getSpaceForPlayer(playerID: string): CoveySpaceInfo {
     const spaceForPlayer = this._spaces.find((space) => space.isPlayerInSpace(playerID));
 
     if (spaceForPlayer !== undefined) {
@@ -52,7 +50,7 @@ export default class CoveySpacesStore {
         whitelist: spaceForPlayer.whitelist.map(player => player.id),
         hostID: spaceForPlayer.spaceHostID,
         presenterID: spaceForPlayer.presenterID,
-      }
+      };
     }
     return {
       coveySpaceID: 'World',
@@ -60,7 +58,7 @@ export default class CoveySpacesStore {
       whitelist: [],
       hostID: null,
       presenterID: null,
-    }
+    };
   }
 
   /**
@@ -95,19 +93,15 @@ export default class CoveySpacesStore {
    */
   updateSpace(coveySpaceID: string, playerID: string, spaceHostID?: string | null, spacePresenterID?: string | null, whitelist?: string[]): boolean {
     const hostedSpace = this.getControllerForSpace(coveySpaceID);
-    console.log(`updateSpace is called in SpaceStore: ${coveySpaceID}, ${spaceHostID}, ${spacePresenterID}, ${whitelist}`);
     if (hostedSpace !== undefined){
       if (hostedSpace.spaceHostID === null || playerID === hostedSpace.spaceHostID){
         if (spaceHostID !== undefined) {
-          console.log('Updated spaceHostID');
           hostedSpace.updateSpaceHost(spaceHostID);
         }
         if (whitelist !== undefined) {
-          console.log('Updated whitelist');
           hostedSpace.updateWhitelist(whitelist);
         }
         if (spacePresenterID !== undefined) {
-          console.log('Updated presenterID');
           hostedSpace.updatePresenter(spacePresenterID);
         }
         return true;

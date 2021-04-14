@@ -1,4 +1,3 @@
-import Player from '../types/Player';
 import { CoveySpaceInfo } from '../CoveyTypes';
 import CoveySpacesStore from '../lib/CoveySpacesStore';
 
@@ -55,14 +54,14 @@ export interface SpaceListResponse {
 /**
  * Response to the server to get info on a space
  */
- export interface SpaceGetForPlayerRequest {
+export interface SpaceGetForPlayerRequest {
   playerID: string;
 }
 
 /**
  * Response from the server for a space request
  */
- export interface SpaceInfoResponse {
+export interface SpaceInfoResponse {
   space: {
     coveySpaceID: string; 
     currentPlayers?: string[]; 
@@ -148,7 +147,7 @@ export async function spaceJoinHandler(requestData: SpaceJoinRequest): Promise<R
   return {
     isOK: success,
     response: {},
-    message: !success ? `Player ID${playerID} can't join space` : undefined
+    message: !success ? `Player ID${playerID} can't join space` : undefined,
   };
 }
 
@@ -198,10 +197,10 @@ export async function spaceListHandler(): Promise<ResponseEnvelope<SpaceListResp
  * Handler for getting a specific space
  * @returns listing of the specific space (spaceID, currentPlayers, Whitelist, Host, Presenter)
  */
- export async function spaceGetForPlayerHandler(requestData: SpaceGetForPlayerRequest): Promise<ResponseEnvelope<SpaceInfoResponse>> {
+export async function spaceGetForPlayerHandler(requestData: SpaceGetForPlayerRequest): Promise<ResponseEnvelope<SpaceInfoResponse>> {
   const spacesStore = CoveySpacesStore.getInstance();
 
-  let spaceResponse = spacesStore.getSpaceForPlayer(requestData.playerID)
+  const spaceResponse = spacesStore.getSpaceForPlayer(requestData.playerID);
 
   return {
     isOK: true,
@@ -232,7 +231,7 @@ export async function spaceClaimHandler(requestData: SpaceClaimRequest): Promise
   return {
     isOK: success,
     response: {},
-    message: success? `Could not claim space` : undefined
+    message: success? 'Could not claim space' : undefined,
   };
 }
 
@@ -244,10 +243,10 @@ export async function spaceClaimHandler(requestData: SpaceClaimRequest): Promise
 export async function spaceUpdateHandler(requestData: SpaceUpdateRequest): Promise<ResponseEnvelope<Record<string, null>>> {
   const spacesStore = CoveySpacesStore.getInstance();
   const { coveySpaceID, playerID, hostID, presenterID, whitelist } = requestData;
-  let success: boolean = false;
+  let success = false;
 
   if (hostID === null) {
-    spacesStore.disbandSpace(coveySpaceID , playerID);
+    spacesStore.disbandSpace(coveySpaceID, playerID);
     success = true;
   } else if (whitelist === undefined && presenterID === undefined) { // when claim space is called
     success = spacesStore.updateSpace(
@@ -270,7 +269,7 @@ export async function spaceUpdateHandler(requestData: SpaceUpdateRequest): Promi
   return {
     isOK: success,
     response: {},
-    message: success? `Could not update space.` : undefined,
+    message: success? 'Could not update space.' : undefined,
     
   };
 }

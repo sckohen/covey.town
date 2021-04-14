@@ -146,7 +146,7 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
   /**
      * List the space for the given player
      */
-   app.get('/spaces/:playerID', BodyParser.json(), async (req, res) => {
+  app.get('/spaces/:playerID', BodyParser.json(), async (req, res) => {
     try {
       const result = await spaceGetForPlayerHandler({
         playerID: req.params.playerID,

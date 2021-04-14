@@ -1,4 +1,3 @@
-import { throws } from 'assert';
 import Player from '../types/Player';
 import CoveyTownController from './CoveyTownController';
 
@@ -99,20 +98,20 @@ export default class CoveySpaceController {
       if (this._isPrivate === false) {
         this._players.push(newPlayer);
         return true;
-      } else if (this._spaceHostID !== null) { // If the space is private and the spaceHost is defined
-          if (this.playerFromID(this._spaceHostID) === undefined) { // If the host is no longer in the game
-            this.publicizeSpace();
-            this._players.push(newPlayer);
-            return true;
-          } else if (this._whitelist.includes(newPlayer) || this.spaceHostID === newPlayerID) {
-            this._players.push(newPlayer);
-            return true;
-          }
-          return false;
+      } if (this._spaceHostID !== null) { // If the space is private and the spaceHost is defined
+        if (this.playerFromID(this._spaceHostID) === undefined) { // If the host is no longer in the game
+          this.publicizeSpace();
+          this._players.push(newPlayer);
+          return true;
+        } if (this._whitelist.includes(newPlayer) || this.spaceHostID === newPlayerID) {
+          this._players.push(newPlayer);
+          return true;
         }
+        return false;
       }
-      return false;
     }
+    return false;
+  }
 
   /**
    * Remove the player specified from the space
@@ -175,11 +174,11 @@ export default class CoveySpaceController {
         return true;
       } 
       return false; // If the spaceHostID was already defined when trying to claim, fail
-    } else {
-      // Else it is not private
-      this.publicizeSpace();
-      return true;
-    }
+    } 
+    // Else it is not private
+    this.publicizeSpace();
+    return true;
+    
   }
   
   /**
@@ -197,8 +196,8 @@ export default class CoveySpaceController {
    * @param newWhitelist the list of players that are allowed to enter a given space
    */
   updateWhitelist(newWhitelist: string[]): void {
-    //get a list of IDs and return a list of player and update it
-    let idWhitelistToPlayerWhitelist: Player[] = [];
+    // get a list of IDs and return a list of player and update it
+    const idWhitelistToPlayerWhitelist: Player[] = [];
 
     newWhitelist.forEach(playerID => {
       const player = this.playerFromID(playerID);
