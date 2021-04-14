@@ -17,6 +17,8 @@ import assert from 'assert';
 export interface SpaceClaimRequest {
   /** The id for the space that is to be claimed* */
   coveySpaceID: string;
+  /** The id for the player sending the request* */
+  playerID: string;
   /** The id for the new host (player) for the private space* */
   hostID: string;
 }
@@ -67,6 +69,7 @@ export interface SpaceListResponse {
  */
 export interface SpaceDisbandRequest {
   coveySpaceID: string;
+  playerID: string;
   hostID: null;
 }
 
@@ -75,6 +78,7 @@ export interface SpaceDisbandRequest {
  */
 export interface SpaceUpdateRequest {
   coveySpaceID: string;
+  playerID: string;
   hostID: string | null;
   presenterID: string | null;
   whitelist: string[];

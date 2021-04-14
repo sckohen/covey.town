@@ -208,12 +208,12 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
      * - disband a space
      * - change hosts
      * - change presenters
-     * TODO: Maybe update client requests to match naming convention (e.g. newPresenterID -> presenterID)
      */
   app.patch('/spaces/:spaceID', BodyParser.json(), async (req, res) => {
     try {
       const result = await spaceUpdateHandler({
         coveySpaceID: req.params.spaceID,
+        playerID: req.body.playerID,
         hostID: req.body.hostID,
         presenterID: req.body.presenterID,
         whitelist: req.body.whitelist,

@@ -18,6 +18,8 @@ export interface SpaceCreateRequest {
 export interface SpaceClaimRequest {
   /** The id for the space that is to be claimed* */
   coveySpaceID: string;
+  /** The id for the player sending the request* */
+  playerID: string;
   /** The id for the new host (player) for the private space* */
   hostID: string;
 }
@@ -75,6 +77,8 @@ export interface SpaceListResponse {
  */
 export interface SpaceDisbandRequest {
   coveySpaceID: string;
+  playerID: string;
+  hostID: null;
 }
 
 /**
@@ -82,6 +86,7 @@ export interface SpaceDisbandRequest {
  */
 export interface SpaceUpdateRequest {
   coveySpaceID: string;
+  playerID: string;
   hostID: string | null;
   presenterID: string | null;
   whitelist: string[];
@@ -238,20 +243,24 @@ export async function spaceClaimHandler(requestData: SpaceClaimRequest): Promise
  */
 export async function spaceUpdateHandler(requestData: SpaceUpdateRequest): Promise<ResponseEnvelope<Record<string, null>>> {
   const spacesStore = CoveySpacesStore.getInstance();
-  const { coveySpaceID, hostID, presenterID, whitelist } = requestData;
+  const { coveySpaceID, playerID, hostID, presenterID, whitelist } = requestData;
+  let success: boolean = false;
 
   if (hostID === null) {
-    spacesStore.disbandSpace(coveySpaceID);
+    spacesStore.disbandSpace(coveySpaceID , playerID);
+    success = true;
   } else if (whitelist === undefined && presenterID === undefined) { // when claim space is called
-    spacesStore.updateSpace(
-      coveySpaceID, 
+    success = spacesStore.updateSpace(
+      coveySpaceID,
+      playerID, 
       hostID, 
       null, 
       [hostID],
     );
   } else {
-    spacesStore.updateSpace(
-      coveySpaceID, 
+    success = spacesStore.updateSpace(
+      coveySpaceID,
+      playerID, 
       hostID,
       presenterID, 
       whitelist,
@@ -259,8 +268,9 @@ export async function spaceUpdateHandler(requestData: SpaceUpdateRequest): Promi
   }
 
   return {
-    isOK: true,
-    message: `The space ${requestData.coveySpaceID} was updated.`,
+    isOK: success,
     response: {},
+    message: success? `Could not update space.` : undefined,
+    
   };
 }

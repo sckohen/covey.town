@@ -71,7 +71,7 @@ class CoveyGameScene extends Phaser.Scene {
   }
 
   /**
-   * EXISTING
+   * EXISTING FUNCTION
    * updates the location of a group of given players that are moving. 
    * Also removes players from the space that have disconnedcted by detroying their sprite and label
    * 
@@ -85,16 +85,14 @@ class CoveyGameScene extends Phaser.Scene {
     }
 
     // Hide the sprite and label of player that do not share the same space as the player
-    players.forEach(async (p) => {
+    players.forEach((p) => {
       this.updatePlayerLocation(p);
-      const playerSpace = p.location?.space;
-
-      if (p.sprite && playerSpace){
-        if (playerSpace !== this.inSpace) {
-          p.sprite.setAlpha(0);
+      if (p.location){
+        if (p.location.space !== this.inSpace) {
+          p.sprite?.setAlpha(0);
           p.label?.setAlpha(0);
         } else {
-          p.sprite.setAlpha(100);
+          p.sprite?.setAlpha(100);
           p.label?.setAlpha(100);
         }
       }
@@ -121,6 +119,7 @@ class CoveyGameScene extends Phaser.Scene {
   }
 
   /**
+   * EXISTING FUNCTION
    * Updates the location of a single player. Moves the location of their sprite based on how, or if, they move
    * @param player the player in question
    * @returns void
@@ -639,6 +638,7 @@ export default function WorldMap(): JSX.Element {
     spaceApiClient,
     myPlayerID,
     currentTownID,
+    currentLocation,
   } = useCoveyAppState();
   const [gameScene, setGameScene] = useState<CoveyGameScene>();
   useEffect(() => {
@@ -677,7 +677,7 @@ export default function WorldMap(): JSX.Element {
   const deepPlayers = JSON.stringify(players);
   useEffect(() => {
     gameScene?.updatePlayersLocations(players);
-  }, [players, deepPlayers, gameScene]);
+  }, [players, deepPlayers, gameScene, currentLocation.space]);
 
   return <div id="map-container"/>;
 }

@@ -88,26 +88,30 @@ export default class CoveySpacesStore {
   /**
    * Updates a private space based on the host's request
    * @param coveySpaceId the ID number for a covey space
+   * @param playerID the ID for the player who sent the request
    * @param spaceHost the desired host of a space that may or maynot be updated
+   * @param spacePresenterID the ID for the player who is the presenter
    * @param whitelist the desired whitelist of a space that may or maynot be updated
    */
-  updateSpace(coveySpaceID: string, spaceHostID?: string | null, spacePresenterID?: string | null, whitelist?: string[]): boolean {
+  updateSpace(coveySpaceID: string, playerID: string, spaceHostID?: string | null, spacePresenterID?: string | null, whitelist?: string[]): boolean {
     const hostedSpace = this.getControllerForSpace(coveySpaceID);
     console.log(`updateSpace is called in SpaceStore: ${coveySpaceID}, ${spaceHostID}, ${spacePresenterID}, ${whitelist}`);
     if (hostedSpace !== undefined){
-      if (spaceHostID !== undefined) {
-        console.log('Updated spaceHostID');
-        hostedSpace.updateSpaceHost(spaceHostID);
+      if (hostedSpace.spaceHostID === null || playerID === hostedSpace.spaceHostID){
+        if (spaceHostID !== undefined) {
+          console.log('Updated spaceHostID');
+          hostedSpace.updateSpaceHost(spaceHostID);
+        }
+        if (whitelist !== undefined) {
+          console.log('Updated whitelist');
+          hostedSpace.updateWhitelist(whitelist);
+        }
+        if (spacePresenterID !== undefined) {
+          console.log('Updated presenterID');
+          hostedSpace.updatePresenter(spacePresenterID);
+        }
+        return true;
       }
-      if (whitelist !== undefined) {
-        console.log('Updated whitelist');
-        hostedSpace.updateWhitelist(whitelist);
-      }
-      if (spacePresenterID !== undefined) {
-        console.log('Updated presenterID');
-        hostedSpace.updatePresenter(spacePresenterID);
-      }
-      return true;
     }
     return false;
   }
@@ -117,10 +121,10 @@ export default class CoveySpacesStore {
   * @param spaceID the spaceID for the space they would like to leave
   * @returns success as a boolean
   */
-  disbandSpace(spaceID: string): boolean {
+  disbandSpace(spaceID: string, playerID: string): boolean {
     const spaceController = this.getControllerForSpace(spaceID);
 
-    if (spaceController) {
+    if (spaceController !== undefined && spaceController.spaceHostID === playerID) {
       spaceController.publicizeSpace();
       return true;
     }

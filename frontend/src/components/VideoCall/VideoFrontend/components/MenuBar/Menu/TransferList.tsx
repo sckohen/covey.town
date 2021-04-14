@@ -62,7 +62,7 @@ export default function TransferList({whitelistOfPlayers, onWhitelistChange}: Tr
   // Calls initializeWhitelist when controls are opened (on load of component)
   useEffect (() => {
     initializeWhitelist();
-  }, [onOpen])
+  }, [onOpen, players])
 
   const leftChecked = intersection(checked, notSelected);
   const rightChecked = intersection(checked, newWhitelist);

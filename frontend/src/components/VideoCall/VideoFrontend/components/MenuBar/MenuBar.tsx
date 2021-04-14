@@ -87,7 +87,7 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
   const claimSpace = async () => {
     if (currentLocation.space !== 'World') { 
       try {
-        await spaceApiClient.claimSpace({ coveySpaceID: currentLocation.space , hostID: myPlayerID });
+        await spaceApiClient.claimSpace({ coveySpaceID: currentLocation.space, playerID: myPlayerID, hostID: myPlayerID });
         setShowClaimButton(false);
         setShowControls(true);
         toast({
@@ -95,10 +95,12 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
           description: 'You can use the space controls in the menu bar',
           status: 'success',
           isClosable: true,
-        });     
+        });
       } catch (error) {
+        setShowClaimButton(false);
         toast({
-          title: 'Unable to claim space',
+          title: 'Unable to claim space.',
+          description: 'Space may already be claimed. Try walking in again.',
           status: 'error',
         });
       }
@@ -106,9 +108,6 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
   }
 
   const handleClaimButton = async () => {
-    const currentSpaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
-    const spaceInfo = currentSpaceInfo.space;
-
     if (currentLocation.space === 'World') {
       setShowClaimButton(false);
     } else if(spaceInfo.hostID === null) {
@@ -117,9 +116,6 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
   }
 
   const handleSpaceControls = async () => {
-    const currentSpaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
-    const spaceInfo = currentSpaceInfo.space;
-
     if (currentLocation.space !== 'World' && spaceInfo.hostID === myPlayerID) {
       setShowControls(true);
     } else {
@@ -128,10 +124,10 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
   }
 
   useEffect(() => {
+    getSpaceInfo();
     handleClaimButton();
     handleSpaceControls();
-    getSpaceInfo();
-  }, [currentLocation.space]);
+  }, [currentLocation.space, spaceInfo.coveySpaceID]);
 
   return (
     <>
