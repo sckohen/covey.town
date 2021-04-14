@@ -18,13 +18,6 @@ export interface SpaceCreateRequest {
 }
 
 /**
- * Response to a SpaceCreateRequest
- */
-export interface SpaceCreateResponse {
-  // unimplemented
-}
-
-/**
  * Payload sent by client to claim a space within a Town in Covey.Town
  */
 export interface SpaceClaimRequest {
@@ -32,14 +25,6 @@ export interface SpaceClaimRequest {
   coveySpaceID: string;
   /** The id for the new host (player) for the private space* */
   newHostPlayerID: string;
-}
-
-/**
-* Response from the server for a space claim request
-*/
-export interface SpaceClaimResponse {
-  // might not need to return anything here 
-  // we could just send confirmation in the response envelope
 }
 
 /**
