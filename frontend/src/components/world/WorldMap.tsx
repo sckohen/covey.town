@@ -63,11 +63,16 @@ class CoveyGameScene extends Phaser.Scene {
     this.load.atlas('atlas', '/assets/atlas/atlas.png', '/assets/atlas/atlas.json');
   }
 
-  // get space by player
-  async getSpaceForPlayer(playerID: string): Promise<string> {
+  
+  /**
+   * Gets space for the specific playerID
+   * @param playerID ID for the player we want the space for
+   * @returns  the space info
+   */
+  async getSpaceForPlayer(playerID: string) {
     const { spaceApiClient } = this.spaceCreateInfo;
     const playerSpace = await spaceApiClient.getSpaceForPlayer({ playerID });
-    return playerSpace.space.coveySpaceID;
+    return playerSpace.space;
   }
 
   /**
