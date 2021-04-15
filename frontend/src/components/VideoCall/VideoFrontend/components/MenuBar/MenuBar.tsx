@@ -110,10 +110,10 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
 
   const handleClaimButton = async () => {
     console.log(`In claim: currLoc.space: ${currentLocation.space}, hostID: ${spaceInfo.hostID}`);
-    if (currentLocation.space === 'World') {
-      setShowClaimButton(false);
-    } else if(spaceInfo.hostID === null) {
+    if (currentLocation.space !== 'World' && spaceInfo.hostID === null) {
       setShowClaimButton(true);
+    } else {
+      setShowClaimButton(false);
     }
   }
 

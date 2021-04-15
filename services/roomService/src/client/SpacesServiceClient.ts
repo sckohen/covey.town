@@ -131,11 +131,11 @@ export default class SpacesServiceClient {
    * Takes the coveyTownId and coveySpaceId from a given SpaceCreateRequest, wraps it and turns it into a Space create response promise
    * 
    * @param requestData 
-   * @returns A SpaceCreateResponse promise made from the wrapped request data that was given
+   * @returns void
    */
-  async createSpace(requestData: SpaceCreateRequest): Promise<SpaceCreateResponse> {
+  async createSpace(requestData: SpaceCreateRequest): Promise<void> {
     const { coveyTownID, coveySpaceID } = requestData;
-    const responseWrapper = await this._axios.post<ResponseEnvelope<SpaceCreateResponse>>(`/spaces/${coveyTownID}/${coveySpaceID}`, requestData);
+    const responseWrapper = await this._axios.post<ResponseEnvelope<void>>(`/spaces/${coveyTownID}/${coveySpaceID}`, requestData);
     return SpacesServiceClient.unwrapOrThrowError(responseWrapper);
   }
 
@@ -143,7 +143,7 @@ export default class SpacesServiceClient {
    * Takes the coveySpaceId from a given SpaceUpdateRequest, wraps it and turns it into a void promise to update the space
    * 
    * @param requestData 
-   * @returns A SpaceCreateResponse promise made from the wrapped request data that was given
+   * @returns void
    */
   async updateSpace(requestData: SpaceUpdateRequest): Promise<void> {
     const { coveySpaceID } = requestData;
@@ -155,7 +155,7 @@ export default class SpacesServiceClient {
    * Takes the coveySpaceId from a given SpaceDisbandRequest, wraps it and turns it into a void promise to delete the space
    * 
    * @param requestData 
-   * @returns A SpaceCreateResponse promise made from the wrapped request data that was given
+   * @returns void
    */
   async deleteSpace(requestData: SpaceDisbandRequest): Promise<void> {
     const { coveySpaceID } = requestData;
