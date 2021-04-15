@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 
 import Button from '@material-ui/core/Button';
@@ -82,6 +82,7 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
   const getSpaceInfo = async () => {
     const currentSpaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
     setSpaceInfo(currentSpaceInfo.space);
+    console.log(`After setting: ${spaceInfo.coveySpaceID}, ${spaceInfo.currentPlayers}, ${spaceInfo.hostID}, ${spaceInfo.presenterID}, ${spaceInfo.whitelist}`);
   }
   
   const claimSpace = async () => {
@@ -108,6 +109,7 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
   }
 
   const handleClaimButton = async () => {
+    console.log(`In claim: currLoc.space: ${currentLocation.space}, hostID: ${spaceInfo.hostID}`);
     if (currentLocation.space === 'World') {
       setShowClaimButton(false);
     } else if(spaceInfo.hostID === null) {
@@ -116,6 +118,7 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
   }
 
   const handleSpaceControls = async () => {
+    console.log(`In controls: currLoc.space: ${currentLocation.space}, hostID: ${spaceInfo.hostID}`);
     if (currentLocation.space !== 'World' && spaceInfo.hostID === myPlayerID) {
       setShowControls(true);
     } else {
@@ -125,9 +128,12 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
 
   useEffect(() => {
     getSpaceInfo();
+  }, [currentLocation.space]);
+
+  useEffect(() => {
     handleClaimButton();
     handleSpaceControls();
-  }, [currentLocation.space, spaceInfo.coveySpaceID]);
+  }, [spaceInfo.coveySpaceID]);
 
   return (
     <>
