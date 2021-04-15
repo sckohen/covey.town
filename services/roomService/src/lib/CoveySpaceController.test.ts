@@ -14,12 +14,13 @@ import CoveySpaceController from './CoveySpaceController';
 
 jest.mock('./TwilioVideo');
 
-const mockGetTokenForTown = jest.fn();
+const mockGetTokenForSpace = jest.fn();
 // eslint-disable-next-line
 // @ts-ignore it's a mock
 TwilioVideo.getInstance = () => ({
-  getTokenForTown: mockGetTokenForTown,
+  getTokenForSpace: mockGetTokenForSpace,
 });
+
 
 function generateTestLocation(): UserLocation {
   return {
@@ -59,12 +60,11 @@ describe('addPlayer', () => { // Included in handout
       const townController = new CoveyTownController(townName, false);
       await townController.addPlayer(new Player('1'));
       await townController.addPlayer(new Player('2'));
-      const spaceController = new CoveySpaceController(spaceID, townController);
-      spaceController.addPlayer('1');
-      expect(spaceController.players.length)
-      .toBe(1);
-      spaceController.addPlayer('2');
-      expect(spaceController.players.length)
+      coconst newPlayerSession = await nst spaceController = new CoveySpaceController(spaceID, townController);
+        expect(mockGetTokenForTown).toBeCalledTimes(1);eController.players.length)
+      .tspaceController.addPlayer('2');
+        expect(spaceController.players.length)
+        .toBe(2);eController.players.length)
       .toBe(2);
     });
   });
