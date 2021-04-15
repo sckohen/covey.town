@@ -24,15 +24,15 @@ export default class Player {
     this._userName = userName;
     this._id = nanoid();
   }
-
+  // gets the username of a player
   get userName(): string {
     return this._userName;
   }
-
+  // gets the id of a player
   get id(): string {
     return this._id;
   }
-
+  // updates the location of a player
   updateLocation(location: UserLocation): void {
     this.location = location;
   }

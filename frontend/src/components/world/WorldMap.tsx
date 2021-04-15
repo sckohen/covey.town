@@ -627,14 +627,15 @@ class CoveyGameScene extends Phaser.Scene {
   }
   
 }
-
+// the info needed to create a space 
+// API client, the player Id, and the current town Id
 type SpaceCreationInfo = {
   spaceApiClient: SpacesServiceClient,
   myPlayerID: string,
   currentTownID: string,
 }
 
-
+// exports the default world map function to connect the hitbox in the map with the backend of a private space
 export default function WorldMap(): JSX.Element {
   const video = Video.instance();
   const {
@@ -660,6 +661,7 @@ export default function WorldMap(): JSX.Element {
       },
     };
 
+    // gets info needed to create a space
     const spaceCreateInfo = { spaceApiClient, myPlayerID, currentTownID };
 
     const game = new Phaser.Game(config);

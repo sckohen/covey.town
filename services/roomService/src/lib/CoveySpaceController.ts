@@ -2,26 +2,26 @@ import Player from '../types/Player';
 import CoveyTownController from './CoveyTownController';
 
 /**
- * The CoveyTownController implements  the logic for each town: managing the various events that
- * can occur (e.g. joining a town, moving, leaving a town)
+ * The CoveySpaceController implements  the logic for each space: managing the various events that
+ * can occur (e.g. joining a space, moving, leaving a space, becoming host etc.)
  */
 export default class CoveySpaceController {
   get spaceHostID(): string | null {
     return this._spaceHostID;
   }
-
+  // gets the ID of the current presenter
   get presenterID(): string | null {
     return this._presenterID;
   }
-
+  // gets the current players in a space
   get players(): Player[] {
     return this._players;
   }
-
+  // gets the ID of the current space
   get coveySpaceID(): string {
     return this._coveySpaceID;
   }
-
+  // gets the list of players that are allowed to enter the private space (whitelist)
   get whitelist(): Player[] {
     return this._whitelist;
   }

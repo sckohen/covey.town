@@ -20,7 +20,7 @@ export default class PlayerSession {
     // Session tokens are randomly generated strings
     this._sessionToken = nanoid();
   }
-
+ 
   set videoToken(value: string | undefined) {
     this._videoToken = value;
   }
