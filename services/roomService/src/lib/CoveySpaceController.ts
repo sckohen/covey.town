@@ -91,7 +91,7 @@ export default class CoveySpaceController {
     if (newPlayer !== undefined) {
       // If player is already on the list dont do anything
       if (this._players.includes(newPlayer)) {
-        return false; 
+        return true; 
       }
 
       // If the space is not private
@@ -167,20 +167,18 @@ export default class CoveySpaceController {
     // Updates the spacehost
     // If the new host is not null, space is set to private
     if (newHostID !== null){
-      if (this._spaceHostID === null) {
+      if (this._spaceHostID === null) { // If the spacehost is not already defined
         this._spaceHostID = newHostID;
         this.disconnectAllPlayersExceptP(newHostID);
         this._isPrivate = true;
-        this.disconnectAllPlayersExceptP(newHostID);
-        this._coveyTownController.claimSpace();
+        this._coveyTownController.claimSpace(this._coveySpaceID);
         return true;
       } 
-      return false; // If the spaceHostID was already defined when trying to claim, fail
+      return false; // Else, if the spaceHostID was already defined, fail
     } 
-    // Else it is not private
+    // Else, if newHostID is null, space is not private
     this.publicizeSpace();
     return true;
-    
   }
   
   /**

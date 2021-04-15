@@ -169,7 +169,7 @@ export default class CoveyTownController {
     this._listeners.forEach((listener) => listener.onTownDestroyed());
   }
 
-  claimSpace(): void {
-    this._listeners.forEach((listener) => listener.onSpaceClaimed());
+  claimSpace(spaceID: string): void {
+    this._listeners.forEach((listener) => listener.onSpaceClaimed(spaceID));
   }
 }
