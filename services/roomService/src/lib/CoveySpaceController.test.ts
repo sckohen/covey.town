@@ -33,7 +33,7 @@ function generateTestLocation(): UserLocation {
 
 describe('CoveySpaceController', () => {
   beforeEach(() => {
-    mockGetTokenForTown.mockClear();
+    mockGetTokenForSpace.mockClear();
   });
   it('constructor should set the CoveySpaceID and the CoveyTownController', () => { // Included in handout
     const spaceID = `SpaceIDTest-${nanoid()}`;
@@ -60,12 +60,10 @@ describe('addPlayer', () => { // Included in handout
       const townController = new CoveyTownController(townName, false);
       await townController.addPlayer(new Player('1'));
       await townController.addPlayer(new Player('2'));
-      coconst newPlayerSession = await nst spaceController = new CoveySpaceController(spaceID, townController);
-        expect(mockGetTokenForTown).toBeCalledTimes(1);eController.players.length)
-      .tspaceController.addPlayer('2');
-        expect(spaceController.players.length)
-        .toBe(2);eController.players.length)
-      .toBe(2);
+      const spaceController = new CoveySpaceController(spaceID, townController);
+      const newPlayerSession = await spaceController.addPlayer('1')
+      expect(mockGetTokenForSpace).toBeCalledTimes(1);
+      expect(mockGetTokenForSpace).toBeCalledWith(spaceController.coveySpaceID, newPlayerSession.player.id);
     });
   });
 // tests removing a player from a space
