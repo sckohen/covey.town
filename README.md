@@ -45,3 +45,18 @@ Create a `.env` file in the `frontend` directory, with the line: `REACT_APP_TOWN
 
 In the `frontend` directory, run `npm start` (again, you'll need to run `npm install` the very first time). After several moments (or minutes, depending on the speed of your machine), a browser will open with the frontend running locally.
 The frontend will automatically re-compile and reload in your browser if you change any files in the `frontend/src` directory.
+
+#
+
+## Covey Spaces
+
+### [https://github.com/sckohen/covey.town](https://github.com/sckohen/covey.town)
+
+### Deploying Covey Spaces is the same as deploying Covey.Town (no additional steps).
+
+Covey Spaces are pre-defined spaces on the map that allow users to meet without having to worry about distancing.
+While there is a hard limit of 2 spaces per map, you can define these spaces anywhere you like.
+
+The default map comes with 2 defined spaces, but if you would like to change these spaces, you can open the map (inside `frontend\public\assets\tilemaps\tuxemon-town.json`) using Tiled editor. You can define spaces as a rectangular objects on the Objects layer paying attention to the naming convention: `Private Space #` where `#` should be 1 or 2.
+
+![Covey Spaces On Tiled](docs/covey-space-on-tiled.png)
