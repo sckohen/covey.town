@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { io, Socket } from 'socket.io-client';
+import assert from 'assert';
 import Phaser from 'phaser';
 import Player, { UserLocation } from '../../classes/Player';
 import Video from '../../classes/Video/Video';
@@ -40,6 +42,8 @@ class CoveyGameScene extends Phaser.Scene {
 
   private allSpaces: Phaser.GameObjects.Zone[];
 
+  private spawnPoint: Phaser.GameObjects.Components.Transform | undefined;
+
   /**
    * Constructs the map taking in required arguments needed to 'play the game'
    * 
@@ -54,6 +58,7 @@ class CoveyGameScene extends Phaser.Scene {
     this.spaceCreateInfo = spaceCreateInfo;
     this.inSpace = "World";
     this.allSpaces = [];
+    this.spawnPoint = undefined;
   }
 
   preload() {
@@ -285,21 +290,33 @@ class CoveyGameScene extends Phaser.Scene {
    * Helper function to join a space
    * @param space the space to join
    */
-  async joinSpace(space: Phaser.GameObjects.Zone) {    
+  async joinSpace(spaceID: string) {    
     const { spaceApiClient, myPlayerID } = this.spaceCreateInfo;
+    const space = this.allSpaces.find(zone => zone.name === spaceID);
     
-    // Try to join a space (returns boolean for success or failure)
-    try {
-      await spaceApiClient.joinSpace({ coveySpaceID: space.name, playerID: myPlayerID });
-      this.inSpace = space.name;
-    } catch (error) {
-      // If join space attempt fails, kick player out of space
-      if(this.lastLocation && this.player){
-        // Move the player to their last location (outside the space)
-        this.player.sprite.x = this.lastLocation.x;
-        this.player.sprite.y = this.lastLocation.y;
-        this.lastLocation.space = this.inSpace;
-        this.emitMovement(this.lastLocation);
+    if (space !== undefined){
+      // Try to join a space (returns boolean for success or failure)
+      try {
+        await spaceApiClient.joinSpace({ coveySpaceID: space.name, playerID: myPlayerID });
+        this.inSpace = space.name;
+        console.log('Was able to join');
+      } catch (error) {
+        // If join space attempt fails, kick player out of space
+        if(this.spawnPoint && this.player && this.lastLocation){
+          // Move the player to their last location (outside the space)
+          const locationForSpawn = {
+            x: this.spawnPoint.x,
+            y: this.spawnPoint.x,
+            rotation: this.lastLocation.rotation,
+            moving: false,
+            space: 'World',
+          }
+          this.player.sprite.x = this.spawnPoint.x;
+          this.player.sprite.y = this.spawnPoint.y;
+          // this.lastLocation.space = this.inSpace;
+          this.emitMovement(locationForSpawn);
+          console.log('Not able to join');
+        }
       }
     }
   }
@@ -340,7 +357,7 @@ class CoveyGameScene extends Phaser.Scene {
 
     // Object layers in Tiled let you embed extra info into a map - like a spawn point or custom
     // collision shapes. In the tmx file, there's an object layer with a point named "Spawn Point"
-    const spawnPoint = map.findObject('Objects',
+    this.spawnPoint = map.findObject('Objects',
       (obj) => obj.name === 'Spawn Point') as unknown as
       Phaser.GameObjects.Components.Transform;
 
@@ -394,10 +411,10 @@ class CoveyGameScene extends Phaser.Scene {
     // has a bit of whitespace, so I'm using setSize & setOffset to control the size of the
     // player's body.
     const sprite = this.physics.add
-      .sprite(spawnPoint.x, spawnPoint.y, 'atlas', 'misa-front')
+      .sprite(this.spawnPoint.x, this.spawnPoint.y, 'atlas', 'misa-front')
       .setSize(30, 40)
       .setOffset(0, 24);
-    const label = this.add.text(spawnPoint.x, spawnPoint.y - 20, '(You)', {
+    const label = this.add.text(this.spawnPoint.x, this.spawnPoint.y - 20, '(You)', {
       font: '18px monospace',
       color: '#000000',
       // padding: {x: 20, y: 10},
@@ -440,8 +457,8 @@ class CoveyGameScene extends Phaser.Scene {
       moving: false,
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore - JB todo
-      x: spawnPoint.x,
-      y: spawnPoint.y,
+      x: this.spawnPoint.x,
+      y: this.spawnPoint.y,
       space: 'World'
     });
 
@@ -605,7 +622,7 @@ class CoveyGameScene extends Phaser.Scene {
     // Handles which space the player is in
     this.allSpaces.forEach(space => {
       if(this.checkOverlap(space) && this.inSpace === 'World') {
-        this.joinSpace(space);
+        this.joinSpace(space.name);
       }
 
       if(!this.checkOverlap(space) && this.inSpace === space.name) {
@@ -638,6 +655,8 @@ type SpaceCreationInfo = {
 // exports the default world map function to connect the hitbox in the map with the backend of a private space
 export default function WorldMap(): JSX.Element {
   const video = Video.instance();
+  const url = process.env.REACT_APP_TOWNS_SERVICE_URL;
+  assert(url);
   const {
     emitMovement, 
     players,
@@ -645,6 +664,7 @@ export default function WorldMap(): JSX.Element {
     myPlayerID,
     currentTownID,
     currentLocation,
+    sessionToken
   } = useCoveyAppState();
   const [gameScene, setGameScene] = useState<CoveyGameScene>();
   useEffect(() => {
@@ -685,6 +705,20 @@ export default function WorldMap(): JSX.Element {
   useEffect(() => {
     gameScene?.updatePlayersLocations(players);
   }, [players, deepPlayers, gameScene, currentLocation.space]);
+
+  useEffect(() => {
+    const socket = io(url, { auth: { token: sessionToken, coveyTownID: currentTownID } });
+    socket.on('spaceClaimed', () => {
+      gameScene?.joinSpace(currentLocation.space);
+      console.log('I am called');
+    });
+    socket.on('playerDisconnect', () => {
+      socket.disconnect();
+    });
+    socket.on('disconnect', () => {
+      socket.disconnect();
+    });
+  }, []);
 
   return <div id="map-container"/>;
 }

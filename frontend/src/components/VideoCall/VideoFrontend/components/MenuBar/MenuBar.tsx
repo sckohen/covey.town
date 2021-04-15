@@ -82,7 +82,6 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
   const getSpaceInfo = async () => {
     const currentSpaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
     setSpaceInfo(currentSpaceInfo.space);
-    console.log(`After setting: ${spaceInfo.coveySpaceID}, ${spaceInfo.currentPlayers}, ${spaceInfo.hostID}, ${spaceInfo.presenterID}, ${spaceInfo.whitelist}`);
   }
   
   const claimSpace = async () => {
@@ -91,6 +90,7 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
         await spaceApiClient.claimSpace({ coveySpaceID: currentLocation.space, playerID: myPlayerID, hostID: myPlayerID });
         setShowClaimButton(false);
         setShowControls(true);
+        
         toast({
           title: 'You are now the host of this space',
           description: 'You can use the space controls in the menu bar',
@@ -105,11 +105,10 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
           status: 'error',
         });
       }
-    } 
+    }
   }
 
   const handleClaimButton = async () => {
-    console.log(`In claim: currLoc.space: ${currentLocation.space}, hostID: ${spaceInfo.hostID}`);
     if (currentLocation.space !== 'World' && spaceInfo.hostID === null) {
       setShowClaimButton(true);
     } else {
@@ -118,7 +117,6 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
   }
 
   const handleSpaceControls = async () => {
-    console.log(`In controls: currLoc.space: ${currentLocation.space}, hostID: ${spaceInfo.hostID}`);
     if (currentLocation.space !== 'World' && spaceInfo.hostID === myPlayerID) {
       setShowControls(true);
     } else {

@@ -171,6 +171,8 @@ export default class CoveySpaceController {
         this._spaceHostID = newHostID;
         this.disconnectAllPlayersExceptP(newHostID);
         this._isPrivate = true;
+        this.disconnectAllPlayersExceptP(newHostID);
+        this._coveyTownController.claimSpace();
         return true;
       } 
       return false; // If the spaceHostID was already defined when trying to claim, fail

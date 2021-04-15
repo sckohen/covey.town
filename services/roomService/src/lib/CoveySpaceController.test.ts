@@ -129,8 +129,100 @@ describe('removePlayerFromWhitelist', () => { // Included in handout
       spaceController.removePlayerFromWhiteList('1');
       expect(spaceController.whitelist.length)
       .toBe(1);
-      spaceController.removePlayerFromWhiteList('2');
-      expect(spaceController.whitelist.length)
+     
+  // tests updating the host of a space
+  describe('updateHost', () => { // Included in handout
+    it('should check if the player is on the whitelist before they are made host',
+      async () => {
+        const spaceID = `SpaceIDTest-${nanoid()}`;
+        const townName = `FriendlyNameTest-${nanoid()}`;
+        const townController = new CoveyTownController(townName, false);
+        await townController.addPlayer(new Player('1'));
+        await townController.addPlayer(new Player('2'));
+        const spaceController = new CoveySpaceController(spaceID, townController);
+        spaceController.updateSpaceHost('1');
+        expect(spaceController.spaceHostID)
+        .toBe('1');
+      });
+  });
+    // tests updating the presenter of a space
+    describe('updatePresenter', () => { // Included in handout
+      it('should check if the player is on the whitelist before they are made host',
+        async () => {
+          const spaceID = `SpaceIDTest-${nanoid()}`;
+          const townName = `FriendlyNameTest-${nanoid()}`;
+          const townController = new CoveyTownController(townName, false);
+          await townController.addPlayer(new Player('1'));
+          await townController.addPlayer(new Player('2'));
+          const spaceController = new CoveySpaceController(spaceID, townController);
+          spaceController.updatePresenter('1');
+          expect(spaceController.updatePresenter('2'))
+          .toBe('2');
+        });
+    }); spaceController.removePlayerFromWhiteList('2');
+    // tests updating the whitelist of a space
+    describe('updateWhitelist', () => { // Included in handout
+      it('should check if the player is on the whitelist before they are made host',
+        async () => {
+          const spaceID = `SpaceIDTest-${nanoid()}`;
+          const townName = `FriendlyNameTest-${nanoid()}`;
+          const townController = new CoveyTownController(townName, false);
+          await townController.addPlayer(new Player('1'));
+          await townController.addPlayer(new Player('2'));
+          const spaceController = new CoveySpaceController(spaceID, townController);
+          const newWhitelist = ['1'];
+          spaceController.updateWhitelist(newWhitelist);
+          expect(spaceController.whitelist)
+          .toBe(['1']);
+        });
+    });
+    // tests making a space public again
+    describe('publicizeSpace', () => { // Included in handout
+      it('should check if the player is on the whitelist before they are made host',
+        async () => {
+          const spaceID = `SpaceIDTest-${nanoid()}`;
+          const townName = `FriendlyNameTest-${nanoid()}`;
+          const townController = new CoveyTownController(townName, false);
+          await townController.addPlayer(new Player('1'));
+          await townController.addPlayer(new Player('2'));
+          const spaceController = new CoveySpaceController(spaceID, townController);
+          const newWhitelist = ['1'];
+          spaceController.updateSpaceHost('1');
+          expect(spaceController.spaceHostID)
+         .toBe('1');
+          spaceController.updateWhitelist(newWhitelist);
+          expect(spaceController.whitelist)
+          .toBe(['1']);
+          spaceController.publicizeSpace();
+          expect(spaceController.spaceHostID)
+         .toBe(null);
+          spaceController.updateWhitelist(newWhitelist);
+          expect(spaceController.whitelist)
+          .toBe(['1', '2']);
+        });
+    });
+    // tests that remove all players from a space except one
+    describe('updateWhitelist', () => { // Included in handout
+      it('should check if the player is on the whitelist before they are made host',
+        async () => {
+          const spaceID = `SpaceIDTest-${nanoid()}`;
+          const townName = `FriendlyNameTest-${nanoid()}`;
+          const townController = new CoveyTownController(townName, false);
+          await townController.addPlayer(new Player('1'));
+          await townController.addPlayer(new Player('2'));
+          const spaceController = new CoveySpaceController(spaceID, townController);
+          const newWhitelist = ['1'];
+          spaceController.addPlayer('1');
+          expect(spaceController.players.length)
+          .toBe(1);
+          spaceController.addPlayer('2');
+          expect(spaceController.players.length)
+          .toBe(2);
+          spaceController.disconnectAllPlayersExceptP('1');
+          expect(spaceController.players.length)
+          .toBe(1);
+        });
+    });      expect(spaceController.whitelist.length)
       .toBe(0);
     });
   });
@@ -227,7 +319,7 @@ describe('removePlayerFromWhitelist', () => { // Included in handout
   //     expect(listenerRemoved.onTownDestroyed).not.toBeCalled();
 
   //   });
-  });
+  // });
   // describe('townSubscriptionHandler', () => {
   //   const mockSocket = mock<Socket>();
   //   let testingTown: CoveyTownController;

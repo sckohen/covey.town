@@ -7,21 +7,23 @@ import CoveySpacesStore from './CoveySpacesStore';
 
 function createTownForTesting(friendlyNameToUse?: string, isPublic = false) {
     const friendlyName = friendlyNameToUse !== undefined ? friendlyNameToUse :
-      `${isPublic ? 'Public' : 'Private'}TestingTown=${nanoid()}`;
+      `${isPublic ? 'Public' : 'Private'} TestingTown=${nanoid()}`;
     return CoveyTownsStore.getInstance()
       .createTown(friendlyName, isPublic);
   }
 
-  function createSpaceForTesting(spaceID: string, townControllerID: string) {
+function createSpaceForTesting(spaceID: string, townControllerID: string) {
     return CoveySpacesStore.getInstance()
       .createSpace(spaceID, townControllerID);
   }
 
 
- describe('CoveyTownsStore', () => {
+ describe('CoveySpacesStore', () => {
    beforeEach(() => {
    });
    it('should be a singleton', () => {
+     //const town = createTownForTesting();
+     //const space = createSpaceForTesting('1', town.coveyTownID);
      const store1 = CoveySpacesStore.getInstance();
      const store2 = CoveySpacesStore.getInstance();
      expect(store1)
@@ -67,47 +69,47 @@ function createTownForTesting(friendlyNameToUse?: string, isPublic = false) {
       expect(space.presenterID)
         .toBe('newName');
      });
-//     it('Should fail if the townID does not exist', async () => {
-//       const town = createTownForTesting();
-//       const { friendlyName } = town;
+   });
 
-//       const res = CoveyTownsStore.getInstance()
-//         .updateTown('abcdef', town.townUpdatePassword, 'newName', true);
-//       expect(res)
-//         .toBe(false);
-//       expect(town.friendlyName)
-//         .toBe(friendlyName);
-//       expect(town.isPubliclyListed)
-//         .toBe(false);
+  describe('disband space', () => {
+    it('Should fail if the spaceID does not exist', async () => {
+      const res = CoveySpacesStore.getInstance()
+        .disbandSpace('abcdef');
+      expect(res)
+        .toBe(false);
+    });
+   });
 
-     });
-//     it('Should update the town parameters', async () => {
+  describe('getSpaceForPlayer', () => {
+    it('Should check if the space exists before getting the space', async () => {
+      const town = createTownForTesting(undefined, true);
+      const space = createSpaceForTesting('1', town.coveyTownID)
+      const player1 = new Player('p1');
+      const player2 = new Player('p2');
+      space.addPlayer(player1.id);
+      const res1 = CoveySpacesStore.getInstance().getSpaceForPlayer(player1.id);
+      const res2 = CoveySpacesStore.getInstance().getSpaceForPlayer(player2.id);
+      const spaces = CoveySpacesStore.getInstance()
+        .listSpaces();
+      expect(res1.coveySpaceID)
+        .toBe(space.coveySpaceID);
+      expect(res2.coveySpaceID)
+        .toBe('World');
 
-//       // First try with just a visiblity change
-//       const town = createTownForTesting();
-//       const { friendlyName } = town;
-//       const res = CoveyTownsStore.getInstance()
-//         .updateTown(town.coveyTownID, town.townUpdatePassword, undefined, true);
-//       expect(res)
-//         .toBe(true);
-//       expect(town.isPubliclyListed)
-//         .toBe(true);
-//       expect(town.friendlyName)
-//         .toBe(friendlyName);
-
-//       // Now try with just a name change
-//       const newFriendlyName = nanoid();
-//       const res2 = CoveyTownsStore.getInstance()
-//         .updateTown(town.coveyTownID, town.townUpdatePassword, newFriendlyName, undefined);
-//       expect(res2)
-//         .toBe(true);
-//       expect(town.isPubliclyListed)
-//         .toBe(true);
-//       expect(town.friendlyName)
-//         .toBe(newFriendlyName);
-
-//       // Now try to change both
-//       const res3 = CoveyTownsStore.getInstance()
+    });
+  });
+  describe('listSpaces', () => {
+    it('Should include all spaces', async () => {
+      const town = createTownForTesting(undefined, true);
+      createSpaceForTesting('1', town.coveyTownID);
+      createSpaceForTesting('2', town.coveyTownID);
+      const spaces = CoveySpacesStore.getInstance()
+        .listSpaces();
+      expect(spaces.length)
+        .toBe(2);
+    });
+  });
+});
 //         .updateTown(town.coveyTownID, town.townUpdatePassword, friendlyName, false);
 //       expect(res3)
 //         .toBe(true);

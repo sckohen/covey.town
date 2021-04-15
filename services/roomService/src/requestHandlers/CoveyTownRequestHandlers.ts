@@ -5,6 +5,7 @@ import { CoveyTownList, UserLocation } from '../CoveyTypes';
 import CoveyTownListener from '../types/CoveyTownListener';
 import CoveyTownsStore from '../lib/CoveyTownsStore';
 import CoveySpacesStore from '../lib/CoveySpacesStore';
+import CoveySpaceController from '../lib/CoveySpaceController';
 
 /**
  * The format of a request to join a Town in Covey.Town, as dispatched by the server middleware
@@ -192,6 +193,9 @@ function townSocketAdapter(socket: Socket): CoveyTownListener {
     },
     onPlayerJoined(newPlayer: Player) {
       socket.emit('newPlayer', newPlayer);
+    },
+    onSpaceClaimed() {
+      socket.emit('spaceClaimed');
     },
     onTownDestroyed() {
       socket.emit('townClosing');
