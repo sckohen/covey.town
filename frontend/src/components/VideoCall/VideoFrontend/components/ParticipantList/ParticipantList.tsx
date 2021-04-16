@@ -70,6 +70,14 @@ export default function ParticipantList(props: { gridView: boolean }) {
   const mainParticipant = useMainParticipant();
   const { nearbyPlayers, presenter } = useNearbyPlayers();
 
+  // function setPresenterAsSelected() {
+  //   const presenterParticipantWithSlot = participants.find((p) => presenter?.id == p.participant.identity);
+  //   const presenterParticipant = presenterParticipantWithSlot?.participant;
+  //   if (presenterParticipant !== undefined) {
+  //     setSelectedParticipant(presenterParticipant);
+  //   }
+  // }
+
   // const { preferredMode, highlightedProfiles } = useAppState();
   // const classes = useStyles(preferredMode);
 
@@ -88,6 +96,7 @@ export default function ParticipantList(props: { gridView: boolean }) {
                 // highlight={highlightedProfiles?.includes(localUserProfile.id) ?? false}
         slot={0}
       />
+      {/* {setPresenterAsSelected()} */}
       {participants
         .filter((p) => nearbyPlayers.find((player) => player.id == p.participant.identity))
         .sort(participantSorter).map((participantWithSlot) => {
@@ -105,7 +114,7 @@ export default function ParticipantList(props: { gridView: boolean }) {
                         // highlight={highlightedProfiles?.includes(participant.identity) ?? false}
               participant={participant}
               profile={remoteProfile}
-              isSelected={presenter? true : participant === selectedParticipant}
+              isSelected={participant === selectedParticipant}
               onClick={() => setSelectedParticipant(participant)}
               hideParticipant={hideParticipant}
               slot={participantWithSlot.slot}

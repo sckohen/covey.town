@@ -15,9 +15,8 @@ export default function MainParticipant() {
   } = useVideoContext();
   const [selectedParticipant] = useSelectedParticipant();
   const screenShareParticipant = useScreenShareParticipant();
-  const { presenter } = useNearbyPlayers();
 
-  const videoPriority = (mainParticipant === selectedParticipant || mainParticipant === screenShareParticipant || mainParticipant === presenter)
+  const videoPriority = (mainParticipant === selectedParticipant || mainParticipant === screenShareParticipant)
     && mainParticipant !== localParticipant
     ? 'high'
     : null;

@@ -96,19 +96,19 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
         }
       });
 
-      // Get the info on the current space (whitelist, hostID, presenterID)
-      const { spaceApiClient, myPlayerID } = state;
-      let presenterID: string | null = null;
-      const getSpaceInfo = async () => {
-        const currentSpaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
-        presenterID = currentSpaceInfo.space.presenterID;
-      };
+      // // Get the info on the current space (whitelist, hostID, presenterID)
+      // const { spaceApiClient, myPlayerID } = state;
+      // let presenterID: string | null = null;
+      // const getSpaceInfo = async () => {
+      //   const currentSpaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
+      //   presenterID = currentSpaceInfo.space.presenterID;
+      // };
 
-      getSpaceInfo();
-      const presenter = players.find(player => player.id === presenterID);
+      // getSpaceInfo();
+      // const presenter = players.find(player => player.id === presenterID);
       
       // Return all players in the same space and whoever else may be nearby 
-      return { nearbyPlayers: playersInSameSpace.concat(players.filter((p) => isWithinCallRadius(p, currentLocation))), presenter }
+      return { nearbyPlayers: playersInSameSpace.concat(players.filter((p) => isWithinCallRadius(p, currentLocation))), presenter: undefined }
     }
 
   function samePlayers(a1: NearbyPlayers, a2: NearbyPlayers) {

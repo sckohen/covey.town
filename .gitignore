@@ -116,3 +116,4 @@ ngrok.yml
 
 # Local Netlify folder
 .netlify
+/frontend/build

@@ -1,5 +1,3 @@
-
-
 import { customAlphabet, nanoid } from 'nanoid';
 import { UserLocation } from '../CoveyTypes';
 import CoveyTownListener from '../types/CoveyTownListener';
@@ -8,8 +6,6 @@ import PlayerSession from '../types/PlayerSession';
 import TwilioVideo from './TwilioVideo';
 import IVideoClient from './IVideoClient';
 import CoveySpacesStore  from './CoveySpacesStore';
-import CoveySpaceController from './CoveySpaceController';
-
 
 const friendlyNanoID = customAlphabet('1234567890ABCDEF', 8);
 
@@ -169,6 +165,7 @@ export default class CoveyTownController {
     this._listeners.forEach((listener) => listener.onTownDestroyed());
   }
 
+  // TODO
   claimSpace(spaceID: string): void {
     this._listeners.forEach((listener) => listener.onSpaceClaimed(spaceID));
   }

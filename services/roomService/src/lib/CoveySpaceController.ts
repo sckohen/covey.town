@@ -9,18 +9,22 @@ export default class CoveySpaceController {
   get spaceHostID(): string | null {
     return this._spaceHostID;
   }
+
   // gets the ID of the current presenter
   get presenterID(): string | null {
     return this._presenterID;
   }
+
   // gets the current players in a space
   get players(): Player[] {
     return this._players;
   }
+
   // gets the ID of the current space
   get coveySpaceID(): string {
     return this._coveySpaceID;
   }
+
   // gets the list of players that are allowed to enter the private space (whitelist)
   get whitelist(): Player[] {
     return this._whitelist;
