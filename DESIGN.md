@@ -1,8 +1,8 @@
 # Covey Space Designs
 
-### Description of archetecture and changes
+## Description of archetecture and changes
 
-##### Changes:
+### Changes:
 
 Some of the major changes to Covey.Town include, Adding spaces files, changes to the map to add hitboxes for a space, and using towns.ts to act as a router for the covey.spaces
 The spaces files that we added include:
@@ -23,10 +23,11 @@ We also added general routing commands to towns.ts after the comment "// This is
 All other files dealing with the town itself remained the same.
 
 
-##### Architecture
-Essentially uses the same architecture as the orriginal code. The architecture uses Rest, and web sockets that we edited to work with spaces as seen above. More information in UML Diagram
+### Architecture
+Essentially uses the same architecture as the orriginal code. The architecture uses Rest, and web sockets that we edited to work with spaces as seen above. More information in UML Diagram and CRC Cards Below
 
-### CRC and UML Diagrams
+## UML Diagram And CRC Cards
+### CRC Cards 
 
 working on creating CRC cards/UML diagrams using google doc.
 access here:
@@ -38,3 +39,7 @@ https://docs.google.com/document/d/16KcxJZgKEppeUxgmWtYGLQIQG7ojapIN_-aylWLFzrY/
 ![card3](docs/cards/card3.png)
 ![card4](docs/cards/card4.png)
 ![card5](docs/cards/card5.png)
+
+### UML Diagram 
+
+![UML](docs/cards/UML.jpg)
