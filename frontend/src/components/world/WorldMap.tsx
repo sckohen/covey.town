@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { io } from 'socket.io-client';
 import assert from 'assert';
 import Phaser from 'phaser';
 import Player, { UserLocation } from '../../classes/Player';
@@ -261,8 +261,6 @@ class CoveyGameScene extends Phaser.Scene {
    */
   getZoneFromSpaceID(spaceID: string): Phaser.GameObjects.Zone | undefined {
     const zone = this.allSpaces.find(space => space.name === spaceID);
-    console.log(`allSpaces: ${this.allSpaces}`);
-    console.log(`zone: ${zone}`);
     return zone;
   }
   
@@ -304,27 +302,11 @@ class CoveyGameScene extends Phaser.Scene {
    */
   async joinSpace(space: Phaser.GameObjects.Zone) {    
     const { spaceApiClient, myPlayerID } = this.spaceCreateInfo;
-
-    console.log('trying to join');
-
-    if (this.lastLocation !== undefined) {
-      const updatedLocation =  {
-        x: this.lastLocation?.x,
-        y: this.lastLocation?.y,
-        rotation: this.lastLocation?.rotation,
-        moving: false,
-        space: space.name,
-      }
-      
-      this.emitMovement(updatedLocation);
-      console.log(updatedLocation);
-    }
     
     // Try to join a space (returns boolean for success or failure)
     try {
       await spaceApiClient.joinSpace({ coveySpaceID: space.name, playerID: myPlayerID });
       this.inSpace = space.name;
-      console.log('Was able to join');
     } catch (error) {
       // If join space attempt fails, kick player out of space
       if(this.spawnPoint && this.player && this.lastLocation){
@@ -337,10 +319,8 @@ class CoveyGameScene extends Phaser.Scene {
           space: 'World',
         }
         this.player.sprite.x = this.spawnPoint.x;
-        this.player.sprite.y = this.spawnPoint.y;
-        // this.lastLocation.space = this.inSpace;
+        this.player.sprite.y = this.spawnPoint.y; 
         this.emitMovement(locationForSpawn);
-        console.log('Not able to join');
       }
     }
   }
@@ -355,7 +335,6 @@ class CoveyGameScene extends Phaser.Scene {
     try {
       await spaceApiClient.leaveSpace({ coveySpaceID: space.name, playerID: myPlayerID });
       this.inSpace = "World";
-      console.log('Just left')
     } catch (error) {
       this.inSpace = space.name;
     }
@@ -683,7 +662,6 @@ export default function WorldMap(): JSX.Element {
   const video = Video.instance();
   const url = process.env.REACT_APP_TOWNS_SERVICE_URL;
   assert(url);
-  let socket: Socket | undefined;
   const {
     emitMovement, 
     players,
@@ -740,13 +718,8 @@ export default function WorldMap(): JSX.Element {
    * - When a space is updated?
    */
   useEffect(() => {
-    if (socket !== undefined) {
-      socket.disconnect();
-      socket = undefined;
-    }
-    socket = io(url, { auth: { token: sessionToken, coveyTownID: currentTownID } });
+    const socket = io(url, { auth: { token: sessionToken, coveyTownID: currentTownID } });
     socket.on('spaceClaimed', (spaceID: string) => {
-      // if (gameScene !== undefined){}
       const space = gameScene?.getZoneFromSpaceID(spaceID);
       if (space !== undefined) {
         gameScene?.joinSpace(space);
