@@ -6,6 +6,8 @@ import useSelectedParticipant from '../VideoProvider/useSelectedParticipant/useS
 import useScreenShareParticipant from '../../hooks/useScreenShareParticipant/useScreenShareParticipant';
 import useVideoContext from '../../hooks/useVideoContext/useVideoContext';
 
+import useNearbyPlayers from '../../../../../hooks/useNearbyPlayers';
+
 export default function MainParticipant() {
   const mainParticipant = useMainParticipant();
   const {
@@ -13,8 +15,9 @@ export default function MainParticipant() {
   } = useVideoContext();
   const [selectedParticipant] = useSelectedParticipant();
   const screenShareParticipant = useScreenShareParticipant();
+  const { presenter } = useNearbyPlayers();
 
-  const videoPriority = (mainParticipant === selectedParticipant || mainParticipant === screenShareParticipant)
+  const videoPriority = (mainParticipant === selectedParticipant || mainParticipant === screenShareParticipant || mainParticipant === presenter)
     && mainParticipant !== localParticipant
     ? 'high'
     : null;

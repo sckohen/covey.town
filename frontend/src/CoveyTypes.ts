@@ -14,7 +14,8 @@ export type UserProfile = {
   id: string
 };
 export type NearbyPlayers = {
-  nearbyPlayers: Player[]
+  nearbyPlayers: Player[],
+  presenter: Player | undefined
 };
 export type CoveyAppState = {
   sessionToken: string,

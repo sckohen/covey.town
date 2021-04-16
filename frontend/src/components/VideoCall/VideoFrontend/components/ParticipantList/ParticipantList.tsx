@@ -68,7 +68,7 @@ export default function ParticipantList(props: { gridView: boolean }) {
   const [selectedParticipant, setSelectedParticipant] = useSelectedParticipant();
   const screenShareParticipant = useScreenShareParticipant();
   const mainParticipant = useMainParticipant();
-  const { nearbyPlayers } = useNearbyPlayers();
+  const { nearbyPlayers, presenter } = useNearbyPlayers();
 
   // const { preferredMode, highlightedProfiles } = useAppState();
   // const classes = useStyles(preferredMode);
@@ -105,7 +105,7 @@ export default function ParticipantList(props: { gridView: boolean }) {
                         // highlight={highlightedProfiles?.includes(participant.identity) ?? false}
               participant={participant}
               profile={remoteProfile}
-              isSelected={participant === selectedParticipant}
+              isSelected={presenter? true : participant === selectedParticipant}
               onClick={() => setSelectedParticipant(participant)}
               hideParticipant={hideParticipant}
               slot={participantWithSlot.slot}

@@ -25,7 +25,7 @@ import { Callback } from './components/VideoCall/VideoFrontend/types';
 import Player, { ServerPlayer, UserLocation } from './classes/Player';
 import TownsServiceClient, { TownJoinResponse } from './classes/TownsServiceClient';
 import Video from './classes/Video/Video';
-import SpacesServiceClient, { CoveySpaceInfo } from './classes/SpacesServiceClient';
+import SpacesServiceClient from './classes/SpacesServiceClient';
 
 type CoveyAppUpdate =
   | { action: 'doConnect'; data: { userName: string, townFriendlyName: string, townID: string,townIsPubliclyListed:boolean, sessionToken: string, myPlayerID: string, socket: Socket, players: Player[], emitMovement: (location: UserLocation) => void } }
@@ -38,7 +38,7 @@ type CoveyAppUpdate =
 
 function defaultAppState(): CoveyAppState {
   return {
-    nearbyPlayers: { nearbyPlayers: [] },
+    nearbyPlayers: { nearbyPlayers: [], presenter: undefined },
     players: [],
     myPlayerID: '',
     currentTownFriendlyName: '',
@@ -95,9 +95,20 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
           }
         }
       });
+
+      // Get the info on the current space (whitelist, hostID, presenterID)
+      const { spaceApiClient, myPlayerID } = state;
+      let presenterID: string | null = null;
+      const getSpaceInfo = async () => {
+        const currentSpaceInfo = await spaceApiClient.getSpaceForPlayer({ playerID: myPlayerID });
+        presenterID = currentSpaceInfo.space.presenterID;
+      };
+
+      getSpaceInfo();
+      const presenter = players.find(player => player.id === presenterID);
       
       // Return all players in the same space and whoever else may be nearby 
-      return { nearbyPlayers: playersInSameSpace.concat(players.filter((p) => isWithinCallRadius(p, currentLocation))) }
+      return { nearbyPlayers: playersInSameSpace.concat(players.filter((p) => isWithinCallRadius(p, currentLocation))), presenter }
     }
 
   function samePlayers(a1: NearbyPlayers, a2: NearbyPlayers) {
