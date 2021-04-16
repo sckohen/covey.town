@@ -61,9 +61,10 @@ describe('addPlayer', () => { // Included in handout
       await townController.addPlayer(new Player('1'));
       await townController.addPlayer(new Player('2'));
       const spaceController = new CoveySpaceController(spaceID, townController);
-      const newPlayerSession = await spaceController.addPlayer('1')
+      await spaceController.addPlayer('1')
       expect(mockGetTokenForSpace).toBeCalledTimes(1);
-      expect(mockGetTokenForSpace).toBeCalledWith(spaceController.coveySpaceID, newPlayerSession.player.id);
+      await spaceController.addPlayer('2')
+      expect(mockGetTokenForSpace).toBeCalledTimes(2);
     });
   });
 // tests removing a player from a space
@@ -76,18 +77,16 @@ describe('removePlayer', () => { // Included in handout
       await townController.addPlayer(new Player('1'));
       await townController.addPlayer(new Player('2'));
       const spaceController = new CoveySpaceController(spaceID, townController);
-      spaceController.addPlayer('1');
-      expect(spaceController.players.length)
-      .toBe(1);
-      spaceController.addPlayer('2');
-      expect(spaceController.players.length)
-      .toBe(2);
+
+      await spaceController.addPlayer('1')
+      expect(mockGetTokenForSpace).toBeCalledTimes(1);
+      await spaceController.addPlayer('2')
+      expect(mockGetTokenForSpace).toBeCalledTimes(2);
+
       spaceController.removePlayer('1');
-      expect(spaceController.players.length)
-      .toBe(1);
-      spaceController.removePlayer('2');
-      expect(spaceController.players.length)
-      .toBe(0);
+      expect(mockGetTokenForSpace).toBeCalledTimes(3);
+      await spaceController.removePlayer('2')
+      expect(mockGetTokenForSpace).toBeCalledTimes(4);
     });
   });
 // tests adding a player to a whitelist
@@ -210,15 +209,14 @@ describe('removePlayerFromWhitelist', () => { // Included in handout
           await townController.addPlayer(new Player('2'));
           const spaceController = new CoveySpaceController(spaceID, townController);
           const newWhitelist = ['1'];
-          spaceController.addPlayer('1');
-          expect(spaceController.players.length)
-          .toBe(1);
-          spaceController.addPlayer('2');
-          expect(spaceController.players.length)
-          .toBe(2);
+          
+          await spaceController.addPlayer('1')
+          expect(mockGetTokenForSpace).toBeCalledTimes(1);
+          await spaceController.addPlayer('2')
+          expect(mockGetTokenForSpace).toBeCalledTimes(2);
+
           spaceController.disconnectAllPlayersExceptP('1');
-          expect(spaceController.players.length)
-          .toBe(1);
+          expect(mockGetTokenForSpace).toBeCalledTimes(3);
         });
     });      expect(spaceController.whitelist.length)
       .toBe(0);
