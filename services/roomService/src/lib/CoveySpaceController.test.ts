@@ -62,9 +62,9 @@ describe('addPlayer', () => { // Included in handout
       await townController.addPlayer(new Player('2'));
       const spaceController = new CoveySpaceController(spaceID, townController);
       await spaceController.addPlayer('1')
-      expect(mockGetTokenForSpace).toBeCalledTimes(1);
+      expect(getTokenForSpace()).toBeCalledTimes(1);
       await spaceController.addPlayer('2')
-      expect(mockGetTokenForSpace).toBeCalledTimes(2);
+      expect(getTokenForSpace()).toBeCalledTimes(2);
     });
   });
 // tests removing a player from a space
@@ -79,14 +79,14 @@ describe('removePlayer', () => { // Included in handout
       const spaceController = new CoveySpaceController(spaceID, townController);
 
       await spaceController.addPlayer('1')
-      expect(mockGetTokenForSpace).toBeCalledTimes(1);
+      expect(getTokenForSpace).toBeCalledTimes(1);
       await spaceController.addPlayer('2')
-      expect(mockGetTokenForSpace).toBeCalledTimes(2);
+      expect(getTokenForSpace).toBeCalledTimes(2);
 
       spaceController.removePlayer('1');
-      expect(mockGetTokenForSpace).toBeCalledTimes(3);
+      expect(getTokenForSpace).toBeCalledTimes(3);
       await spaceController.removePlayer('2')
-      expect(mockGetTokenForSpace).toBeCalledTimes(4);
+      expect(getTokenForSpace).toBeCalledTimes(4);
     });
   });
 // tests adding a player to a whitelist
