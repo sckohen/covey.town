@@ -1,11 +1,11 @@
-import { customAlphabet, nanoid } from 'nanoid';
-import { UserLocation } from '../CoveyTypes';
+import { customAlphabet,nanoid } from 'nanoid';
+import { CoveySpaceInfo, UserLocation } from '../CoveyTypes';
 import CoveyTownListener from '../types/CoveyTownListener';
 import Player from '../types/Player';
 import PlayerSession from '../types/PlayerSession';
-import TwilioVideo from './TwilioVideo';
+import CoveySpaceController from './CoveySpaceController';
 import IVideoClient from './IVideoClient';
-import CoveySpacesStore  from './CoveySpacesStore';
+import TwilioVideo from './TwilioVideo';
 
 const friendlyNanoID = customAlphabet('1234567890ABCDEF', 8);
 
@@ -14,6 +14,7 @@ const friendlyNanoID = customAlphabet('1234567890ABCDEF', 8);
  * can occur (e.g. joining a town, moving, leaving a town)
  */
 export default class CoveyTownController {
+
   get capacity(): number {
     return this._capacity;
   }
@@ -50,15 +51,12 @@ export default class CoveyTownController {
     return this._coveyTownID;
   }
 
-  get privateSpaces(): CoveySpacesStore {
-    return this._privateSpaces;
+  get spaces(): CoveySpaceController[] {
+    return this._spaces;
   }
 
   /** The list of players currently in the town * */
   private _players: Player[] = [];
-  
-  /** All the private spaces in this town * */
-  private _privateSpaces: CoveySpacesStore;
 
   /** The list of valid sessions for this town * */
   private _sessions: PlayerSession[] = [];
@@ -79,15 +77,21 @@ export default class CoveyTownController {
 
   private _capacity: number;
 
+  private _spaces: CoveySpaceController[];
+
   constructor(friendlyName: string, isPubliclyListed: boolean) {
     this._coveyTownID = (process.env.DEMO_TOWN_ID === friendlyName ? friendlyName : friendlyNanoID());
     this._capacity = 50;
     this._townUpdatePassword = nanoid(24);
     this._isPubliclyListed = isPubliclyListed;
     this._friendlyName = friendlyName;
-    this._privateSpaces = CoveySpacesStore.getInstance();
+    
+    // add two new spaces (future modifactions of the code would load the spaces dynamically from the map
+    // fut for now spaces are hard coded since we can gurantee there will only be two)
+    this._spaces = [];
+    this._spaces.push(new CoveySpaceController(`${this.coveyTownID}_1`));
+    this._spaces.push(new CoveySpaceController(`${this.coveyTownID}_2`));
   }
-
 
   /**
    * Adds a player to this Covey Town, provisioning the necessary credentials for the
@@ -166,7 +170,140 @@ export default class CoveyTownController {
   }
 
   // TODO
-  claimSpace(spaceID: string): void {
-    this._listeners.forEach((listener) => listener.onSpaceClaimed(spaceID));
+  claimSpace(spaceID: string, hostID: string): boolean {
+    const maybeSpace = this._spaces.find((space) => space.coveySpaceID === spaceID);
+    const host = this.getPlayerFromID(hostID);
+
+    if (host === undefined) {
+      return false;
+    }
+
+    if (maybeSpace !== undefined && maybeSpace.claimSpace(host)) {
+      this._listeners.forEach(listener => listener.onSpaceClaimed(maybeSpace.getSpaceInfo()));
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * List all spaces
+   */
+    listSpaces(): CoveySpaceInfo[] {
+      const spacesList = this._spaces.map((spaceController) => spaceController.getSpaceInfo());
+      return spacesList;
+  }
+
+  /**
+   * Get the space controller for the given spaceID
+   */
+    getSpace(spaceID: string): CoveySpaceController | undefined {
+      const space = this._spaces.find(p => p.coveySpaceID === spaceID);
+      return space;
+  }
+
+  /**
+   * Gets space where the given player is in
+   */
+  getSpaceForPlayer(playerID: string): CoveySpaceInfo {
+    const spaceForPlayer = this._spaces.find((space) => space.isPlayerInSpace(playerID));
+
+    if (spaceForPlayer !== undefined) {
+      return spaceForPlayer.getSpaceInfo();
+    }
+    
+    return {
+      coveySpaceID: 'World',
+      currentPlayers: [],
+      whitelist: [],
+      hostID: null,
+      presenterID: null,
+    };
+  }
+  
+  /**
+   * Updates a private space based on the host's request
+   * @param coveySpaceId the ID number for a covey space
+   * @param playerID the ID for the player who sent the request
+   * @param spaceHost the desired host of a space that may or maynot be updated
+   * @param spacePresenterID the ID for the player who is the presenter
+   * @param whitelist the desired whitelist of a space that may or maynot be updated
+   */
+   updateSpace(coveySpaceID: string, spaceHostID?: string | null, spacePresenterID?: string | null, whitelist?: string[]): boolean {
+    const hostedSpace = this.getSpace(coveySpaceID);
+
+    if (hostedSpace !== undefined){
+      if (hostedSpace.host === null){
+        if (spaceHostID !== undefined) {
+          if (spaceHostID === null) {
+            hostedSpace.unclaimSpace();
+          } else {
+            hostedSpace.claimSpace(this.getPlayerFromID(spaceHostID));
+          }
+        }
+        if (whitelist !== undefined) {
+          const playerWhiteList = whitelist.map((playerID) => this.getPlayerFromID(playerID));
+          hostedSpace.updateWhitelist(playerWhiteList);
+        }
+        if (spacePresenterID !== undefined) {
+          if (spacePresenterID === null){
+            hostedSpace.updatePresenter(null);
+          } else {
+            hostedSpace.updatePresenter(this.getPlayerFromID(spacePresenterID));
+          }
+        }
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+  * Removes all players from the space in means to disband the space (returns back to original state)
+  * @param spaceID the spaceID for the space they would like to leave
+  * @returns success as a boolean
+  */
+   unclaimSpace(spaceID: string, playerID: string): boolean {
+    const spaceController = this.getSpace(spaceID);
+
+    if (spaceController !== undefined && spaceController.host?.id === playerID) {
+      spaceController.unclaimSpace();
+      return true;
+    }
+    return false;
+  }
+
+  getPlayerFromID(playerID: string): Player {
+    const player = this._players.find((player) => player.id === playerID);
+
+    if (player === undefined) {
+      throw new Error('Player not found.');
+    }
+    return player;
+  }
+
+  /**
+   * Add a player to a given space
+   * @param playerID the ID of the player to add
+   * @param spaceID the ID of the space to add
+   */
+  addPlayerToSpace(playerID: string, spaceID: string): boolean {
+    const player = this.getPlayerFromID(playerID);
+    const space = this._spaces.find((space) => space.coveySpaceID == spaceID);
+
+    if (player !== undefined && space !== undefined) {
+      return space.addPlayer(player)
+    }
+
+    return false;
+  }
+
+  removePlayerFromSpace(playerID: string, spaceID: string): void {
+    const player = this.getPlayerFromID(playerID);
+    const space = this._spaces.find((space) => space.coveySpaceID == spaceID);
+
+    if (player !== undefined && space !== undefined) {
+      space.removePlayer(player)
+    }
   }
 }

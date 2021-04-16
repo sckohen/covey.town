@@ -1,3 +1,4 @@
+import { CoveySpaceInfo } from '../CoveyTypes';
 import Player from './Player';
 
 /**
@@ -30,5 +31,6 @@ export default interface CoveyTownListener {
   /**
    * Called when space claimed
    */
-  onSpaceClaimed(spaceID: string): void;
+  onSpaceClaimed(space: CoveySpaceInfo): void;
+  
 }

@@ -89,59 +89,36 @@ describe('removePlayer', () => { // Included in handout
       expect(getTokenForSpace).toBeCalledTimes(4);
     });
   });
-// tests adding a player to a whitelist
-describe('addPlayerToWhitelist', () => { // Included in handout
-  it('should check if the player is on the whitelist before added',
+// tests making a player the host
+describe('claimSpace', () => { // Included in handout
+  it('should check if a player can claim a space and be host',
     async () => {
       const spaceID = `SpaceIDTest-${nanoid()}`;
       const townName = `FriendlyNameTest-${nanoid()}`;
       const townController = new CoveyTownController(townName, false);
-      await townController.addPlayer(new Player('1'));
-      await townController.addPlayer(new Player('2'));
-      const spaceController = new CoveySpaceController(spaceID, townController);
-      spaceController.addPlayerToWhiteList('1');
-      expect(spaceController.whitelist.length)
-      .toBe(1);
-      spaceController.addPlayerToWhiteList('2');
-      expect(spaceController.whitelist.length)
-      .toBe(2);
-    });
+      const player1 = new Player('1')
+      const player2 = new Player('2')
+      await townController.addPlayer(player1);
+      await townController.addPlayer(player2);
+      const spaceController = new CoveySpaceController(spaceID);
+      expect(spaceController.claimSpace(player1)).toBe(true);
   });
 // tests removing a player from a whitelist
-describe('removePlayerFromWhitelist', () => { // Included in handout
-  it('should check if the player is on the whitelist before removed',
+describe('unclaimSpace', () => { // Included in handout
+  it('should check if a player can unclaim a space and stop being host',
     async () => {
       const spaceID = `SpaceIDTest-${nanoid()}`;
       const townName = `FriendlyNameTest-${nanoid()}`;
       const townController = new CoveyTownController(townName, false);
-      await townController.addPlayer(new Player('1'));
-      await townController.addPlayer(new Player('2'));
-      const spaceController = new CoveySpaceController(spaceID, townController);
-      spaceController.addPlayerToWhiteList('1');
-      expect(spaceController.whitelist.length)
-      .toBe(1);
-      spaceController.addPlayerToWhiteList('2');
-      expect(spaceController.whitelist.length)
-      .toBe(2);
-      spaceController.removePlayerFromWhiteList('1');
-      expect(spaceController.whitelist.length)
-      .toBe(1);
-     
-  // tests updating the host of a space
-  describe('updateHost', () => { // Included in handout
-    it('should check if the player is on the whitelist before they are made host',
-      async () => {
-        const spaceID = `SpaceIDTest-${nanoid()}`;
-        const townName = `FriendlyNameTest-${nanoid()}`;
-        const townController = new CoveyTownController(townName, false);
-        await townController.addPlayer(new Player('1'));
-        await townController.addPlayer(new Player('2'));
-        const spaceController = new CoveySpaceController(spaceID, townController);
-        spaceController.updateSpaceHost('1');
-        expect(spaceController.spaceHostID)
-        .toBe('1');
-      });
+      const player1 = new Player('1')
+      const player2 = new Player('2')
+      await townController.addPlayer(player1);
+      await townController.addPlayer(player2);
+      const spaceController = new CoveySpaceController(spaceID);
+      expect(spaceController.claimSpace(player1)).toBe(true);
+      expect(spaceController.unclaimSpace()).toBeCalledTimes(1));
   });
+     
     // tests updating the presenter of a space
     describe('updatePresenter', () => { // Included in handout
       it('should check if the player is on the whitelist before they are made host',
@@ -149,12 +126,14 @@ describe('removePlayerFromWhitelist', () => { // Included in handout
           const spaceID = `SpaceIDTest-${nanoid()}`;
           const townName = `FriendlyNameTest-${nanoid()}`;
           const townController = new CoveyTownController(townName, false);
-          await townController.addPlayer(new Player('1'));
-          await townController.addPlayer(new Player('2'));
+          const player1 = new Player('1')
+          const player2 = new Player('2')
+          await townController.addPlayer(player1);
+          await townController.addPlayer(player2);
           const spaceController = new CoveySpaceController(spaceID, townController);
-          spaceController.updatePresenter('1');
-          expect(spaceController.updatePresenter('2'))
-          .toBe('2');
+          spaceController.updatePresenter(player1);
+          expect(spaceController.updatePresenter(player2))
+          .toBeCalledTimes(1);
         });
     }); spaceController.removePlayerFromWhiteList('2');
     // tests updating the whitelist of a space
@@ -171,31 +150,6 @@ describe('removePlayerFromWhitelist', () => { // Included in handout
           spaceController.updateWhitelist(newWhitelist);
           expect(spaceController.whitelist)
           .toBe(['1']);
-        });
-    });
-    // tests making a space public again
-    describe('publicizeSpace', () => { // Included in handout
-      it('should check if the player is on the whitelist before they are made host',
-        async () => {
-          const spaceID = `SpaceIDTest-${nanoid()}`;
-          const townName = `FriendlyNameTest-${nanoid()}`;
-          const townController = new CoveyTownController(townName, false);
-          await townController.addPlayer(new Player('1'));
-          await townController.addPlayer(new Player('2'));
-          const spaceController = new CoveySpaceController(spaceID, townController);
-          const newWhitelist = ['1'];
-          spaceController.updateSpaceHost('1');
-          expect(spaceController.spaceHostID)
-         .toBe('1');
-          spaceController.updateWhitelist(newWhitelist);
-          expect(spaceController.whitelist)
-          .toBe(['1']);
-          spaceController.publicizeSpace();
-          expect(spaceController.spaceHostID)
-         .toBe(null);
-          spaceController.updateWhitelist(newWhitelist);
-          expect(spaceController.whitelist)
-          .toBe(['1', '2']);
         });
     });
     // tests that remove all players from a space except one
@@ -223,7 +177,51 @@ describe('removePlayerFromWhitelist', () => { // Included in handout
     });
   });
 
-  
+  // tests adding a player to a space
+describe('getSpaceInfo', () => { // Included in handout
+  it('should check if the player is on the whitelist before added',
+    async () => {
+      //const townName = `FriendlyNameTest-${nanoid()}`;
+      //const townController = new CoveySpaceController(townName, false);
+      //const newPlayerSession = await townController.addPlayer(new Player(nanoid()));
+      //expect(mockGetTokenForTown).toBeCalledTimes(1);
+      //expect(mockGetTokenForTown).toBeCalledWith(townController.coveyTownID, newPlayerSession.player.id);
+
+      const spaceID = `SpaceIDTest-${nanoid()}`;
+      const townName = `FriendlyNameTest-${nanoid()}`;
+      const townController = new CoveyTownController(townName, false);
+      await townController.addPlayer(new Player('1'));
+      await townController.addPlayer(new Player('2'));
+      const spaceController = new CoveySpaceController(spaceID, townController);
+      await spaceController.addPlayer('1')
+      expect(getTokenForSpace()).toBeCalledTimes(1);
+      await spaceController.addPlayer('2')
+      expect(getTokenForSpace()).toBeCalledTimes(2);
+    });
+  });
+
+  // tests adding a player to a space
+describe('isPlayerInSpace', () => { // Included in handout
+  it('should check if the player is on the whitelist before added',
+    async () => {
+      //const townName = `FriendlyNameTest-${nanoid()}`;
+      //const townController = new CoveySpaceController(townName, false);
+      //const newPlayerSession = await townController.addPlayer(new Player(nanoid()));
+      //expect(mockGetTokenForTown).toBeCalledTimes(1);
+      //expect(mockGetTokenForTown).toBeCalledWith(townController.coveyTownID, newPlayerSession.player.id);
+
+      const spaceID = `SpaceIDTest-${nanoid()}`;
+      const townName = `FriendlyNameTest-${nanoid()}`;
+      const townController = new CoveyTownController(townName, false);
+      await townController.addPlayer(new Player('1'));
+      await townController.addPlayer(new Player('2'));
+      const spaceController = new CoveySpaceController(spaceID, townController);
+      await spaceController.addPlayer('1')
+      expect(getTokenForSpace()).toBeCalledTimes(1);
+      await spaceController.addPlayer('2')
+      expect(getTokenForSpace()).toBeCalledTimes(2);
+    });
+  });
 
   // describe('space listeners and events', () => {
   //   let testingSpace: CoveySpaceController;

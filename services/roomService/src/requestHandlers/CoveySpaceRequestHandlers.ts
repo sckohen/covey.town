@@ -1,5 +1,5 @@
 import { CoveySpaceInfo } from '../CoveyTypes';
-import CoveySpacesStore from '../lib/CoveySpacesStore';
+import CoveyTownsStore from '../lib/CoveyTownsStore';
 
 /**
  * Request to create a covey space
@@ -101,48 +101,27 @@ export interface ResponseEnvelope<T> {
 }
 
 /**
- * Handler for creating spaces
- * @param requestData the townID and the spaceID for space to create
- * @returns success or failure message
- */
-export async function spaceCreateHandler(requestData: SpaceCreateRequest): Promise<ResponseEnvelope<Record<string, null>>> {
-  const spacesStore = CoveySpacesStore.getInstance();
-
-  const { coveySpaceID, coveyTownID } = requestData;
-  // checks if there is no coveySpaceId provided
-  if (coveySpaceID.length === 0) {
-    return {
-      isOK: false,
-      message: 'Space ID must be specified',
-    };
-  }
-  // creates the private space and sends message saying the new space was created
-  spacesStore.createSpace(coveySpaceID, coveyTownID);
-  return {
-    isOK: true,
-    message: `Private Space ${coveySpaceID} was created`,
-  };
-}
-
-/**
  * Handler for joining a space
  * @param requestData the playerID for the player and spaceID they want to join
  * @returns success or failure message
  */
 export async function spaceJoinHandler(requestData: SpaceJoinRequest): Promise<ResponseEnvelope<Record<string, null>>> {
-  const spacesStore = CoveySpacesStore.getInstance();
+  const townsStore = CoveyTownsStore.getInstance();
   const { playerID, coveySpaceID } = requestData;
-  const coveySpaceController = spacesStore.getControllerForSpace(coveySpaceID);
+  const townController = townsStore.getControllerForTown(coveySpaceID.split("_")[0]);
+  
   // if we cant get the controller for a specific space send an error that the space doesnt exist
-  if (!coveySpaceController) {
+  if (!townController) {
     return {
       isOK: false,
-      message: 'Error: No such space',
+      message: 'Error: No such town',
       response: {},
     };
   }  
+
   // if there is said space successfully add a player to it
-  const success = coveySpaceController.addPlayer(playerID);
+  const success = townController.addPlayerToSpace(playerID, coveySpaceID);
+
   return {
     isOK: success,
     response: {},
@@ -156,18 +135,19 @@ export async function spaceJoinHandler(requestData: SpaceJoinRequest): Promise<R
  * @returns success or failure message
  */
 export async function spaceLeaveHandler(requestData: SpaceLeaveRequest): Promise<ResponseEnvelope<Record<string, null>>> {
-  const spacesStore = CoveySpacesStore.getInstance();
+  const townsStore = CoveyTownsStore.getInstance();
   const { playerID, coveySpaceID } = requestData;
-  const coveySpaceController = spacesStore.getControllerForSpace(coveySpaceID);
+  const townController = townsStore.getControllerForTown(coveySpaceID.split("_")[0]);
+
   // if we cant get the controller for a specific space send an error that the space doesnt exist
-  if (!coveySpaceController) {
+  if (!townController) {
     return {
       isOK: false,
-      message: 'Error: No such space',
+      message: 'Error: No such town',
     };
   }
   // if there is said space successfully remove a player from it
-  coveySpaceController.removePlayer(playerID);
+  townController.removePlayerFromSpace(playerID, coveySpaceID);
 
   return {
     isOK: true,
@@ -182,12 +162,14 @@ export async function spaceLeaveHandler(requestData: SpaceLeaveRequest): Promise
  * @returns list of all spaces (spaceID, currentPlayers, Whitelist, Host, Presenter)
  */
 export async function spaceListHandler(): Promise<ResponseEnvelope<SpaceListResponse>> {
-  const spacesStore = CoveySpacesStore.getInstance();
+  const townsStore = CoveyTownsStore.getInstance();
+  const spacesList = townsStore.listAllSpaces();
+
   // responds with a list of all the spaces
   return {
     isOK: true,
     response: { 
-      spaces: spacesStore.listSpaces(), 
+      spaces: spacesList, 
     },
   };
 }
@@ -197,9 +179,17 @@ export async function spaceListHandler(): Promise<ResponseEnvelope<SpaceListResp
  * @returns listing of the specific space (spaceID, currentPlayers, Whitelist, Host, Presenter)
  */
 export async function spaceGetForPlayerHandler(requestData: SpaceGetForPlayerRequest): Promise<ResponseEnvelope<SpaceInfoResponse>> {
-  const spacesStore = CoveySpacesStore.getInstance();
+  const townsStore = CoveyTownsStore.getInstance();
+  const townController = townsStore.getTownFromPlayerID(requestData.playerID);
 
-  const spaceResponse = spacesStore.getSpaceForPlayer(requestData.playerID);
+  if (!townController) {
+    return {
+      isOK: false,
+      message: 'Error: No such town',
+    };
+  }
+
+  const spaceResponse = townController.getSpaceForPlayer(requestData.playerID);
 
   return {
     isOK: true,
@@ -215,18 +205,18 @@ export async function spaceGetForPlayerHandler(requestData: SpaceGetForPlayerReq
  * @returns success or failure message
  */
 export async function spaceClaimHandler(requestData: SpaceClaimRequest): Promise<ResponseEnvelope<Record<string, null>>> {
-  const spacesStore = CoveySpacesStore.getInstance();
-  // if we cant get the controller for a specific space send an error that the space doesnt exist
-  const coveySpaceController = spacesStore.getControllerForSpace(requestData.coveySpaceID);
-  if (!coveySpaceController) {
+  const townsStore = CoveyTownsStore.getInstance();
+  const townController = townsStore.getControllerForTown(requestData.coveySpaceID.split("_")[0]);
+
+  if (!townController) {
     return {
       isOK: false,
-      message: 'Error: No such space',
+      message: 'Error: No such town',
       response: {},
     };
   }
   // if there is said space successfully update the host of the space
-  const success = coveySpaceController.updateSpaceHost(requestData.hostID);
+  const success = townController.claimSpace(requestData.coveySpaceID, requestData.hostID);
   return {
     isOK: success,
     response: {},
@@ -240,35 +230,20 @@ export async function spaceClaimHandler(requestData: SpaceClaimRequest): Promise
  * @returns success or failure message
  */
 export async function spaceUpdateHandler(requestData: SpaceUpdateRequest): Promise<ResponseEnvelope<Record<string, null>>> {
-  const spacesStore = CoveySpacesStore.getInstance();
+  const townsStore = CoveyTownsStore.getInstance();
   const { coveySpaceID, playerID, hostID, presenterID, whitelist } = requestData;
+  const townController = townsStore.getControllerForTown(coveySpaceID.split("_")[0]);
   let success = false;
+
+  // TODO playerID to check valid request?
   // if statement determines what parts of the space need to be updated if the space does not have empty default settings
-  if (hostID === null) {
-    spacesStore.disbandSpace(coveySpaceID, playerID);
-    success = true;
-  } else if (whitelist === undefined && presenterID === undefined) { // when claim space is called
-    success = spacesStore.updateSpace(
-      coveySpaceID,
-      playerID, 
-      hostID, 
-      null, 
-      [hostID],
-    );
-  } else {
-    success = spacesStore.updateSpace(
-      coveySpaceID,
-      playerID, 
-      hostID,
-      presenterID, 
-      whitelist,
-    );
+  if (townController !== undefined) {
+    success = townController.updateSpace(coveySpaceID, hostID, presenterID, whitelist);
   }
 
   return {
     isOK: success,
     response: {},
     message: success? 'Could not update space.' : undefined,
-    
   };
 }
