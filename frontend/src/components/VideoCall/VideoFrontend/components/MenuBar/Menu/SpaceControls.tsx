@@ -46,7 +46,7 @@ export default function SpaceControls () {
 
   useEffect(() => {
     getCurrentWhitelistAndPresenter();
-  }, [])
+  }, [players])
 
   // Gets the names of the players in the whitelist by matching the IDs
   function idListToPlayerList (idList: string[]): Player[] {

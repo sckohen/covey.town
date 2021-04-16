@@ -1,22 +1,30 @@
-# CoveySpace Features
+# Covey Space Features
 
-The features of the coveySpace include:
+The features of the Covey Spaces include:
 
-- Claim a space and become the host of a space
-  - Once host a player can
-    - Redefine the whitelist by removing or adding players that they do or don't want in their private space
-    - Control who is the presenter of a space
-    - Control who is able to speak or screenshare
-- If on the whiteslist a player can join a space
-  - Once in a space a player can
-    - See the video of all the players in the same space
-    - Not see the video of players outside the space
-    - Not see the avatars of the players outside the space
-  - If they become a presenter
-    - Their video will be prioritized
-    - All other players in a space will be able to see and hear the presenter
-    - Can determine who has permission to speak or share their screen
-- If not on the whitelist
-  - A player will be kicked out of the space if they try to join
+### Spaces will be public until claimed by a player:
+
+- _Spaces_ allow players to communicate regardless of proximity
+- _Spaces_ have designated and easily accesible locations (landmarks)
+- _Spaces_ remove distractions outside of the spaces
+- Any player can join the space by walking in
+
+### A space becomes private if claimed by a player:
+
+- The player who claims the space becomes the host:
+  - The host can change the whitelist by adding or removing players
+  - The host can designate a presenter
+  - The host can disband the space (relinquish their host privileges)
+- The player who is designated as presenter (by the host):
+  - Will have their video prioritized for all users in the space
+- Players on the whitelist can join a space:
+  - See the video of all the players in the same space
+  - Not be distracted by players outside the space
+- Players not on the whitelist cannot join a space:
+  - A player will be teleported to spawn if they try joining the space
+
+### Joining a Space
+
+Players can join a space by walking into the designated locations on the map.
 
 To Become the host a player must enter a space that does not already have a host and press the button on the bottom bar that says "claim space". Once the player becomes the host they will be able to press a button that says "space controlls" that gives them the option to change the whitelist and choose which player will be the presenter if any. selecting these options and pressing the "update space" button will finalize their changes. They will also be given the option to disband the space which will restore the space to it's default settings, this will put all players on the whitelist and make it so there is no presenter or host for the space.

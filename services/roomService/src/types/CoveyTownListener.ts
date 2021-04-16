@@ -1,5 +1,4 @@
 import Player from './Player';
-import CoveySpaceController from '../lib/CoveySpaceController';
 
 /**
  * A listener for player-related events in each town

@@ -74,7 +74,7 @@ function createSpaceForTesting(spaceID: string, townControllerID: string) {
   describe('disband space', () => {
     it('Should fail if the spaceID does not exist', async () => {
       const res = CoveySpacesStore.getInstance()
-        .disbandSpace('abcdef');
+      .disbandSpace('abcdef');
       expect(res)
         .toBe(false);
     });
