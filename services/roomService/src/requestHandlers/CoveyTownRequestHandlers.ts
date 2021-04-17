@@ -188,7 +188,7 @@ function townSocketAdapter(socket: Socket): CoveyTownListener {
       socket.emit('newPlayer', newPlayer);
     },
     onSpaceUpdate(space: CoveySpaceInfo) {
-      socket.emit('spaceUpdated', space.coveySpaceID);
+      socket.emit('spaceUpdated', space);
     },
     onTownDestroyed() {
       socket.emit('townClosing');
