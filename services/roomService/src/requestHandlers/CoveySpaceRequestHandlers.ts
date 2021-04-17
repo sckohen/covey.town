@@ -225,7 +225,7 @@ export async function spaceUnclaimHandler(requestData: SpaceDisbandRequest): Pro
  * @param requestData spaceID for the space to be claimed and the playerID for the new host
  * @returns success or failure message
  */
- export async function spaceClaimHandler(requestData: SpaceClaimRequest): Promise<ResponseEnvelope<Record<string, null>>> {
+export async function spaceClaimHandler(requestData: SpaceClaimRequest): Promise<ResponseEnvelope<Record<string, null>>> {
   const townsStore = CoveyTownsStore.getInstance();
   const townController = townsStore.getControllerForTown(requestData.coveySpaceID.split('_')[0]);
 

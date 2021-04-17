@@ -10,6 +10,10 @@ import SpacesServiceClient, { CoveySpaceInfo } from '../../classes/SpacesService
 // https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
 class CoveyGameScene extends Phaser.Scene {
 
+  get playerSpace(): string {
+    return this.inSpace;
+  }
+
   private player?: {
     sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, label: Phaser.GameObjects.Text
   };
@@ -728,10 +732,8 @@ export default function WorldMap(): JSX.Element {
     const socket = io(url, { auth: { token: sessionToken, coveyTownID: currentTownID } });
     socket.on('spaceUpdated', (spaceInfo: CoveySpaceInfo) => {
 
-      const inSpace: boolean = (currentLocation.space === spaceInfo.coveySpaceID);
+      const inSpace: boolean = (gameScene?.playerSpace === spaceInfo.coveySpaceID);
       const inWhiteList: boolean = spaceInfo.whitelist.includes(myPlayerID);
-      console.log(inSpace);
-      console.log(inWhiteList);
 
       // only teleport the player if they are both in the space, and not in the whitelist
       if (inSpace && !inWhiteList) {
@@ -744,7 +746,7 @@ export default function WorldMap(): JSX.Element {
     socket.on('disconnect', () => {
       socket?.disconnect();
     });
-  }, [gameScene, currentTownID, sessionToken, url]);
+  }, [gameScene, currentTownID, sessionToken, url, myPlayerID]);
 
   return <div id="map-container"/>;
 }
