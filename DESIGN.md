@@ -7,7 +7,6 @@
 Some of the major changes to Covey.Town include, Adding spaces files, changes to the map to add hitboxes for a space, and using towns.ts to act as a router for the covey.spaces
 The spaces files that we added include:
 - CoveySpaceController
-- CoveySpacesStore
 - CoveySpaceRequestHandlers
 - SpacesServiceClient
 - SpaceRestClient
@@ -19,6 +18,8 @@ We also added general routing commands to towns.ts after the comment "// This is
 - disband a space
 - change hosts
 - change presenters
+
+We also changed the CoveyTownController to have a store of the spaces within the town:  #TODO: more depth
 
 All other files dealing with the town itself remained the same.
 
