@@ -3,8 +3,8 @@ import { Express } from 'express';
 import { Server } from 'http';
 import { StatusCodes } from 'http-status-codes';
 import io from 'socket.io';
-import { spaceClaimHandler, spaceGetForPlayerHandler,spaceJoinHandler,spaceLeaveHandler,spaceListHandler,spaceUnclaimHandler,spaceUpdateHandler } from '../requestHandlers/CoveySpaceRequestHandlers';
-import { townCreateHandler,townDeleteHandler,townJoinHandler,townListHandler,townSubscriptionHandler,townUpdateHandler } from '../requestHandlers/CoveyTownRequestHandlers';
+import { spaceClaimHandler, spaceGetForPlayerHandler, spaceJoinHandler, spaceLeaveHandler, spaceListHandler, spaceUnclaimHandler, spaceUpdateHandler } from '../requestHandlers/CoveySpaceRequestHandlers';
+import { townCreateHandler, townDeleteHandler, townJoinHandler, townListHandler, townSubscriptionHandler, townUpdateHandler } from '../requestHandlers/CoveyTownRequestHandlers';
 import { logError } from '../Utils';
 
 export default function addTownRoutes(http: Server, app: Express): io.Server {
@@ -183,7 +183,7 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
   /**
    * Unclaim a spaces
    */
-   app.delete('/spaces/claim/:spaceID/:playerID', BodyParser.json(), async (req, res) => {
+  app.delete('/spaces/claim/:spaceID/:playerID', BodyParser.json(), async (req, res) => {
     try {
       const result = await spaceUnclaimHandler({
         playerID: req.params.playerID,

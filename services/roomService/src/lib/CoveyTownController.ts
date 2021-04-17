@@ -1,5 +1,5 @@
-import { customAlphabet,nanoid } from 'nanoid';
-import { CoveySpaceInfo,UserLocation } from '../CoveyTypes';
+import { customAlphabet, nanoid } from 'nanoid';
+import { CoveySpaceInfo, UserLocation } from '../CoveyTypes';
 import CoveyTownListener from '../types/CoveyTownListener';
 import Player from '../types/Player';
 import PlayerSession from '../types/PlayerSession';
@@ -36,7 +36,7 @@ export default class CoveyTownController {
   }
 
   get occupancy(): number {
-    return this._listeners.length;
+    return this._players.length;
   }
 
   get friendlyName(): string {
