@@ -36,7 +36,7 @@ export default class CoveyTownController {
   }
 
   get occupancy(): number {
-    return this._listeners.length;
+    return this._players.length;
   }
 
   get friendlyName(): string {

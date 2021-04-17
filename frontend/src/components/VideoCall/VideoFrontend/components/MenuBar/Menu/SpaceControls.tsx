@@ -67,7 +67,7 @@ export default function SpaceControls () {
     const whitelistOfPlayers: Player[] = idListToPlayerList(whitelist);
 
     return (
-      <Select id='presenterSelector' placeholder={presenter? presenter : 'Select player'} defaultValue='' value={presenter} onChange={e => setPresenter(e.target.value)}>
+      <Select id='presenterSelector' placeholder='Select player' defaultValue='' value={presenter} onChange={e => setPresenter(e.target.value)}>
         {whitelistOfPlayers.map((player) => (
           <option value={player.id}> {`${player.userName}`} </option>
         ))}
