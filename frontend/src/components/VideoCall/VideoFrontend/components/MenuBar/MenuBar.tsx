@@ -87,7 +87,7 @@ export default function MenuBar(props: { setMediaError?(error: Error): void }) {
   const claimSpace = async () => {
     if (currentLocation.space !== 'World') { 
       try {
-        await spaceApiClient.claimSpace({ coveySpaceID: currentLocation.space, playerID: myPlayerID, hostID: myPlayerID });
+        await spaceApiClient.claimSpace({ coveySpaceID: currentLocation.space, playerID: myPlayerID });
         setShowClaimButton(false);
         setShowControls(true);
         

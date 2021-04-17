@@ -719,7 +719,7 @@ export default function WorldMap(): JSX.Element {
    */
   useEffect(() => {
     const socket = io(url, { auth: { token: sessionToken, coveyTownID: currentTownID } });
-    socket.on('spaceClaimed', (spaceID: string) => {
+    socket.on('spaceUpdated', (spaceID: string) => {
       const space = gameScene?.getZoneFromSpaceID(spaceID);
       if (space !== undefined) {
         gameScene?.joinSpace(space);

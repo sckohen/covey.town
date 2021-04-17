@@ -1,11 +1,11 @@
-import { Express } from 'express';
 import BodyParser from 'body-parser';
-import io from 'socket.io';
+import { Express } from 'express';
 import { Server } from 'http';
 import { StatusCodes } from 'http-status-codes';
+import io from 'socket.io';
+import { spaceClaimHandler, spaceGetForPlayerHandler,spaceJoinHandler,spaceLeaveHandler,spaceListHandler,spaceUnclaimHandler,spaceUpdateHandler } from '../requestHandlers/CoveySpaceRequestHandlers';
+import { townCreateHandler,townDeleteHandler,townJoinHandler,townListHandler,townSubscriptionHandler,townUpdateHandler } from '../requestHandlers/CoveyTownRequestHandlers';
 import { logError } from '../Utils';
-import { townCreateHandler, townDeleteHandler, townJoinHandler, townListHandler, townSubscriptionHandler, townUpdateHandler } from '../requestHandlers/CoveyTownRequestHandlers';
-import { spaceJoinHandler, spaceLeaveHandler, spaceListHandler, spaceUpdateHandler, spaceGetForPlayerHandler } from '../requestHandlers/CoveySpaceRequestHandlers';
 
 export default function addTownRoutes(http: Server, app: Express): io.Server {
   /*
@@ -143,8 +143,8 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
   });
   
   /**
-     * Join a space
-     */
+   * Join a space
+   */
   app.put('/spaces/:spaceID/:playerID', BodyParser.json(), async (req, res) => {
     try {
       const result = await spaceJoinHandler({
@@ -159,6 +159,42 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
         .json({
           message: 'Internal server error, please see log in server for more details',
         });
+    }
+  });
+  
+  /**
+   * Claim a spaces
+   */
+  app.post('/spaces/claim/:spaceID/:playerID', BodyParser.json(), async (req, res) => {
+    try {
+      const result = await spaceClaimHandler({
+        playerID: req.params.playerID,
+        coveySpaceID: req.params.spaceID,
+      });
+      res.status(StatusCodes.OK).json(result);
+    } catch (err) {
+      logError(err);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: 'Internal server error, please see log in server for more details',
+      });
+    }
+  });
+
+  /**
+   * Unclaim a spaces
+   */
+   app.delete('/spaces/claim/:spaceID/:playerID', BodyParser.json(), async (req, res) => {
+    try {
+      const result = await spaceUnclaimHandler({
+        playerID: req.params.playerID,
+        coveySpaceID: req.params.spaceID,
+      });
+      res.status(StatusCodes.OK).json(result);
+    } catch (err) {
+      logError(err);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: 'Internal server error, please see log in server for more details',
+      });
     }
   });
 
@@ -184,7 +220,6 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
   
   /**
      * Update a space, also called when we want to:
-     * - claim a space
      * - disband a space
      * - change hosts
      * - change presenters
@@ -194,7 +229,6 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
       const result = await spaceUpdateHandler({
         coveySpaceID: req.params.spaceID,
         playerID: req.body.playerID,
-        hostID: req.body.hostID,
         presenterID: req.body.presenterID,
         whitelist: req.body.whitelist,
       });

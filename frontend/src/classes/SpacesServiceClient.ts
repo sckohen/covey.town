@@ -19,8 +19,6 @@ export interface SpaceClaimRequest {
   coveySpaceID: string;
   /** The id for the player sending the request* */
   playerID: string;
-  /** The id for the new host (player) for the private space* */
-  hostID: string;
 }
 
 /**
@@ -70,7 +68,6 @@ export interface SpaceListResponse {
 export interface SpaceDisbandRequest {
   coveySpaceID: string;
   playerID: string;
-  hostID: null;
 }
 
 /**
@@ -79,7 +76,6 @@ export interface SpaceDisbandRequest {
 export interface SpaceUpdateRequest {
   coveySpaceID: string;
   playerID: string;
-  hostID: string | null;
   presenterID: string | null;
   whitelist: string[];
 }
@@ -162,14 +158,14 @@ export default class SpacesServiceClient {
   }
 
   async claimSpace(requestData: SpaceClaimRequest): Promise<void> {
-    const { coveySpaceID } = requestData;
-    const responseWrapper = await this._axios.patch<ResponseEnvelope<void>>(`/spaces/${coveySpaceID}`, requestData);
+    const { coveySpaceID, playerID } = requestData;
+    const responseWrapper = await this._axios.post<ResponseEnvelope<void>>(`/spaces/claim/${coveySpaceID}/${playerID}`, requestData);
     return SpacesServiceClient.unwrapOrThrowError(responseWrapper, true);
   }
 
   async disbandSpace(requestData: SpaceDisbandRequest): Promise<void> {
-    const { coveySpaceID } = requestData;
-    const responseWrapper = await this._axios.patch<ResponseEnvelope<void>>(`/spaces/${coveySpaceID}`, requestData);
+    const { coveySpaceID, playerID } = requestData;
+    const responseWrapper = await this._axios.delete<ResponseEnvelope<void>>(`/spaces/claim/${coveySpaceID}/${playerID}`);
     return SpacesServiceClient.unwrapOrThrowError(responseWrapper, true);
   } 
 

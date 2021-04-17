@@ -19,8 +19,6 @@ export interface SpaceClaimRequest {
   coveySpaceID: string;
   /** The id for the player sending the request* */
   playerID: string;
-  /** The id for the new host (player) for the private space* */
-  hostID: string;
 }
 
 /**
@@ -77,7 +75,6 @@ export interface SpaceInfoResponse {
 export interface SpaceDisbandRequest {
   coveySpaceID: string;
   playerID: string;
-  hostID: null;
 }
 
 /**
@@ -86,7 +83,6 @@ export interface SpaceDisbandRequest {
 export interface SpaceUpdateRequest {
   coveySpaceID: string;
   playerID: string;
-  hostID: string | null;
   presenterID: string | null;
   whitelist: string[];
 }
@@ -108,7 +104,7 @@ export interface ResponseEnvelope<T> {
 export async function spaceJoinHandler(requestData: SpaceJoinRequest): Promise<ResponseEnvelope<Record<string, null>>> {
   const townsStore = CoveyTownsStore.getInstance();
   const { playerID, coveySpaceID } = requestData;
-  const townController = townsStore.getControllerForTown(coveySpaceID.split("_")[0]);
+  const townController = townsStore.getControllerForTown(coveySpaceID.split('_')[0]);
   
   // if we cant get the controller for a specific space send an error that the space doesnt exist
   if (!townController) {
@@ -137,7 +133,7 @@ export async function spaceJoinHandler(requestData: SpaceJoinRequest): Promise<R
 export async function spaceLeaveHandler(requestData: SpaceLeaveRequest): Promise<ResponseEnvelope<Record<string, null>>> {
   const townsStore = CoveyTownsStore.getInstance();
   const { playerID, coveySpaceID } = requestData;
-  const townController = townsStore.getControllerForTown(coveySpaceID.split("_")[0]);
+  const townController = townsStore.getControllerForTown(coveySpaceID.split('_')[0]);
 
   // if we cant get the controller for a specific space send an error that the space doesnt exist
   if (!townController) {
@@ -200,13 +196,13 @@ export async function spaceGetForPlayerHandler(requestData: SpaceGetForPlayerReq
 }
 
 /**
- * Handler for claiming a space
- * @param requestData spaceID for the space to be claimed and the playerID for the new host
+ * Handler for unclaiming a space
+ * @param requestData spaceID for the space to be unclaimed and the playerID
  * @returns success or failure message
  */
-export async function spaceClaimHandler(requestData: SpaceClaimRequest): Promise<ResponseEnvelope<Record<string, null>>> {
+export async function spaceUnclaimHandler(requestData: SpaceDisbandRequest): Promise<ResponseEnvelope<Record<string, null>>> {
   const townsStore = CoveyTownsStore.getInstance();
-  const townController = townsStore.getControllerForTown(requestData.coveySpaceID.split("_")[0]);
+  const townController = townsStore.getControllerForTown(requestData.coveySpaceID.split('_')[0]);
 
   if (!townController) {
     return {
@@ -215,8 +211,33 @@ export async function spaceClaimHandler(requestData: SpaceClaimRequest): Promise
       response: {},
     };
   }
-  // if there is said space successfully update the host of the space
-  const success = townController.claimSpace(requestData.coveySpaceID, requestData.hostID);
+  // if there is said space, successfully update the host of the space
+  const success = townController.unclaimSpace(requestData.coveySpaceID, requestData.playerID);
+  return {
+    isOK: success,
+    response: {},
+    message: success? 'Could not disband space' : undefined,
+  };
+}
+
+/**
+ * Handler for unclaiming a space
+ * @param requestData spaceID for the space to be claimed and the playerID for the new host
+ * @returns success or failure message
+ */
+ export async function spaceClaimHandler(requestData: SpaceClaimRequest): Promise<ResponseEnvelope<Record<string, null>>> {
+  const townsStore = CoveyTownsStore.getInstance();
+  const townController = townsStore.getControllerForTown(requestData.coveySpaceID.split('_')[0]);
+
+  if (!townController) {
+    return {
+      isOK: false,
+      message: 'Error: No such town',
+      response: {},
+    };
+  }
+  // if there is said space, successfully update the host of the space
+  const success = townController.claimSpace(requestData.coveySpaceID, requestData.playerID);
   return {
     isOK: success,
     response: {},
@@ -231,14 +252,15 @@ export async function spaceClaimHandler(requestData: SpaceClaimRequest): Promise
  */
 export async function spaceUpdateHandler(requestData: SpaceUpdateRequest): Promise<ResponseEnvelope<Record<string, null>>> {
   const townsStore = CoveyTownsStore.getInstance();
-  const { coveySpaceID, playerID, hostID, presenterID, whitelist } = requestData;
-  const townController = townsStore.getControllerForTown(coveySpaceID.split("_")[0]);
+  const { coveySpaceID, playerID, presenterID, whitelist } = requestData;
+  const townController = townsStore.getControllerForTown(coveySpaceID.split('_')[0]);
+  const spaceToUpdate = townController?.getSpace(coveySpaceID);
   let success = false;
 
   // TODO playerID to check valid request?
   // if statement determines what parts of the space need to be updated if the space does not have empty default settings
-  if (townController !== undefined) {
-    success = townController.updateSpace(coveySpaceID, hostID, presenterID, whitelist);
+  if (townController !== undefined && playerID === spaceToUpdate?.host?.id) {
+    success = townController.updateSpace(coveySpaceID, presenterID, whitelist);
   }
 
   return {

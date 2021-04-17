@@ -31,6 +31,6 @@ export default interface CoveyTownListener {
   /**
    * Called when space claimed
    */
-  onSpaceClaimed(space: CoveySpaceInfo): void;
+  onSpaceUpdate(space: CoveySpaceInfo): void;
   
 }

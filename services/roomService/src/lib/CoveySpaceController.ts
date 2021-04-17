@@ -67,7 +67,7 @@ export default class CoveySpaceController {
     }
 
     // there is no whitelist
-    else if (this._whitelist.length === 0) {
+    if (this._whitelist.length === 0) {
       this.addPlayerToPlayerList(playerToAdd);
       return true;
     }

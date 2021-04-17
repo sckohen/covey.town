@@ -1,5 +1,4 @@
 import { CoveySpaceInfo, CoveyTownList } from '../CoveyTypes';
-import Player from '../types/Player';
 import CoveyTownController from './CoveyTownController';
 
 function passwordMatches(provided: string, expected: string): boolean {
@@ -71,14 +70,9 @@ export default class CoveyTownsStore {
     return false;
   }
 
-  getTownFromPlayerID(playerID: string): CoveyTownController | undefined {
-    let townToReturn = undefined;
-    
-    townToReturn = this._towns.find((town) => {
-      town.players.find((player) => player.id === playerID);
-    });
-
-    return townToReturn;
+  getTownFromPlayerID(playerID: string): CoveyTownController | undefined {    
+    const townWithPlayer = this._towns.filter(town => town.getPlayerFromID(playerID));
+    return townWithPlayer[0];
   }
 
   /**

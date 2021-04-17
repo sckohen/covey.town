@@ -91,7 +91,7 @@ export default function SpaceControls () {
   const processUpdates = async (action: string) => {
     if (action === 'disband') {
       try {
-        await spaceApiClient.disbandSpace({ coveySpaceID: currentLocation.space, playerID: myPlayerID, hostID: null });
+        await spaceApiClient.disbandSpace({ coveySpaceID: currentLocation.space, playerID: myPlayerID });
         toast({
           title: 'Space disbanded',
           status: 'success'
@@ -116,7 +116,6 @@ export default function SpaceControls () {
         await spaceApiClient.updateSpace({
           coveySpaceID: currentLocation.space,
           playerID: myPlayerID,
-          hostID: myPlayerID,
           presenterID: presenterActual,
           whitelist: whitelist,
         });
