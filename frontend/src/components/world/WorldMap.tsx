@@ -5,10 +5,11 @@ import Phaser from 'phaser';
 import Player, { UserLocation } from '../../classes/Player';
 import Video from '../../classes/Video/Video';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
-import SpacesServiceClient from '../../classes/SpacesServiceClient';
+import SpacesServiceClient, { CoveySpaceInfo } from '../../classes/SpacesServiceClient';
 
 // https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
 class CoveyGameScene extends Phaser.Scene {
+
   private player?: {
     sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, label: Phaser.GameObjects.Text
   };
@@ -308,20 +309,7 @@ class CoveyGameScene extends Phaser.Scene {
       await spaceApiClient.joinSpace({ coveySpaceID: space.name, playerID: myPlayerID });
       this.inSpace = space.name;
     } catch (error) {
-      // If join space attempt fails, kick player out of space
-      if(this.spawnPoint && this.player && this.lastLocation){
-        // Move the player to their last location (outside the space)
-        const locationForSpawn = {
-          x: this.spawnPoint.x,
-          y: this.spawnPoint.x,
-          rotation: this.lastLocation.rotation,
-          moving: false,
-          space: 'World',
-        }
-        this.player.sprite.x = this.spawnPoint.x;
-        this.player.sprite.y = this.spawnPoint.y; 
-        this.emitMovement(locationForSpawn);
-      }
+      this.teleportPlayerToSpawn();
     }
   }
 
@@ -337,6 +325,25 @@ class CoveyGameScene extends Phaser.Scene {
       this.inSpace = "World";
     } catch (error) {
       this.inSpace = space.name;
+    }
+  }
+
+  /**
+   * Helper function to teleport player to spawn
+   */
+   teleportPlayerToSpawn() {
+    if(this.spawnPoint && this.player && this.lastLocation){
+      // Move the player to their last location (outside the space)
+      const locationForSpawn = {
+        x: this.spawnPoint.x,
+        y: this.spawnPoint.x,
+        rotation: this.lastLocation.rotation,
+        moving: false,
+        space: 'World',
+      }
+      this.player.sprite.x = this.spawnPoint.x;
+      this.player.sprite.y = this.spawnPoint.y; 
+      this.emitMovement(locationForSpawn);
     }
   }
 
@@ -719,10 +726,16 @@ export default function WorldMap(): JSX.Element {
    */
   useEffect(() => {
     const socket = io(url, { auth: { token: sessionToken, coveyTownID: currentTownID } });
-    socket.on('spaceUpdated', (spaceID: string) => {
-      const space = gameScene?.getZoneFromSpaceID(spaceID);
-      if (space !== undefined) {
-        gameScene?.joinSpace(space);
+    socket.on('spaceUpdated', (spaceInfo: CoveySpaceInfo) => {
+
+      const inSpace: boolean = (currentLocation.space === spaceInfo.coveySpaceID);
+      const inWhiteList: boolean = spaceInfo.whitelist.includes(myPlayerID);
+      console.log(inSpace);
+      console.log(inWhiteList);
+
+      // only teleport the player if they are both in the space, and not in the whitelist
+      if (inSpace && !inWhiteList) {
+        gameScene?.teleportPlayerToSpawn();
       }
     });
     socket.on('playerDisconnect', () => {
