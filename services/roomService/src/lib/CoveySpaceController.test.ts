@@ -199,7 +199,6 @@ describe('unclaimSpace', () => { // Included in handout
         expect(spaceController.isPlayerInSpace('2')).toBe(false);
       });
     });
-
   // describe('space listeners and events', () => {
   //   let testingSpace: CoveySpaceController;
   //   let testingTown: CoveyTownController;

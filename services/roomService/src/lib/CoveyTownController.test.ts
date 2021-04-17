@@ -137,6 +137,24 @@ describe('CoveyTownController', () => {
       expect(listenerRemoved.onTownDestroyed).not.toBeCalled();
 
     });
+    it('should notify added listeners of new players entering a space when addPlayerToSpace is called', async () => {
+      mockListeners.forEach(listener => testingTown.addTownListener(listener));
+
+      const player = new Player('test player');
+      await testingTown.addPlayer(player);
+      await testingTown.addPlayerToSpace(player.id, testingTown.spaces[0].coveySpaceID);
+      mockListeners.forEach(listener => expect(listener.onAddPlayerToSpace).toBeCalledWith(player.id, '1'));
+
+    });
+    it('should notify added listeners of player removal from a space when removePlayerFromSpace is called', async () => {
+      const player = new Player('test player');
+      const session = await testingTown.addPlayer(player);
+
+      mockListeners.forEach(listener => testingTown.addTownListener(listener));
+      await testingTown.addPlayerToSpace(player.id, testingTown.spaces[0].coveySpaceID);
+      await testingTown.removePlayerFromSpace(player.id, testingTown.spaces[0].coveySpaceID);
+      mockListeners.forEach(listener => expect(listener.onRemovePlayerFromSpace).toBeCalledWith(player.id, testingTown.spaces[0].coveySpaceID));
+    });
   });
   describe('townSubscriptionHandler', () => {
     const mockSocket = mock<Socket>();
