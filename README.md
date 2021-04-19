@@ -51,6 +51,8 @@ The frontend will automatically re-compile and reload in your browser if you cha
 ## Covey Spaces
 
 ### [https://github.com/sckohen/covey.town](https://github.com/sckohen/covey.town)
+## [https://ptofu-test.netlify.app/](https://ptofu-test.netlify.app/)
+
 
 ### Deploying Covey Spaces is the same as deploying Covey.Town (no additional steps).
 
