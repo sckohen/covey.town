@@ -48,7 +48,7 @@ The frontend will automatically re-compile and reload in your browser if you cha
 
 #
 
-## Covey Spaces
+## Covey Spaces - new Feature
 
 ### [https://github.com/sckohen/covey.town](https://github.com/sckohen/covey.town)
 ### [https://ptofu.netlify.app/](https://ptofu.netlify.app/)
